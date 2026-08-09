@@ -47,13 +47,33 @@ export function Reveal({
     return () => observer.disconnect();
   }, []);
 
-  const base = variant === "clip" ? "fx-clip" : "fx";
+  const styleVar = delay
+    ? ({ "--fx-delay": `${delay}s` } as React.CSSProperties)
+    : undefined;
+
+  // Clip variant: the observed node must NOT be the clipped node. A
+  // `clip-path: inset(0 0 100%)` collapses the element's visible area to zero,
+  // which makes IntersectionObserver report ratio 0 forever — a deadlock where
+  // the reveal can never trigger. So we observe an unclipped outer wrapper and
+  // apply the clip mask to an inner element instead.
+  if (variant === "clip") {
+    return (
+      <Tag ref={ref} className={className}>
+        <span
+          className={`fx-clip block ${inView ? "is-in" : ""}`}
+          style={styleVar}
+        >
+          {children}
+        </span>
+      </Tag>
+    );
+  }
 
   return (
     <Tag
       ref={ref}
-      className={`${base} ${inView ? "is-in" : ""} ${className}`}
-      style={delay ? ({ "--fx-delay": `${delay}s` } as React.CSSProperties) : undefined}
+      className={`fx ${inView ? "is-in" : ""} ${className}`}
+      style={styleVar}
     >
       {children}
     </Tag>
