@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Keep Turbopack rooted on this repo (avoids parent-folder lockfile confusion)
+  turbopack: {
+    root: process.cwd(),
+  },
   async headers() {
     return [
       {

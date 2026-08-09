@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, type ElementType, type ReactNode } from "r
 
 type RevealProps = {
   children: ReactNode;
-  /** Motion variant: rise (translate + fade) or clip (image mask up) */
-  variant?: "rise" | "clip";
+  /** Motion variant: rise, clip (image mask), or rule (line draw) */
+  variant?: "rise" | "clip" | "rule";
   /** Delay in seconds for staggered sequences */
   delay?: number;
   /** Render element */
@@ -51,11 +51,8 @@ export function Reveal({
     ? ({ "--fx-delay": `${delay}s` } as React.CSSProperties)
     : undefined;
 
-  // Clip variant: the observed node must NOT be the clipped node. A
-  // `clip-path: inset(0 0 100%)` collapses the element's visible area to zero,
-  // which makes IntersectionObserver report ratio 0 forever — a deadlock where
-  // the reveal can never trigger. So we observe an unclipped outer wrapper and
-  // apply the clip mask to an inner element instead.
+  // Clip variant: observe an unclipped outer wrapper — a clipped root can
+  // deadlock IntersectionObserver at ratio 0.
   if (variant === "clip") {
     return (
       <Tag ref={ref} className={className}>
@@ -65,6 +62,18 @@ export function Reveal({
         >
           {children}
         </span>
+      </Tag>
+    );
+  }
+
+  if (variant === "rule") {
+    return (
+      <Tag
+        ref={ref}
+        className={`fx-rule ${inView ? "is-in" : ""} ${className}`}
+        style={styleVar}
+      >
+        {children}
       </Tag>
     );
   }

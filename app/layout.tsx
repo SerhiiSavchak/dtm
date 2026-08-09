@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const interTight = Inter_Tight({
@@ -31,10 +32,25 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0d0d0f",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f4f2" },
+    { media: "(prefers-color-scheme: dark)", color: "#121214" },
+  ],
   width: "device-width",
   initialScale: 1,
 };
+
+const themeInitScript = `
+(function(){
+  try {
+    var stored = localStorage.getItem('dtm-theme');
+    var theme = stored === 'light' || stored === 'dark'
+      ? stored
+      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  } catch (e) {}
+})();
+`;
 
 export default function RootLayout({
   children,
@@ -45,9 +61,13 @@ export default function RootLayout({
     <html
       lang="uk"
       className={`${interTight.variable} ${jetbrainsMono.variable} bg-background antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-dvh flex flex-col bg-background text-foreground overflow-x-hidden">
-        {children}
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body className="flex min-h-dvh flex-col overflow-x-hidden bg-background text-foreground">
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

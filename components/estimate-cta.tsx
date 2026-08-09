@@ -1,67 +1,56 @@
+"use client";
+
+import { useDictionary } from "@/lib/i18n/locale-context";
+import { EstimateCalculator } from "./calculator/estimate-calculator";
 import { Reveal } from "./reveal";
 
 export function EstimateCta() {
+  const t = useDictionary().estimate;
+
   return (
     <section
       id="estimate"
       aria-labelledby="estimate-heading"
-      className="bg-bg text-ink"
+      className="bg-bg text-foreground"
     >
-      <div className="container-dtm pb-20 pt-20 md:pb-32 md:pt-28">
+      <div className="container-dtm section-pad">
         <Reveal
           as="div"
           className="flex items-center justify-between border-t border-border pt-4"
         >
-          <span className="label text-accent">(04) — Кошторис</span>
-          <span className="label hidden text-graphite sm:block">
-            Без зобов’язань
-          </span>
+          <span className="label text-accent">{t.label}</span>
+          <span className="label hidden text-muted sm:block">{t.labelRight}</span>
         </Reveal>
 
-        {/* High-contrast dark panel */}
-        <Reveal variant="clip" className="mt-10 md:mt-14">
+        <Reveal variant="clip" className="mt-10 md:mt-12">
           <div className="relative overflow-hidden bg-ink-deep text-paper">
-            {/* Orange edge accent — recurring device */}
             <span
               aria-hidden="true"
               className="absolute left-0 top-0 h-1 w-24 bg-accent"
             />
 
-            <div className="grid grid-cols-1 gap-x-8 gap-y-10 p-8 md:p-14 lg:grid-cols-12 lg:items-end lg:p-20">
-              <div className="lg:col-span-8">
+            <div className="grid grid-cols-1 gap-x-10 gap-y-12 p-7 md:p-12 lg:grid-cols-12 lg:p-16">
+              <div className="lg:col-span-5">
                 <h2
                   id="estimate-heading"
-                  className="font-sans font-semibold tracking-[-0.03em] text-balance text-paper"
-                  style={{ fontSize: "var(--text-h1)", lineHeight: 0.98 }}
+                  className="type-h1 text-balance text-paper"
                 >
-                  Розкажіть про проєкт — підготуємо{" "}
-                  <span className="text-accent">попередній розрахунок.</span>
+                  {t.headingBefore}{" "}
+                  <span className="text-accent">{t.headingAccent}</span>
                 </h2>
-                <p className="mt-6 max-w-lg text-base leading-relaxed text-paper/75 md:text-lg">
-                  Ми зберемо параметри вашого простору й повернемося з
-                  орієнтовною вартістю та наступними кроками.
+                <p className="mt-5 max-w-md type-body-lg text-paper/75">
+                  {t.body}
                 </p>
-              </div>
-
-              <div className="flex flex-col gap-4 lg:col-span-4 lg:items-end">
-                <a
-                  href="#estimate"
-                  className="inline-flex items-center justify-center gap-2 bg-accent px-8 py-4 text-sm font-medium text-paper transition-colors duration-300 hover:bg-paper hover:text-ink"
-                >
-                  Отримати попередній розрахунок
-                  <span
-                    aria-hidden="true"
-                    className="transition-transform duration-300 group-hover:translate-x-1"
-                  >
-                    →
-                  </span>
-                </a>
                 <a
                   href="#contacts"
-                  className="label text-paper/60 transition-colors hover:text-paper"
+                  className="label mt-8 inline-block text-paper/55 transition-colors hover:text-paper"
                 >
-                  або звʼязатися напряму
+                  {t.contactLink}
                 </a>
+              </div>
+
+              <div className="lg:col-span-7 lg:border-l lg:border-white/10 lg:pl-10">
+                <EstimateCalculator />
               </div>
             </div>
           </div>

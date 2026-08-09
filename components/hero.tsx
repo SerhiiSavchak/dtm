@@ -1,114 +1,155 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { heroMedia } from "@/data/media";
+import { useDictionary } from "@/lib/i18n/locale-context";
 
 /**
- * Drop a real DTM loop here later (e.g. "/videos/hero.mp4") and the layout
- * stays identical — the poster/Image fallback keeps the composition stable
- * with no redesign. Kept null so we never depend on a fragile remote URL.
+ * Video-first hero with trivial source swap via `data/media.ts`.
+ * Poster/Image keeps composition stable when video is unavailable.
  */
-const heroVideoSrc: string | null = null;
-const heroPoster = "/images/hero.png";
-
 export function Hero() {
+  const t = useDictionary().hero;
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [ready, setReady] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
+
+  const hasVideo = Boolean(heroMedia.webm || heroMedia.mp4);
+  const showVideo = hasVideo && !videoFailed;
+
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const start = () => setReady(true);
+
+    if (reduced) {
+      start();
+      return;
+    }
+
+    // Kick the entrance quickly — don't wait on media decode forever
+    const fallback = window.setTimeout(start, 120);
+
+    if (showVideo && videoRef.current) {
+      const el = videoRef.current;
+      const tryPlay = async () => {
+        try {
+          await el.play();
+        } catch {
+          setVideoFailed(true);
+        } finally {
+          start();
+        }
+      };
+      if (el.readyState >= 2) {
+        void tryPlay();
+      } else {
+        el.addEventListener("loadeddata", () => void tryPlay(), { once: true });
+        el.addEventListener(
+          "error",
+          () => {
+            setVideoFailed(true);
+            start();
+          },
+          { once: true }
+        );
+      }
+    } else {
+      start();
+    }
+
+    return () => window.clearTimeout(fallback);
+  }, [showVideo]);
+
   return (
     <section
       id="top"
       aria-labelledby="hero-heading"
+      data-hero={ready ? "ready" : "pending"}
       className="relative w-full overflow-hidden bg-ink-deep text-paper"
       style={{ minHeight: "100svh" }}
     >
-      {/* ---- Full-bleed media ---- */}
       <div className="absolute inset-0">
-        <div className="clip-reveal absolute inset-0">
-          {heroVideoSrc ? (
-            <video
-              className="h-full w-full object-cover"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster={heroPoster}
-              aria-hidden="true"
-            >
-              <source src={heroVideoSrc} type="video/mp4" />
-            </video>
-          ) : (
-            <Image
-              src={heroPoster}
-              alt="Інтер’єр після комплексного ремонту DTM у Львові"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover"
-            />
-          )}
+        <div className="hero-media absolute inset-0">
+          <div className="hero-media-inner absolute inset-0">
+            {showVideo ? (
+              <video
+                ref={videoRef}
+                className="h-full w-full object-cover object-[center_center] md:object-[center_40%]"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                poster={heroMedia.poster}
+                aria-hidden="true"
+                onError={() => setVideoFailed(true)}
+              >
+                {heroMedia.webm ? (
+                  <source src={heroMedia.webm} type="video/webm" />
+                ) : null}
+                {heroMedia.mp4 ? (
+                  <source src={heroMedia.mp4} type="video/mp4" />
+                ) : null}
+              </video>
+            ) : (
+              <Image
+                src={heroMedia.poster}
+                alt={t.imageAlt}
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover object-[center_center] md:object-[center_40%]"
+              />
+            )}
+          </div>
         </div>
-        {/* Cinematic scrim — legibility without hiding the architecture */}
+
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(13,13,15,0.62) 0%, rgba(13,13,15,0.14) 32%, rgba(13,13,15,0.22) 60%, rgba(13,13,15,0.82) 100%)",
+              "linear-gradient(180deg, rgba(13,13,15,0.58) 0%, rgba(13,13,15,0.12) 34%, rgba(13,13,15,0.28) 58%, rgba(13,13,15,0.84) 100%)",
           }}
         />
       </div>
 
-      {/* ---- Composition ---- */}
       <div className="relative flex min-h-[100svh] flex-col">
-        {/* Top meta row, offset below the fixed header */}
         <div
-          className="container-dtm reveal-fade delay-2 flex items-center justify-between text-paper/70"
-          style={{ paddingTop: "calc(var(--header-h) + clamp(1rem, 3vh, 2rem))" }}
+          className="container-dtm hero-meta flex items-center justify-between text-paper/70"
+          style={{
+            paddingTop: "calc(var(--header-h) + clamp(0.75rem, 2.5vh, 1.75rem))",
+          }}
         >
-          <span className="label">Комплексний ремонт · Львів</span>
-          <span className="label hidden sm:block">DTM / 01</span>
+          <span className="label">{t.meta}</span>
+          <span className="label hidden sm:block">{t.metaRight}</span>
         </div>
 
-        {/* Bottom-anchored headline block */}
-        <div className="container-dtm mt-auto pb-10 md:pb-14">
-          <div>
-            <h1
-              id="hero-heading"
-              className="font-sans font-semibold tracking-[-0.03em] text-balance"
-              style={{
-                fontSize: "clamp(2.5rem, 5.6vw, 5.75rem)",
-                lineHeight: 0.98,
-              }}
-            >
-              <span className="mask-line">
-                <span className="delay-2">Ремонт,</span>
-              </span>
-              <span className="mask-line">
-                <span className="delay-3">у якому все</span>
-              </span>
-              <span className="mask-line">
-                <span className="delay-4 text-accent">під контролем.</span>
-              </span>
-            </h1>
-          </div>
+        <div className="container-dtm mt-auto pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-10 md:pb-14">
+          <h1 id="hero-heading" className="type-display text-balance text-paper">
+            <span className="mask-line hero-line-1">
+              <span>{t.line1}</span>
+            </span>
+            <span className="mask-line hero-line-2">
+              <span>{t.line2}</span>
+            </span>
+            <span className="mask-line hero-line-3">
+              <span className="text-accent">{t.line3}</span>
+            </span>
+          </h1>
 
-          <div className="mt-8 grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12 lg:items-end">
-            <p className="reveal delay-5 max-w-md text-base leading-relaxed text-paper/80 md:text-lg lg:col-span-6">
-              Комплексний ремонт квартир, будинків і комерційних просторів
-              у Львові — від планування до готового простору.
+          <div className="mt-7 grid grid-cols-1 gap-x-10 gap-y-7 lg:grid-cols-12 lg:items-end md:mt-8">
+            <p className="hero-copy max-w-md type-body-lg text-paper/80 lg:col-span-6">
+              {t.copy}
             </p>
 
-            <div className="reveal delay-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center lg:col-span-6 lg:justify-end">
-              <a
-                href="#estimate"
-                className="inline-flex items-center justify-center bg-accent px-7 py-4 text-sm font-medium text-paper transition-colors duration-300 hover:bg-paper hover:text-ink"
-              >
-                Отримати попередній розрахунок
+            <div className="hero-cta flex flex-col items-stretch gap-3 sm:flex-row sm:items-center lg:col-span-6 lg:justify-end">
+              <a href="#estimate" className="btn btn-primary">
+                {t.ctaPrimary}
               </a>
-              <a
-                href="#projects"
-                className="group inline-flex items-center justify-center gap-2 border border-paper/35 px-7 py-4 text-sm font-medium text-paper transition-colors duration-300 hover:border-paper hover:bg-paper/10"
-              >
-                Дивитися роботи
-                <span
-                  aria-hidden="true"
-                  className="inline-block transition-transform duration-300 group-hover:translate-x-1"
-                >
+              <a href="#projects" className="btn btn-ghost group">
+                {t.ctaSecondary}
+                <span className="btn-arrow" aria-hidden>
                   →
                 </span>
               </a>

@@ -5,10 +5,12 @@ import { Projects } from "@/components/projects";
 import { Services } from "@/components/services";
 import { EstimateCta } from "@/components/estimate-cta";
 import { SiteFooter } from "@/components/site-footer";
+import { DocumentMeta } from "@/components/document-meta";
 
 export default function Home() {
   return (
     <>
+      <DocumentMeta />
       <SiteHeader />
       <main>
         <Hero />
