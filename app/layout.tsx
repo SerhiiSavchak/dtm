@@ -1,16 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Geist_Mono } from "next/font/google";
+import { Inter_Tight, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
   subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono-dtm",
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -29,7 +31,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1a1917",
+  themeColor: "#0d0d0f",
   width: "device-width",
   initialScale: 1,
 };
@@ -42,9 +44,9 @@ export default function RootLayout({
   return (
     <html
       lang="uk"
-      className={`${manrope.variable} ${geistMono.variable} bg-background antialiased`}
+      className={`${interTight.variable} ${jetbrainsMono.variable} bg-background antialiased`}
     >
-      <body className="min-h-dvh flex flex-col bg-background text-foreground">
+      <body className="min-h-dvh flex flex-col bg-background text-foreground overflow-x-hidden">
         {children}
       </body>
     </html>

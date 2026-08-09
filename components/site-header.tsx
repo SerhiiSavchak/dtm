@@ -15,7 +15,6 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Lock body scroll when the mobile menu is open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => {
@@ -23,22 +22,27 @@ export function SiteHeader() {
     };
   }, [menuOpen]);
 
+  // Solid/light chrome when scrolled or menu open; otherwise light-on-dark hero.
+  const solid = scrolled || menuOpen;
+  const tone = solid ? "ink" : "paper";
+
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ${
-        scrolled || menuOpen
+      className={`reveal-fade fixed inset-x-0 top-0 z-50 transition-colors duration-500 ${
+        solid
           ? "bg-paper/90 backdrop-blur-md border-b border-border"
           : "bg-transparent border-b border-transparent"
       }`}
+      style={{ height: "var(--header-h)" }}
     >
-      <div className="container-dtm flex items-center justify-between h-16 md:h-20">
+      <div className="container-dtm flex h-full items-center justify-between">
         <a
           href="#top"
           className="flex items-center"
           aria-label="DTM — на початок"
         >
-          <Logo tone="ink" withDescriptor className="hidden sm:block" />
-          <Logo tone="ink" withDescriptor={false} className="sm:hidden" />
+          <Logo tone={tone} withDescriptor className="hidden sm:block" />
+          <Logo tone={tone} withDescriptor={false} className="sm:hidden" />
         </a>
 
         {/* Desktop nav */}
@@ -50,7 +54,9 @@ export function SiteHeader() {
             <a
               key={item.href}
               href={item.href}
-              className="group relative text-sm font-medium text-ink/80 hover:text-ink transition-colors"
+              className={`group relative text-sm font-medium transition-colors ${
+                solid ? "text-ink/75 hover:text-ink" : "text-paper/85 hover:text-paper"
+              }`}
             >
               {item.label}
               <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-accent transition-all duration-300 group-hover:w-full" />
@@ -61,7 +67,11 @@ export function SiteHeader() {
         <div className="flex items-center gap-3">
           <a
             href="#estimate"
-            className="hidden sm:inline-flex items-center bg-ink text-paper text-sm font-medium px-5 py-2.5 hover:bg-accent transition-colors duration-300"
+            className={`hidden sm:inline-flex items-center text-sm font-medium px-5 py-2.5 transition-colors duration-300 ${
+              solid
+                ? "bg-ink text-paper hover:bg-accent"
+                : "bg-accent text-paper hover:bg-paper hover:text-ink"
+            }`}
           >
             Розрахувати вартість
           </a>
@@ -76,14 +86,14 @@ export function SiteHeader() {
             className="md:hidden flex flex-col justify-center gap-1.5 w-10 h-10 items-center"
           >
             <span
-              className={`block h-px w-6 bg-ink transition-transform duration-300 ${
-                menuOpen ? "translate-y-[3.5px] rotate-45" : ""
-              }`}
+              className={`block h-px w-6 transition-transform duration-300 ${
+                solid ? "bg-ink" : "bg-paper"
+              } ${menuOpen ? "translate-y-[3.5px] rotate-45" : ""}`}
             />
             <span
-              className={`block h-px w-6 bg-ink transition-transform duration-300 ${
-                menuOpen ? "-translate-y-[3.5px] -rotate-45" : ""
-              }`}
+              className={`block h-px w-6 transition-transform duration-300 ${
+                solid ? "bg-ink" : "bg-paper"
+              } ${menuOpen ? "-translate-y-[3.5px] -rotate-45" : ""}`}
             />
           </button>
         </div>
@@ -92,21 +102,24 @@ export function SiteHeader() {
       {/* Mobile menu */}
       <div
         id="mobile-menu"
-        className={`md:hidden overflow-hidden transition-[max-height] duration-500 ease-out ${
-          menuOpen ? "max-h-[80vh]" : "max-h-0"
+        className={`md:hidden overflow-hidden bg-paper transition-[max-height] duration-500 ease-out ${
+          menuOpen ? "max-h-[80vh] border-b border-border" : "max-h-0"
         }`}
       >
         <nav
           aria-label="Мобільна навігація"
           className="container-dtm flex flex-col gap-1 pb-6 pt-2"
         >
-          {nav.map((item) => (
+          {nav.map((item, i) => (
             <a
               key={item.href}
               href={item.href}
               onClick={() => setMenuOpen(false)}
-              className="py-3 text-2xl font-semibold tracking-tight text-ink border-b border-border"
+              className="flex items-baseline gap-4 py-3 text-2xl font-semibold tracking-tight text-ink border-b border-border"
             >
+              <span className="font-mono text-xs text-accent">
+                {String(i + 1).padStart(2, "0")}
+              </span>
               {item.label}
             </a>
           ))}

@@ -1,49 +1,108 @@
 import Image from "next/image";
 
+/**
+ * Drop a real DTM loop here later (e.g. "/videos/hero.mp4") and the layout
+ * stays identical — the poster/Image fallback keeps the composition stable
+ * with no redesign. Kept null so we never depend on a fragile remote URL.
+ */
+const heroVideoSrc: string | null = null;
+const heroPoster = "/images/hero.png";
+
 export function Hero() {
   return (
     <section
       id="top"
       aria-labelledby="hero-heading"
-      className="relative pt-24 md:pt-28"
+      className="relative w-full overflow-hidden bg-ink-deep text-paper"
+      style={{ minHeight: "100svh" }}
     >
-      <div className="container-dtm">
-        {/* Top meta row */}
-        <div className="reveal reveal-fade flex items-center justify-between border-t border-border pt-4 text-graphite">
-          <span className="label">Ремонт під ключ · Львів</span>
-          <span className="label hidden sm:block">Est. DTM</span>
+      {/* ---- Full-bleed media ---- */}
+      <div className="absolute inset-0">
+        <div className="clip-reveal absolute inset-0">
+          {heroVideoSrc ? (
+            <video
+              className="h-full w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={heroPoster}
+              aria-hidden="true"
+            >
+              <source src={heroVideoSrc} type="video/mp4" />
+            </video>
+          ) : (
+            <Image
+              src={heroPoster}
+              alt="Інтер’єр після комплексного ремонту DTM у Львові"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+          )}
+        </div>
+        {/* Cinematic scrim — legibility without hiding the architecture */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(13,13,15,0.62) 0%, rgba(13,13,15,0.14) 32%, rgba(13,13,15,0.22) 60%, rgba(13,13,15,0.82) 100%)",
+          }}
+        />
+      </div>
+
+      {/* ---- Composition ---- */}
+      <div className="relative flex min-h-[100svh] flex-col">
+        {/* Top meta row, offset below the fixed header */}
+        <div
+          className="container-dtm reveal-fade delay-2 flex items-center justify-between text-paper/70"
+          style={{ paddingTop: "calc(var(--header-h) + clamp(1rem, 3vh, 2rem))" }}
+        >
+          <span className="label">Комплексний ремонт · Львів</span>
+          <span className="label hidden sm:block">DTM / 01</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-8 gap-y-8 pt-8 md:pt-12 pb-14 md:pb-20 items-end">
-          {/* Headline block */}
-          <div className="lg:col-span-7 xl:col-span-6">
+        {/* Bottom-anchored headline block */}
+        <div className="container-dtm mt-auto pb-10 md:pb-14">
+          <div>
             <h1
               id="hero-heading"
-              className="reveal font-sans font-semibold tracking-[-0.03em] text-ink text-balance"
-              style={{ fontSize: "var(--text-display)", lineHeight: 0.95 }}
+              className="font-sans font-semibold tracking-[-0.03em] text-balance"
+              style={{
+                fontSize: "clamp(2.5rem, 5.6vw, 5.75rem)",
+                lineHeight: 0.98,
+              }}
             >
-              Ремонт,
-              <br />
-              у якому все
-              <br />
-              <span className="text-accent">під контролем.</span>
+              <span className="mask-line">
+                <span className="delay-2">Ремонт,</span>
+              </span>
+              <span className="mask-line">
+                <span className="delay-3">у якому все</span>
+              </span>
+              <span className="mask-line">
+                <span className="delay-4 text-accent">під контролем.</span>
+              </span>
             </h1>
+          </div>
 
-            <p className="reveal delay-2 mt-7 max-w-md text-base md:text-lg leading-relaxed text-ink/75">
+          <div className="mt-8 grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12 lg:items-end">
+            <p className="reveal delay-5 max-w-md text-base leading-relaxed text-paper/80 md:text-lg lg:col-span-6">
               Комплексний ремонт квартир, будинків і комерційних просторів
               у Львові — від планування до готового простору.
             </p>
 
-            <div className="reveal delay-3 mt-9 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="reveal delay-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center lg:col-span-6 lg:justify-end">
               <a
                 href="#estimate"
-                className="inline-flex items-center justify-center bg-accent text-paper text-sm font-medium px-7 py-4 hover:bg-ink transition-colors duration-300"
+                className="inline-flex items-center justify-center bg-accent px-7 py-4 text-sm font-medium text-paper transition-colors duration-300 hover:bg-paper hover:text-ink"
               >
                 Отримати попередній розрахунок
               </a>
               <a
                 href="#projects"
-                className="group inline-flex items-center justify-center gap-2 text-sm font-medium text-ink px-2 py-4"
+                className="group inline-flex items-center justify-center gap-2 border border-paper/35 px-7 py-4 text-sm font-medium text-paper transition-colors duration-300 hover:border-paper hover:bg-paper/10"
               >
                 Дивитися роботи
                 <span
@@ -54,30 +113,6 @@ export function Hero() {
                 </span>
               </a>
             </div>
-          </div>
-
-          {/* Image block */}
-          <div className="lg:col-span-5 xl:col-span-6 lg:col-start-8 xl:col-start-7">
-            <figure className="relative">
-              <div className="clip-reveal relative aspect-[4/5] lg:aspect-[3/4] w-full overflow-hidden bg-stone">
-                {/*
-                  Above-the-fold hero asset. Designed so a looping project
-                  video could replace this <Image> in production.
-                */}
-                <Image
-                  src="/images/hero.png"
-                  alt="Інтер’єр квартири після комплексного ремонту DTM у Львові"
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                />
-              </div>
-              <figcaption className="reveal delay-4 mt-3 flex items-center justify-between text-graphite">
-                <span className="label">Вибраний проєкт</span>
-                <span className="label">Квартира · 92 м²</span>
-              </figcaption>
-            </figure>
           </div>
         </div>
       </div>
