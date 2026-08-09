@@ -5,7 +5,7 @@ export function SiteFooter() {
   return (
     <footer
       id="contacts"
-      className="bg-ink text-paper mt-auto"
+      className="bg-ink-deep text-paper mt-auto"
       aria-label="Підвал сайту"
     >
       <div className="container-dtm py-14 md:py-16">
@@ -43,7 +43,7 @@ export function SiteFooter() {
           <span className="label text-paper/50">
             © {new Date().getFullYear()} DTM — Дім Твоєї Мрії
           </span>
-          <span className="label text-paper/40">Візуальний концепт</span>
+          <span className="label text-paper/40">Львів · Україна</span>
         </div>
       </div>
     </footer>

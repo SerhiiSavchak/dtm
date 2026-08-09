@@ -1,25 +1,26 @@
 type LogoProps = {
   /** Show the small "ДІМ ТВОЄЇ МРІЇ" descriptor line */
   withDescriptor?: boolean;
-  /** Color of the DTM wordmark + descriptor (house mark stays orange) */
+  /** Foreground of the house outline + descriptor. Wordmark stays DTM orange. */
   tone?: "ink" | "paper";
   className?: string;
 };
 
 /**
- * DTM identity — recreated as a clean scalable vector from the supplied
- * reference: a minimal architectural house outline, the orange "DTM"
- * wordmark, and the "ДІМ ТВОЄЇ МРІЇ" descriptor.
+ * DTM identity — clean scalable vector rebuilt from the supplied reference:
+ * an architectural house outline (open bracket with a short foot) framing the
+ * orange "DTM" wordmark, above the "ДІМ ТВОЄЇ МРІЇ" descriptor.
  *
- * No gradients, glow, 3D or shadow treatments — flat and sharp at any size.
+ * Reference truth: house outline = white/ink, wordmark = DTM orange.
+ * Flat and sharp at any size — no gradients, glow or shadow.
  */
 export function Logo({
   withDescriptor = true,
   tone = "ink",
   className,
 }: LogoProps) {
-  const wordColor = tone === "paper" ? "var(--paper)" : "var(--ink)";
-  const descColor = tone === "paper" ? "var(--stone)" : "var(--graphite)";
+  const stroke = tone === "paper" ? "var(--paper)" : "var(--ink)";
+  const descColor = tone === "paper" ? "rgba(255,255,255,0.65)" : "var(--graphite)";
 
   return (
     <span
@@ -28,57 +29,50 @@ export function Logo({
       role="img"
     >
       <span className="flex items-center gap-2.5">
-        {/* House mark */}
+        {/* House mark: peaked roof + side walls + bottom-left foot */}
         <svg
-          width="30"
-          height="30"
+          width="34"
+          height="34"
           viewBox="0 0 40 40"
           fill="none"
           aria-hidden="true"
           className="shrink-0"
         >
           <path
-            d="M4 18 L20 5 L36 18"
-            stroke="var(--orange)"
-            strokeWidth="2.4"
+            d="M5 34 V17 L20 5.5 L35 17 V34"
+            stroke={stroke}
+            strokeWidth="2.1"
             strokeLinecap="square"
             strokeLinejoin="miter"
           />
           <path
-            d="M8 16 V35 H32 V16"
-            stroke="var(--orange)"
-            strokeWidth="2.4"
+            d="M5 34 H13"
+            stroke={stroke}
+            strokeWidth="2.1"
             strokeLinecap="square"
-            strokeLinejoin="miter"
-          />
-          <path
-            d="M17 35 V25 H23 V35"
-            stroke="var(--orange)"
-            strokeWidth="2.4"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
           />
         </svg>
 
-        {/* Wordmark */}
+        {/* Wordmark + descriptor */}
         <span className="flex flex-col leading-none">
           <span
-            className="font-sans font-extrabold tracking-tight"
-            style={{ color: wordColor, fontSize: "1.35rem", lineHeight: 1 }}
+            className="font-sans font-bold tracking-[-0.02em]"
+            style={{ color: "var(--orange)", fontSize: "1.4rem", lineHeight: 0.9 }}
           >
             DTM
           </span>
           {withDescriptor && (
             <span
-              className="label mt-1"
+              className="mt-[3px] font-mono"
               style={{
                 color: descColor,
                 fontSize: "0.5rem",
-                letterSpacing: "0.22em",
-                fontWeight: 600,
+                letterSpacing: "0.24em",
+                fontWeight: 500,
+                textTransform: "uppercase",
               }}
             >
-              Дім Твоєї Мрії
+              Дім твоєї мрії
             </span>
           )}
         </span>
