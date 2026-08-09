@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+/*
+  DTM — Дім Твоєї Мрії
+  Architectural neutral palette + restrained DTM orange accent.
+*/
+
+:root {
+  /* Neutrals */
+  --bone: #f4f1ea;        /* warm off-white base */
+  --paper: #faf8f3;       /* lightest surface */
+  --stone: #e4dfd4;       /* light stone */
+  --stone-line: #d8d2c5;  /* hairline on light */
+  --graphite: #6c6a64;    /* muted gray text */
+  --ink: #1a1917;         /* near-black */
+  --ink-soft: #23221f;    /* dark section bg */
+
+  /* Accent */
+  --orange: #e0632a;      /* DTM orange */
+  --orange-soft: #f0764a;
+
+  /* Semantic tokens */
+  --background: var(--bone);
+  --foreground: var(--ink);
+  --muted: var(--graphite);
+  --surface: var(--paper);
+  --border: var(--stone-line);
+  --accent: var(--orange);
+
+  --radius: 0px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--orange-soft);
+
+  --color-bone: var(--bone);
+  --color-paper: var(--paper);
+  --color-stone: var(--stone);
+  --color-graphite: var(--graphite);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+
+  --font-sans: var(--font-manrope);
+  --font-mono: var(--font-geist-mono);
+
+  /* Fluid display scale */
+  --text-display: clamp(2.75rem, 7vw, 8rem);
+  --text-h1: clamp(2.25rem, 5vw, 5rem);
+  --text-h2: clamp(1.75rem, 3.5vw, 3.25rem);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Selection */
+::selection {
+  background: var(--orange);
+  color: var(--paper);
+}
+
+/* Reusable utilities */
+.container-dtm {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 4.5rem);
+}
+
+.label {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.hairline {
+  height: 1px;
+  background: var(--border);
+}
+
+/* Focus visibility for accessibility */
+:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 3px;
+}
+
+/* Entrance reveal — pure CSS, respects reduced motion */
+@keyframes dtm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dtm-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.reveal {
+  animation: dtm-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.reveal-fade {
+  animation: dtm-fade 1.2s ease both;
+}
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+.delay-5 { animation-delay: 0.44s; }
+
+/* Image reveal clip */
+@keyframes dtm-clip {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.clip-reveal {
+  animation: dtm-clip 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-fade,
+  .clip-reveal {
+    animation: none !important;
+  }
+}
