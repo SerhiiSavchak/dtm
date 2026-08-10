@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
 
 type RevealProps = {
-  children: ReactNode;
+  children?: ReactNode;
   /** Motion variant: rise, clip (image mask), or rule (line draw) */
   variant?: "rise" | "clip" | "rule";
   /** Delay in seconds for staggered sequences */

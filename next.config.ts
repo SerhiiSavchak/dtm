@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  images: {
+    // quality={90} is used for hero/portfolio masters
+    qualities: [75, 90],
+  },
   async headers() {
     return [
       {

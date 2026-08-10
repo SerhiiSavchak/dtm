@@ -5,6 +5,7 @@ import { useCallback, useEffect, useId, useState } from "react";
 import { serviceMedia } from "@/data/media";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { Reveal } from "./reveal";
+import { SectionHead } from "./section-head";
 
 export function Services() {
   const t = useDictionary().services;
@@ -43,22 +44,14 @@ export function Services() {
       className="bg-ink-deep text-paper"
     >
       <div className="container-dtm section-pad">
-        <Reveal
-          as="div"
-          className="flex items-center justify-between border-t border-white/15 pt-4"
-        >
-          <span className="label text-accent">{t.label}</span>
-          <span className="label hidden text-paper/50 sm:block">
-            {t.labelRight}
-          </span>
-        </Reveal>
+        <SectionHead label={t.label} right={t.labelRight} onDark />
 
-        <div className="mt-10 grid grid-cols-1 gap-x-12 md:mt-12 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-x-12 lg:grid-cols-12">
           <div className="lg:col-span-7">
             <Reveal>
               <h2
                 id="services-heading"
-                className="mb-8 type-h2 text-balance text-paper md:mb-12"
+                className="mb-6 type-h2 text-balance text-paper md:mb-8"
               >
                 {t.heading}
               </h2>
@@ -73,6 +66,7 @@ export function Services() {
                   alt=""
                   aria-hidden="true"
                   fill
+                  quality={90}
                   sizes="100vw"
                   className="service-media object-cover"
                   data-active={active === i ? "true" : "false"}
@@ -108,7 +102,7 @@ export function Services() {
                       onFocus={() => activate(i)}
                       onClick={() => activate(i)}
                       onKeyDown={(e) => onKeyDown(e, i)}
-                      className="group grid w-full grid-cols-[3rem_1fr_auto] items-baseline gap-x-4 border-b border-white/15 py-6 text-left md:gap-x-8 md:py-8"
+                      className="group grid w-full grid-cols-[3rem_1fr_auto] items-baseline gap-x-4 border-b border-white/15 py-5 text-left md:gap-x-8 md:py-6"
                     >
                       <span
                         className={`font-mono text-xs tabular-nums transition-colors duration-300 ${
@@ -167,7 +161,8 @@ export function Services() {
                     alt=""
                     aria-hidden="true"
                     fill
-                    sizes="42vw"
+                    quality={90}
+                    sizes="(max-width: 1280px) 40vw, 560px"
                     className="service-media object-cover"
                     data-active={active === i ? "true" : "false"}
                     priority={i === 0}

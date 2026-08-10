@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useState,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
@@ -44,22 +45,42 @@ type LocaleContextValue = {
   dictionary: Dictionary;
   setLocale: (locale: Locale) => void;
   toggleLocale: () => void;
+  isSwitching: boolean;
 };
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const locale = useSyncExternalStore(subscribe, readLocale, getServerLocale);
+  const [isSwitching, setIsSwitching] = useState(false);
 
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
 
-  const setLocale = useCallback((next: Locale) => {
-    window.localStorage.setItem(STORAGE_KEY, next);
-    document.documentElement.lang = next;
-    emit();
-  }, []);
+  const setLocale = useCallback(
+    (next: Locale) => {
+      if (next === locale) return;
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const apply = () => {
+        window.localStorage.setItem(STORAGE_KEY, next);
+        document.documentElement.lang = next;
+        emit();
+      };
+
+      if (reduced) {
+        apply();
+        return;
+      }
+
+      setIsSwitching(true);
+      window.setTimeout(() => {
+        apply();
+        window.setTimeout(() => setIsSwitching(false), 40);
+      }, 160);
+    },
+    [locale]
+  );
 
   const toggleLocale = useCallback(() => {
     setLocale(locale === "uk" ? "en" : "uk");
@@ -71,8 +92,9 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       dictionary: getDictionary(locale),
       setLocale,
       toggleLocale,
+      isSwitching,
     }),
-    [locale, setLocale, toggleLocale]
+    [locale, setLocale, toggleLocale, isSwitching]
   );
 
   return (

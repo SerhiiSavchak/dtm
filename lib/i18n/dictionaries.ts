@@ -14,6 +14,7 @@ export type Dictionary = {
   nav: {
     services: string;
     projects: string;
+    process: string;
     about: string;
     contact: string;
     estimate: string;
@@ -41,7 +42,8 @@ export type Dictionary = {
     headingAccent: string;
     headingAfter: string;
     body: string;
-    responsibilities: string[];
+    proposition: string;
+    responsibilities: { title: string; text: string }[];
   };
   projects: {
     label: string;
@@ -49,6 +51,11 @@ export type Dictionary = {
     all: string;
     areaPlaceholder: string;
     titlePlaceholder: string;
+    counter: string;
+    close: string;
+    next: string;
+    prev: string;
+    open: string;
     location: {
       lviv: string;
     };
@@ -68,6 +75,32 @@ export type Dictionary = {
       description: string;
     }[];
   };
+  process: {
+    label: string;
+    labelRight: string;
+    heading: string;
+    body: string;
+    stages: { index: string; title: string; text: string }[];
+  };
+  inProgress: {
+    label: string;
+    labelRight: string;
+    heading: string;
+    body: string;
+    stages: {
+      finishing: string;
+      install: string;
+      detail: string;
+      handover: string;
+    };
+    captionPlaceholder: string;
+    instagramCta: string;
+  };
+  faq: {
+    label: string;
+    heading: string;
+    items: { q: string; a: string }[];
+  };
   estimate: {
     label: string;
     labelRight: string;
@@ -75,6 +108,14 @@ export type Dictionary = {
     headingAccent: string;
     body: string;
     contactLink: string;
+  };
+  finalCta: {
+    headingBefore: string;
+    headingAfter: string;
+    body: string;
+    primary: string;
+    telegram: string;
+    call: string;
   };
   calculator: {
     progress: string;
@@ -174,6 +215,7 @@ const uk: Dictionary = {
   nav: {
     services: "Послуги",
     projects: "Наші роботи",
+    process: "Як працюємо",
     about: "Про DTM",
     contact: "Контакти",
     estimate: "Розрахувати вартість",
@@ -195,27 +237,43 @@ const uk: Dictionary = {
     imageAlt: "Інтер’єр після комплексного ремонту DTM у Львові",
   },
   intro: {
-    label: "(01) — Про DTM",
-    labelRight: "Процес під ключ",
-    headingBefore: "Беремо на себе",
-    headingAccent: "весь процес ремонту",
-    headingAfter:
-      "— від планування до готового простору, у якому можна жити.",
-    body: "Один підрядник, одна відповідальність. Ви узгоджуєте результат, а організацію, закупівлю й контроль якості беремо на себе ми.",
+    label: "(01) — Відповідальність",
+    labelRight: "Модель роботи",
+    headingBefore: "Один підрядник —",
+    headingAccent: "весь ремонт під контролем.",
+    headingAfter: "",
+    body: "DTM веде комплексний ремонт як єдиний процес — без потреби клієнту координувати окремих підрядників. Ви узгоджуєте результат; організацію беремо на себе ми.",
+    proposition: "Що DTM бере на себе",
     responsibilities: [
-      "Кошторис",
-      "Організація робіт",
-      "Прораб",
-      "Закупівля та комплектація",
-      "Контроль виконання",
+      {
+        title: "Кошторис і планування",
+        text: "Зрозуміла структура робіт та етапів перед стартом.",
+      },
+      {
+        title: "Організація робіт і прораб",
+        text: "Команда, графік і керування процесом на об’єкті.",
+      },
+      {
+        title: "Закупівля та комплектація",
+        text: "Матеріали та комплектація під узгоджений результат.",
+      },
+      {
+        title: "Контроль виконання",
+        text: "Перевірка якості та фото / відео звітність ходу робіт.",
+      },
     ],
   },
   projects: {
     label: "(02) — Портфоліо",
     heading: "Вибрані роботи",
-    all: "Усі проєкти",
+    all: "Листати проєкти",
     areaPlaceholder: "[площа]",
     titlePlaceholder: "[Назва проєкту]",
+    counter: "з",
+    close: "Закрити",
+    next: "Наступний",
+    prev: "Попередній",
+    open: "Відкрити проєкт",
     location: { lviv: "Львів" },
     categories: {
       apartment: "Квартира",
@@ -254,13 +312,103 @@ const uk: Dictionary = {
       },
     ],
   },
+  process: {
+    label: "(04) — Процес",
+    labelRight: "Від запиту до передачі",
+    heading: "Як ми ведемо ремонт",
+    body: "Чітка послідовність етапів — щоб ви завжди розуміли, що відбувається з об’єктом.",
+    stages: [
+      {
+        index: "01",
+        title: "Знайомство та консультація",
+        text: "Обговорюємо задачу, очікування й рамки проєкту.",
+      },
+      {
+        index: "02",
+        title: "Оцінка об’єкта",
+        text: "Оглядаємо простір і фіксуємо вихідні умови для розрахунку.",
+      },
+      {
+        index: "03",
+        title: "Кошторис і планування",
+        text: "Формуємо попередній розрахунок і логіку робіт.",
+      },
+      {
+        index: "04",
+        title: "Організація робіт",
+        text: "Збираємо команду, матеріали та графік виконання.",
+      },
+      {
+        index: "05",
+        title: "Реалізація та контроль",
+        text: "Ведемо роботи з контролем якості на кожному етапі.",
+      },
+      {
+        index: "06",
+        title: "Передача готового об’єкта",
+        text: "Завершуємо фініш і передаємо простір до користування.",
+      },
+    ],
+  },
+  inProgress: {
+    label: "(05) — У роботі",
+    labelRight: "Живі об’єкти",
+    heading: "Об’єкти зараз у роботі",
+    body: "Реальні кадри з поточних ремонтів DTM — процес, звітність і хід робіт без постановки.",
+    stages: {
+      finishing: "Фінішні роботи",
+      install: "Монтаж",
+      detail: "Деталі",
+      handover: "Підготовка до здачі",
+    },
+    captionPlaceholder: "[Об’єкт]",
+    instagramCta: "Більше процесів в Instagram",
+  },
+  faq: {
+    label: "(07) — FAQ",
+    heading: "Часті запитання",
+    items: [
+      {
+        q: "Як формується попередня вартість?",
+        a: "Ми збираємо параметри об’єкта — тип, площу, стан і обсяг робіт — і готуємо орієнтовний розрахунок. Точна вартість уточнюється після деталізації.",
+      },
+      {
+        q: "Чи можна замовити ремонт без дизайн-проєкту?",
+        a: "Так. Можна стартувати без готового проєкту або отримати консультацію щодо його потреби для вашого об’єкта.",
+      },
+      {
+        q: "Чи працюєте ви з новобудовами?",
+        a: "Так, працюємо з новобудовами, вторинним житлом і об’єктами після демонтажу.",
+      },
+      {
+        q: "Чи можна замовити тільки окремі роботи?",
+        a: "Основний фокус — комплексний ремонт. Окремі роботи обговорюються індивідуально залежно від обсягу й етапу.",
+      },
+      {
+        q: "Як відбувається контроль ремонту?",
+        a: "Процес веде відповідальний з боку DTM: організація робіт, прораб на об’єкті та регулярна фото / відео звітність.",
+      },
+      {
+        q: "Коли краще звертатися перед початком ремонту?",
+        a: "Що раніше — то краще: так можна спокійніше спланувати кошторис, комплектацію й старт робіт.",
+      },
+    ],
+  },
   estimate: {
-    label: "(04) — Кошторис",
+    label: "(06) — Кошторис",
     labelRight: "Без зобов’язань",
     headingBefore: "Розкажіть про проєкт — підготуємо",
     headingAccent: "попередній розрахунок.",
     body: "Ми зберемо параметри вашого простору й повернемося з орієнтовною вартістю та наступними кроками. Це не автоматична точна ціна — це кваліфікований запит.",
     contactLink: "або звʼязатися напряму",
+  },
+  finalCta: {
+    headingBefore: "Розкажіть про ваш об’єкт —",
+    headingAfter: "ми підготуємо попередній розрахунок.",
+    body: "Коротко опишіть задачу — і ми повернемося з наступними кроками.",
+    primary: "Отримати попередній розрахунок",
+    telegram: "Telegram",
+    call: "Зателефонувати",
   },
   calculator: {
     progress: "Прогрес",
@@ -384,6 +532,7 @@ const en: Dictionary = {
   nav: {
     services: "Services",
     projects: "Projects",
+    process: "How we work",
     about: "About DTM",
     contact: "Contact",
     estimate: "Get an estimate",
@@ -405,26 +554,43 @@ const en: Dictionary = {
     imageAlt: "Interior after a DTM full-cycle renovation in Lviv",
   },
   intro: {
-    label: "(01) — About DTM",
-    labelRight: "Turnkey process",
-    headingBefore: "We take on",
-    headingAccent: "the entire renovation process",
-    headingAfter: "— from planning to a finished space you can live in.",
-    body: "One contractor, one responsibility. You approve the result; we handle organisation, procurement and quality control.",
+    label: "(01) — Responsibility",
+    labelRight: "How we work",
+    headingBefore: "One contractor —",
+    headingAccent: "the whole renovation under control.",
+    headingAfter: "",
+    body: "DTM runs full-cycle renovation as a single process — so you don’t coordinate separate contractors. You approve the result; we own the organisation.",
+    proposition: "What DTM takes on",
     responsibilities: [
-      "Estimate",
-      "Work organisation",
-      "Site manager",
-      "Procurement & fit-out",
-      "Quality control",
+      {
+        title: "Estimate & planning",
+        text: "A clear structure of works and stages before the start.",
+      },
+      {
+        title: "Work organisation & site manager",
+        text: "Team, schedule and on-site process management.",
+      },
+      {
+        title: "Procurement & fit-out",
+        text: "Materials and fit-out aligned to the agreed result.",
+      },
+      {
+        title: "Execution control",
+        text: "Quality checks and photo / video progress reporting.",
+      },
     ],
   },
   projects: {
     label: "(02) — Portfolio",
     heading: "Selected projects",
-    all: "All projects",
+    all: "Browse projects",
     areaPlaceholder: "[area]",
     titlePlaceholder: "[Project title]",
+    counter: "of",
+    close: "Close",
+    next: "Next",
+    prev: "Previous",
+    open: "Open project",
     location: { lviv: "Lviv" },
     categories: {
       apartment: "Apartment",
@@ -463,13 +629,103 @@ const en: Dictionary = {
       },
     ],
   },
+  process: {
+    label: "(04) — Process",
+    labelRight: "From enquiry to handover",
+    heading: "How we run a renovation",
+    body: "A clear sequence of stages — so you always know what is happening on site.",
+    stages: [
+      {
+        index: "01",
+        title: "Introduction & consultation",
+        text: "We discuss the brief, expectations and project frame.",
+      },
+      {
+        index: "02",
+        title: "Site assessment",
+        text: "We review the space and record starting conditions for the estimate.",
+      },
+      {
+        index: "03",
+        title: "Estimate & planning",
+        text: "We prepare a preliminary estimate and a work plan.",
+      },
+      {
+        index: "04",
+        title: "Work organisation",
+        text: "We assemble the team, materials and execution schedule.",
+      },
+      {
+        index: "05",
+        title: "Delivery & control",
+        text: "We execute with quality checks at every stage.",
+      },
+      {
+        index: "06",
+        title: "Handover",
+        text: "We finish the space and hand it over ready to use.",
+      },
+    ],
+  },
+  inProgress: {
+    label: "(05) — In progress",
+    labelRight: "Live sites",
+    heading: "Projects currently in progress",
+    body: "Real frames from active DTM renovations — process, reporting and progress without staging.",
+    stages: {
+      finishing: "Finishing works",
+      install: "Installation",
+      detail: "Details",
+      handover: "Pre-handover",
+    },
+    captionPlaceholder: "[Project]",
+    instagramCta: "More process on Instagram",
+  },
+  faq: {
+    label: "(07) — FAQ",
+    heading: "Frequently asked questions",
+    items: [
+      {
+        q: "How is the preliminary cost formed?",
+        a: "We collect property parameters — type, area, condition and scope — and prepare an indicative estimate. Exact cost is refined after detailing.",
+      },
+      {
+        q: "Can I order a renovation without a design project?",
+        a: "Yes. You can start without a finished design, or get advice on whether you need one for your property.",
+      },
+      {
+        q: "Do you work with new builds?",
+        a: "Yes — new builds, secondary housing and sites after demolition.",
+      },
+      {
+        q: "Can I order only selected works?",
+        a: "Our focus is full-cycle renovation. Partial scopes are discussed case by case.",
+      },
+      {
+        q: "How is the renovation controlled?",
+        a: "A DTM lead owns the process: work organisation, a site foreman, and regular photo / video reporting.",
+      },
+      {
+        q: "When should I get in touch before starting?",
+        a: "The earlier the better — so estimate, procurement and start can be planned calmly.",
+      },
+    ],
+  },
   estimate: {
-    label: "(04) — Estimate",
+    label: "(06) — Estimate",
     labelRight: "No obligation",
     headingBefore: "Tell us about the project — we’ll prepare a",
     headingAccent: "preliminary estimate.",
     body: "We’ll collect your space parameters and follow up with an indicative cost and next steps. This is not an automatic exact price — it’s a qualified request.",
     contactLink: "or contact us directly",
+  },
+  finalCta: {
+    headingBefore: "Tell us about your property —",
+    headingAfter: "we’ll prepare a preliminary estimate.",
+    body: "Share a short brief — and we’ll come back with next steps.",
+    primary: "Get a preliminary estimate",
+    telegram: "Telegram",
+    call: "Call us",
   },
   calculator: {
     progress: "Progress",
@@ -589,6 +845,7 @@ export function getDictionary(locale: Locale): Dictionary {
 export const navHrefs = {
   services: "#services",
   projects: "#projects",
+  process: "#process",
   about: "#about",
   contact: "#contacts",
   estimate: "#estimate",

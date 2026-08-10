@@ -32,23 +32,21 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f4f2" },
-    { media: "(prefers-color-scheme: dark)", color: "#121214" },
-  ],
+  themeColor: "#121214",
   width: "device-width",
   initialScale: 1,
 };
 
+/** Persist manual choice; default dark — matches CSS :root to avoid FOUC */
 const themeInitScript = `
 (function(){
   try {
     var stored = localStorage.getItem('dtm-theme');
-    var theme = stored === 'light' || stored === 'dark'
-      ? stored
-      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var theme = stored === 'light' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', theme);
-  } catch (e) {}
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
 })();
 `;
 
@@ -60,6 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="uk"
+      data-theme="dark"
       className={`${interTight.variable} ${jetbrainsMono.variable} bg-background antialiased`}
       suppressHydrationWarning
     >

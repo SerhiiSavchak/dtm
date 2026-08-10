@@ -2,20 +2,18 @@ export type ProjectCategory = "apartment" | "house" | "commercial";
 
 export type Project = {
   slug: string;
-  /** Display title — keep explicit placeholders until verified */
   titleKey: "placeholder";
   category: ProjectCategory;
-  locationKey: "lviv";
-  /** Keep as placeholder string; never invent square metres */
-  area: string;
+  locationKey?: "lviv";
+  area?: string;
   cover: string;
   gallery: string[];
   span: "large" | "tall" | "wide" | "small";
 };
 
 /**
- * Central portfolio source. Replace placeholders with verified DTM project
- * data when available — never invent names, budgets, or areas.
+ * Portfolio — PNG masters for cover sharpness; JPG extras only in galleries.
+ * Metadata stays placeholder until verified.
  */
 export const projects: Project[] = [
   {
@@ -23,19 +21,24 @@ export const projects: Project[] = [
     titleKey: "placeholder",
     category: "apartment",
     locationKey: "lviv",
-    area: "[площа]",
     cover: "/images/project-01.png",
-    gallery: ["/images/project-01.png"],
+    gallery: [
+      "/images/project-01.png",
+      "/images/photo_2026-08-09_15-11-14.jpg",
+      "/images/photo_2026-08-09_15-11-02.jpg",
+    ],
     span: "large",
   },
   {
     slug: "project-02",
     titleKey: "placeholder",
-    category: "house",
+    category: "apartment",
     locationKey: "lviv",
-    area: "[площа]",
     cover: "/images/project-02.png",
-    gallery: ["/images/project-02.png"],
+    gallery: [
+      "/images/project-02.png",
+      "/images/photo_2026-08-09_15-12-16.jpg",
+    ],
     span: "tall",
   },
   {
@@ -43,19 +46,24 @@ export const projects: Project[] = [
     titleKey: "placeholder",
     category: "apartment",
     locationKey: "lviv",
-    area: "[площа]",
     cover: "/images/project-03.png",
-    gallery: ["/images/project-03.png"],
+    gallery: [
+      "/images/project-03.png",
+      "/images/photo_2026-08-09_15-10-13.jpg",
+    ],
     span: "small",
   },
   {
     slug: "project-04",
     titleKey: "placeholder",
-    category: "commercial",
+    category: "house",
     locationKey: "lviv",
-    area: "[площа]",
     cover: "/images/project-04.png",
-    gallery: ["/images/project-04.png"],
+    gallery: [
+      "/images/project-04.png",
+      "/images/photo_2026-08-09_15-12-18.jpg",
+      "/images/hero.png",
+    ],
     span: "wide",
   },
 ];

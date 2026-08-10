@@ -25,16 +25,15 @@ function subscribe(listener: () => void) {
   };
 }
 
+/** Default is dark unless the user manually chose light. */
 function readTheme(): Theme {
   const stored = window.localStorage.getItem(STORAGE_KEY);
   if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return "dark";
 }
 
 function getServerTheme(): Theme {
-  return "light";
+  return "dark";
 }
 
 function applyTheme(theme: Theme) {

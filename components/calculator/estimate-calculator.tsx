@@ -29,7 +29,7 @@ function OptionButton({
       id={id}
       onClick={onClick}
       aria-pressed={selected}
-      className={`w-full border px-5 py-4 text-left text-base font-medium transition-colors duration-300 md:text-lg ${
+      className={`w-full border px-6 py-5 text-left text-base font-medium transition-colors duration-300 md:text-lg ${
         selected
           ? "border-accent bg-accent text-white"
           : "border-white/20 bg-transparent text-paper hover:border-white/50 hover:bg-white/5"
@@ -50,6 +50,7 @@ export function EstimateCalculator() {
   const [phase, setPhase] = useState<Phase>("form");
   const [error, setError] = useState<string | null>(null);
   const [animKey, setAnimKey] = useState(0);
+  const [direction, setDirection] = useState<1 | -1>(1);
 
   const steps = useMemo(
     () => getStepSequence(state.objectType),
@@ -65,6 +66,7 @@ export function EstimateCalculator() {
   }
 
   function goTo(index: number) {
+    setDirection(index < currentIndex ? -1 : 1);
     setAnimKey((k) => k + 1);
     setStepIndex(index);
     setError(null);
@@ -152,23 +154,30 @@ export function EstimateCalculator() {
     setPhase("submitting");
     setError(null);
 
+    const payload = {
+      objectType: state.objectType,
+      area: Number(state.area),
+      rooms: state.rooms ? Number(state.rooms) : null,
+      renovationType: state.renovationType,
+      design: state.design,
+      condition: state.condition,
+      start: state.start,
+      name: state.name.trim(),
+      phone: state.phone.trim(),
+      telegram: state.telegram.trim() || undefined,
+      locale,
+    };
+
+    // Temporary debug visibility until Telegram/email delivery is wired
+    console.group("DTM Calculator Lead");
+    console.log(payload);
+    console.groupEnd();
+
     try {
       const res = await fetch("/api/estimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          objectType: state.objectType,
-          area: Number(state.area),
-          rooms: state.rooms ? Number(state.rooms) : null,
-          renovationType: state.renovationType,
-          design: state.design,
-          condition: state.condition,
-          start: state.start,
-          name: state.name.trim(),
-          phone: state.phone.trim(),
-          telegram: state.telegram.trim() || undefined,
-          locale,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -242,7 +251,7 @@ export function EstimateCalculator() {
           <span className="label text-accent">{Math.round(progress)}%</span>
         </div>
         <div
-          className="h-px w-full bg-white/15"
+          className="h-0.5 w-full bg-white/15"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
@@ -250,7 +259,7 @@ export function EstimateCalculator() {
           aria-label={t.progress}
         >
           <div
-            className="h-px bg-accent transition-[width] duration-500 ease-out"
+            className="h-0.5 bg-accent transition-[width] duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -271,7 +280,12 @@ export function EstimateCalculator() {
         )}
       </div>
 
-      <div key={`${stepId}-${animKey}`} className="calc-step-enter min-h-[14rem]">
+      <div
+        key={`${stepId}-${animKey}`}
+        className={`min-h-[15rem] md:min-h-[17rem] ${
+          direction < 0 ? "calc-step-enter-back" : "calc-step-enter"
+        }`}
+      >
         <StepBody
           stepId={stepId}
           state={state}
@@ -363,8 +377,8 @@ function StepBody({
     case "objectType":
       return (
         <fieldset>
-          <legend className="type-h3 text-paper">{t.steps.objectType.title}</legend>
-          <div className="mt-6 grid gap-3">
+          <legend className="calc-question">{t.steps.objectType.title}</legend>
+          <div className="mt-7 grid gap-3">
             {t.steps.objectType.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -381,7 +395,7 @@ function StepBody({
     case "area":
       return (
         <div>
-          <label htmlFor={`${formId}-area`} className="type-h3 text-paper">
+          <label htmlFor={`${formId}-area`} className="calc-question">
             {t.steps.area.title}
           </label>
           <p className="mt-2 text-sm text-paper/55">{t.steps.area.hint}</p>
@@ -407,7 +421,7 @@ function StepBody({
     case "rooms":
       return (
         <div>
-          <label htmlFor={`${formId}-rooms`} className="type-h3 text-paper">
+          <label htmlFor={`${formId}-rooms`} className="calc-question">
             {t.steps.rooms.title}
           </label>
           <p className="mt-2 text-sm text-paper/55">{t.steps.rooms.hint}</p>
@@ -446,10 +460,10 @@ function StepBody({
     case "renovationType":
       return (
         <fieldset>
-          <legend className="type-h3 text-paper">
+          <legend className="calc-question">
             {t.steps.renovationType.title}
           </legend>
-          <div className="mt-6 grid gap-3">
+          <div className="mt-7 grid gap-3">
             {t.steps.renovationType.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -471,7 +485,7 @@ function StepBody({
     case "design":
       return (
         <fieldset>
-          <legend className="type-h3 text-paper">{t.steps.design.title}</legend>
+          <legend className="calc-question">{t.steps.design.title}</legend>
           <div className="mt-6 grid gap-3">
             {t.steps.design.options.map((opt) => (
               <OptionButton
@@ -491,7 +505,7 @@ function StepBody({
     case "condition":
       return (
         <fieldset>
-          <legend className="type-h3 text-paper">{t.steps.condition.title}</legend>
+          <legend className="calc-question">{t.steps.condition.title}</legend>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             {t.steps.condition.options.map((opt) => (
               <OptionButton
@@ -513,7 +527,7 @@ function StepBody({
     case "start":
       return (
         <fieldset>
-          <legend className="type-h3 text-paper">{t.steps.start.title}</legend>
+          <legend className="calc-question">{t.steps.start.title}</legend>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             {t.steps.start.options.map((opt) => (
               <OptionButton
@@ -533,7 +547,7 @@ function StepBody({
     case "lead":
       return (
         <div className="space-y-6">
-          <h3 className="type-h3 text-paper">{t.steps.lead.title}</h3>
+          <h3 className="calc-question">{t.steps.lead.title}</h3>
           <p className="max-w-lg text-sm leading-relaxed text-paper/55">
             {t.steps.lead.disclaimer}
           </p>
