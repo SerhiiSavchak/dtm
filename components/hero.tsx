@@ -1,73 +1,41 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { heroMedia } from "@/data/media";
 import { useDictionary } from "@/lib/i18n/locale-context";
 
+function subscribeReduced(cb: () => void) {
+  const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+
+function getReduced() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 /**
- * Videos in /public are all vertical phone clips (720×1280) —
- * weak for desktop full-bleed. Keep still + replaceable video hooks.
+ * Hero media is layered: the poster paints immediately, the video loads
+ * behind the scenes and cross-fades in once it can actually play.
+ * Swap the source in data/media.ts — no component changes needed.
  */
 export function Hero({ boot = true }: { boot?: boolean }) {
   const t = useDictionary().hero;
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
-  const [videoFailed, setVideoFailed] = useState(false);
+  const [videoState, setVideoState] = useState<"loading" | "ready" | "failed">(
+    "loading"
+  );
+  const reduced = useSyncExternalStore(subscribeReduced, getReduced, () => false);
 
   const hasVideo = Boolean(heroMedia.webm || heroMedia.mp4);
-  const showVideo = hasVideo && !videoFailed;
+  const showVideo = hasVideo && !reduced && videoState !== "failed";
 
   useEffect(() => {
     if (!boot) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let cancelled = false;
-    const start = () => {
-      if (!cancelled) setReady(true);
-    };
-
-    if (reduced) {
-      const id = window.setTimeout(start, 0);
-      return () => {
-        cancelled = true;
-        window.clearTimeout(id);
-      };
-    }
-
-    const fallback = window.setTimeout(start, 60);
-
-    if (showVideo && videoRef.current) {
-      const el = videoRef.current;
-      const tryPlay = async () => {
-        try {
-          await el.play();
-        } catch {
-          if (!cancelled) setVideoFailed(true);
-        } finally {
-          start();
-        }
-      };
-      if (el.readyState >= 2) void tryPlay();
-      else {
-        el.addEventListener("loadeddata", () => void tryPlay(), { once: true });
-        el.addEventListener(
-          "error",
-          () => {
-            if (!cancelled) setVideoFailed(true);
-            start();
-          },
-          { once: true }
-        );
-      }
-    } else {
-      start();
-    }
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(fallback);
-    };
-  }, [boot, showVideo]);
+    const id = window.setTimeout(() => setReady(true), 60);
+    return () => window.clearTimeout(id);
+  }, [boot]);
 
   return (
     <section
@@ -80,18 +48,34 @@ export function Hero({ boot = true }: { boot?: boolean }) {
       <div className="absolute inset-0">
         <div className="hero-media absolute inset-0">
           <div className="hero-media-inner absolute inset-0">
+            {/* Poster paints first — no black flash, no CLS */}
+            <Image
+              src={heroMedia.poster}
+              alt={t.imageAlt}
+              fill
+              priority
+              quality={90}
+              sizes="100vw"
+              className="object-cover object-[center_40%] md:object-[center_38%]"
+            />
             {showVideo ? (
               <video
-                ref={videoRef}
-                className="h-full w-full object-cover object-[center_40%]"
+                className={`absolute inset-0 h-full w-full object-cover object-[center_40%] transition-opacity duration-700 ease-out md:object-[center_38%] ${
+                  videoState === "ready" ? "opacity-100" : "opacity-0"
+                }`}
                 autoPlay
                 muted
                 loop
                 playsInline
-                preload="metadata"
-                poster={heroMedia.poster}
+                preload="auto"
                 aria-hidden="true"
-                onError={() => setVideoFailed(true)}
+                onCanPlay={(e) => {
+                  const el = e.currentTarget;
+                  el.play()
+                    .then(() => setVideoState("ready"))
+                    .catch(() => setVideoState("failed"));
+                }}
+                onError={() => setVideoState("failed")}
               >
                 {heroMedia.webm ? (
                   <source src={heroMedia.webm} type="video/webm" />
@@ -100,77 +84,70 @@ export function Hero({ boot = true }: { boot?: boolean }) {
                   <source src={heroMedia.mp4} type="video/mp4" />
                 ) : null}
               </video>
-            ) : (
-              <Image
-                src={heroMedia.poster}
-                alt={t.imageAlt}
-                fill
-                priority
-                quality={90}
-                sizes="100vw"
-                className="object-cover object-[center_40%] md:object-[center_38%]"
-              />
-            )}
+            ) : null}
           </div>
         </div>
-        {/* Directional gradient — legibility without flattening the interior */}
+
+        {/* Cinematic overlay: light global wash + local gradient behind copy */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(100deg, rgba(13,13,15,0.66) 0%, rgba(13,13,15,0.2) 44%, rgba(13,13,15,0.3) 68%, rgba(13,13,15,0.62) 100%)",
+              "linear-gradient(180deg, rgba(13,13,15,0.34) 0%, rgba(13,13,15,0.1) 38%, rgba(13,13,15,0.16) 100%)",
           }}
         />
         <div
-          className="absolute inset-x-0 bottom-0 h-[38%]"
+          className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(13,13,15,0) 0%, rgba(13,13,15,0.55) 100%)",
+              "linear-gradient(76deg, rgba(13,13,15,0.7) 0%, rgba(13,13,15,0.32) 40%, rgba(13,13,15,0) 66%)",
+          }}
+        />
+        <div
+          className="absolute inset-x-0 bottom-0 h-[45%]"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(13,13,15,0) 0%, rgba(13,13,15,0.58) 100%)",
           }}
         />
       </div>
 
-      <div className="relative flex min-h-[100svh] flex-col">
-        <div
-          className="container-dtm hero-meta flex items-center justify-between text-paper/70"
-          style={{
-            paddingTop: "calc(var(--header-h) + 0.75rem)",
-          }}
-        >
-          <span className="label">{t.meta}</span>
-          <span className="label hidden sm:block">{t.metaRight}</span>
-        </div>
+      {/* Conversion cluster — left-aligned, slightly below vertical center on desktop */}
+      <div className="relative flex min-h-[100svh] flex-col justify-end lg:justify-center">
+        <div className="container-dtm hero-content w-full pb-[clamp(3rem,9svh,6.5rem)] pt-[calc(var(--header-h)+2rem)] lg:pb-[clamp(1.5rem,3svh,2.5rem)] lg:pt-[calc(var(--header-h)+0.25rem)] lg:translate-y-[clamp(0.75rem,2.5svh,1.75rem)]">
+          <div className="hero-cluster max-w-[46rem] lg:max-w-[48rem] xl:max-w-[50rem] 2xl:max-w-[52rem]">
+            <p className="hero-meta label flex items-center gap-3 text-paper/75">
+              <span aria-hidden className="h-px w-8 bg-accent" />
+              {t.meta}
+            </p>
 
-        {/* Optical lower-middle: centered flex, biased slightly downward */}
-        <div className="container-dtm flex flex-1 flex-col justify-center pb-[clamp(3rem,9vh,6rem)] pt-[clamp(2rem,6vh,4rem)]">
-          <div className="mt-[4vh] grid w-full grid-cols-1 gap-y-8 lg:grid-cols-12 lg:items-end lg:gap-x-8">
-            <div className="lg:col-span-7 xl:col-span-6">
-              <h1
-                id="hero-heading"
-                className="type-display max-w-[12ch] text-paper"
-                style={{ lineHeight: 1.02 }}
-              >
-                <span className="mask-line hero-line-1">
-                  <span>{t.line1}</span>
-                </span>
-                <span className="mask-line hero-line-2">
-                  <span>{t.line2}</span>
-                </span>
-                <span className="mask-line hero-line-3">
-                  <span className="text-accent">{t.line3}</span>
-                </span>
-              </h1>
-              <p className="hero-copy mt-5 max-w-[28rem] text-[0.975rem] leading-relaxed text-paper/80 md:mt-6 md:text-base md:leading-relaxed">
-                {t.copy}
-              </p>
-            </div>
+            <h1
+              id="hero-heading"
+              className="hero-heading type-display mt-5 max-w-[12ch] text-paper md:mt-6 lg:max-w-[13ch] xl:max-w-[13.5ch]"
+            >
+              <span className="mask-line hero-line-1">
+                <span>{t.line1}</span>
+              </span>
+              <span className="mask-line hero-line-2">
+                <span>{t.line2}</span>
+              </span>
+              <span className="mask-line hero-line-3">
+                <span className="text-accent">{t.line3}</span>
+              </span>
+            </h1>
 
-            {/* CTA cluster — right side, one row, sharing the headline baseline */}
-            <div className="hero-cta flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:col-span-5 lg:col-start-8 lg:justify-end lg:pb-1">
-              <a href="#estimate" className="btn btn-primary">
+            <p className="hero-copy mt-5 max-w-[33rem] text-[0.975rem] leading-relaxed text-paper/85 md:mt-6 md:text-base md:leading-relaxed lg:max-w-[36rem] xl:max-w-[38rem] xl:text-[1.0625rem] 2xl:text-[1.125rem]">
+              {t.copy}
+            </p>
+
+            <div className="hero-cta mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center md:mt-9">
+              <a href="#estimate" className="btn btn-primary btn-lg group">
                 {t.ctaPrimary}
+                <span className="btn-arrow" aria-hidden>
+                  →
+                </span>
               </a>
-              <a href="#projects" className="btn btn-ghost group">
+              <a href="#projects" className="btn btn-ghost btn-lg group">
                 {t.ctaSecondary}
                 <span className="btn-arrow" aria-hidden>
                   →

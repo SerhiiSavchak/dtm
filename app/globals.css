@@ -287,6 +287,88 @@ body {
   padding: 0.65rem 1.15rem;
 }
 
+/* Theme toggle — rim/background owned here so Tailwind `border` cannot
+   force --color-border over the intended light Hero outline. */
+.theme-toggle {
+  border-color: var(--color-line);
+  background-color: color-mix(in oklab, var(--color-foreground) 4%, transparent);
+  color: var(--color-muted);
+  transition:
+    border-color 500ms ease,
+    background-color 500ms ease,
+    color 500ms ease;
+}
+
+.theme-toggle[data-tone="on-dark"] {
+  border-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.theme-toggle[data-tone="on-light"] {
+  border-color: color-mix(in oklab, var(--color-foreground) 20%, transparent);
+  background-color: color-mix(in oklab, var(--color-foreground) 4%, transparent);
+  color: color-mix(in oklab, var(--color-foreground) 45%, transparent);
+}
+
+/* Hero-scale CTA — tactile, premium first-screen action */
+.btn-lg {
+  min-height: 3.5rem;
+  padding: 1.1rem 2rem;
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+}
+
+/* Hero display — modest large-desktop lift without touching global type scale */
+.hero-heading {
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+@media (min-width: 1280px) {
+  .hero-heading {
+    font-size: clamp(2.75rem, 6vw, 6.15rem);
+  }
+
+  .hero-cta .btn-lg {
+    min-height: 3.65rem;
+    padding-inline: 2.15rem;
+    font-size: 0.96875rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  .hero-heading {
+    font-size: clamp(3rem, 5.4vw, 6.35rem);
+  }
+
+  .hero-cta .btn-lg {
+    min-height: 3.75rem;
+    padding-inline: 2.25rem;
+    font-size: 1rem;
+  }
+}
+
+/* Header CTA — compresses on narrow phones instead of breaking the row */
+.btn-compact {
+  padding-inline: 0.75rem;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 359px) {
+  .btn-compact {
+    padding-inline: 0.625rem;
+    font-size: 0.6875rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .btn-compact {
+    padding-inline: 1.1rem;
+    font-size: 0.8125rem;
+  }
+}
+
 .btn:active {
   transform: translateY(1px);
 }
@@ -841,30 +923,41 @@ html[data-theme="light"] .calc-panel {
 
 /* ---------- Mobile menu ---------- */
 
+/* Mobile menu — quiet fade + rise, staggered items, utilities settle last */
 .mobile-menu {
   position: fixed;
   inset: 0;
   z-index: 60;
   background: var(--ink-deep);
   color: var(--paper);
-  transform: translateY(-100%);
-  transition: transform 0.55s var(--ease-out-expo);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition:
+    opacity 0.3s var(--ease-out-soft),
+    transform 0.34s var(--ease-out-expo),
+    visibility 0s linear 0.34s;
   visibility: hidden;
   pointer-events: none;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .mobile-menu.is-open {
-  transform: translateY(0);
+  opacity: 1;
+  transform: none;
   visibility: visible;
   pointer-events: auto;
+  transition:
+    opacity 0.3s var(--ease-out-soft),
+    transform 0.34s var(--ease-out-expo);
 }
 
 .mobile-menu-item {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(14px);
   transition:
-    opacity 0.45s var(--ease-out-expo),
-    transform 0.45s var(--ease-out-expo);
+    opacity 0.35s var(--ease-out-soft),
+    transform 0.4s var(--ease-out-expo);
 }
 
 .mobile-menu.is-open .mobile-menu-item {
@@ -873,22 +966,24 @@ html[data-theme="light"] .calc-panel {
 }
 
 .mobile-menu.is-open .mobile-menu-item:nth-child(1) {
-  transition-delay: 0.08s;
+  transition-delay: 0.06s;
 }
 .mobile-menu.is-open .mobile-menu-item:nth-child(2) {
-  transition-delay: 0.14s;
+  transition-delay: 0.11s;
 }
 .mobile-menu.is-open .mobile-menu-item:nth-child(3) {
-  transition-delay: 0.2s;
+  transition-delay: 0.16s;
 }
 .mobile-menu.is-open .mobile-menu-item:nth-child(4) {
-  transition-delay: 0.26s;
+  transition-delay: 0.21s;
 }
 .mobile-menu.is-open .mobile-menu-item:nth-child(5) {
-  transition-delay: 0.32s;
+  transition-delay: 0.26s;
 }
-.mobile-menu.is-open .mobile-menu-item:nth-child(6) {
-  transition-delay: 0.38s;
+
+/* Lower controls arrive slightly after the navigation */
+.mobile-menu.is-open .mobile-menu-utility {
+  transition-delay: 0.34s;
 }
 
 /* FAQ accordion — grid rows + inner fade/translate */
@@ -996,6 +1091,7 @@ html[data-theme="light"] .calc-panel {
 
   .mobile-menu {
     transform: none;
+    opacity: 1;
   }
 
   .mobile-menu:not(.is-open) {

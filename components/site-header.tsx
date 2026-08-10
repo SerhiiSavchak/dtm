@@ -78,13 +78,13 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
 
           <nav
             aria-label={t.nav.mainAria}
-            className="hidden items-center gap-7 xl:flex"
+            className="hidden items-center gap-8 xl:flex"
           >
             {links.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className={`group relative text-sm font-medium transition-colors ${
+                className={`group relative text-[0.9375rem] font-medium tracking-[-0.01em] transition-colors ${
                   solid && !menuOpen
                     ? "text-foreground/75 hover:text-foreground"
                     : "text-paper/85 hover:text-paper"
@@ -97,10 +97,19 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
           </nav>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <ThemeToggle
-              tone={solid && !menuOpen ? (theme === "dark" ? "on-dark" : "on-light") : "on-dark"}
-              className="hidden sm:inline-flex"
-            />
+            {/* Theme + locale live in the mobile menu below xl */}
+            <div className="hidden xl:block">
+              {/* Transparent Hero: always light rim. Solid header: theme-aware. */}
+              <ThemeToggle
+                tone={
+                  !solid || menuOpen
+                    ? "on-dark"
+                    : theme === "dark"
+                      ? "on-dark"
+                      : "on-light"
+                }
+              />
+            </div>
 
             <button
               type="button"
@@ -108,7 +117,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               aria-label={
                 locale === "uk" ? "Switch to English" : "Перейти на українську"
               }
-              className={`label px-1 transition-colors ${
+              className={`label hidden px-1 transition-colors xl:inline-block ${
                 solid && !menuOpen
                   ? "text-muted hover:text-foreground"
                   : "text-paper/65 hover:text-paper"
@@ -119,12 +128,14 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
 
             <a
               href={navHrefs.estimate}
-              className={`btn btn-sm hidden lg:inline-flex ${
-                solid && !menuOpen
-                  ? theme === "dark"
-                    ? "btn-primary"
-                    : "btn-ink"
-                  : "btn-primary"
+              className={`btn btn-sm btn-compact whitespace-nowrap ${
+                menuOpen
+                  ? "btn-primary"
+                  : solid
+                    ? theme === "dark"
+                      ? "btn-primary"
+                      : "btn-ink"
+                    : "btn-primary"
               }`}
             >
               {t.nav.estimate}
@@ -158,42 +169,61 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
         id={menuId}
         className={`mobile-menu xl:hidden ${menuOpen ? "is-open" : ""}`}
         aria-hidden={!menuOpen}
+        inert={!menuOpen}
       >
-        <div className="container-dtm flex h-full flex-col pb-10 pt-[calc(var(--header-h)+1.5rem)]">
+        <div className="container-dtm flex h-full flex-col pb-8 pt-[calc(var(--header-h)+1rem)]">
           <nav
             aria-label={t.nav.mobileAria}
             className="flex flex-1 flex-col justify-center"
           >
-            {links.map((item, i) => (
+            {links.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
                 onClick={() => setMenuOpen(false)}
-                className="mobile-menu-item flex items-baseline gap-5 border-b border-white/12 py-5 text-[clamp(1.75rem,6vw,2.75rem)] font-semibold tracking-tight text-paper"
+                className="mobile-menu-item group flex items-center gap-4 border-b border-white/10 py-[clamp(0.875rem,2.4svh,1.25rem)] text-[clamp(1.625rem,5.5vw,2.5rem)] font-semibold tracking-tight text-paper"
               >
-                <span className="font-mono text-xs text-accent">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
+                <span
+                  aria-hidden
+                  className="h-px w-5 shrink-0 bg-accent transition-all duration-300 group-hover:w-8 group-focus-visible:w-8"
+                />
                 {item.label}
               </a>
             ))}
           </nav>
 
-          <div className="mobile-menu-item space-y-5 pt-8">
-            <div className="flex items-center gap-4">
+          {/* Utility area: theme + language, then final CTA */}
+          <div className="mobile-menu-item mobile-menu-utility pt-6">
+            <div className="flex items-center justify-between border-t border-white/10 pt-6">
               <ThemeToggle tone="on-dark" />
-              <button
-                type="button"
-                onClick={toggleLocale}
-                className="label text-paper/55 hover:text-paper"
+              <div
+                className="flex items-center gap-1"
+                role="group"
+                aria-label="Мова / Language"
               >
-                {locale === "uk" ? "EN" : "UA"}
-              </button>
+                {(["uk", "en"] as const).map((code) => (
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={() => {
+                      if (locale !== code) toggleLocale();
+                    }}
+                    aria-pressed={locale === code}
+                    className={`label px-3 py-2 transition-colors ${
+                      locale === code
+                        ? "text-accent"
+                        : "text-paper/45 hover:text-paper"
+                    }`}
+                  >
+                    {code === "uk" ? "UA" : "EN"}
+                  </button>
+                ))}
+              </div>
             </div>
             <a
               href={navHrefs.estimate}
               onClick={() => setMenuOpen(false)}
-              className="btn btn-primary w-full"
+              className="btn btn-primary mt-5 w-full"
             >
               {t.hero.ctaPrimary}
               <span className="btn-arrow" aria-hidden>

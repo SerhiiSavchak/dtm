@@ -8,7 +8,14 @@
 
 export const heroMedia = {
   webm: null as string | null,
-  mp4: null as string | null,
+  /**
+   * TEMPORARY development fallback: royalty-free interior loop
+   * (Mixkit #43033, free license — no attribution required).
+   * Own DTM videos in /videos are vertical 720×1280 phone clips and
+   * crop badly on desktop. Replace this file with a self-hosted DTM
+   * video when available — no component changes needed.
+   */
+  mp4: "/videos/hero-loop-temp.mp4" as string | null,
   /** Highest-quality landscape-capable still currently in repo */
   poster: "/images/hero.png",
   objectPosition: {
