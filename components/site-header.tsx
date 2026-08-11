@@ -190,14 +190,19 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               <a
                 key={item.href}
                 href={item.href}
-                className={`group relative text-[0.9375rem] font-medium tracking-[-0.01em] transition-colors min-[1440px]:text-[1rem] ${
-                  solid
-                    ? "text-foreground/75 hover:text-foreground"
-                    : "text-paper/85 hover:text-paper"
+                className={`site-nav-link group relative text-[0.9375rem] font-medium tracking-[-0.01em] transition-colors duration-200 min-[1440px]:text-[1rem] ${
+                  !solid
+                    ? "is-on-dark text-paper/85 hover:text-paper"
+                    : theme === "dark"
+                      ? "is-on-dark text-foreground/80 hover:text-foreground"
+                      : "is-on-light text-ink hover:text-accent"
                 }`}
               >
                 {item.label}
-                <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-accent transition-all duration-300 group-hover:w-full group-focus-visible:w-full" />
+                <span
+                  aria-hidden
+                  className="site-nav-underline absolute -bottom-1.5 left-0 h-px w-full origin-left scale-x-0 bg-accent transition-transform duration-200 ease-out group-hover:scale-x-100 group-focus-visible:scale-x-100"
+                />
               </a>
             ))}
           </nav>

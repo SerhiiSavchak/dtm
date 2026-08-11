@@ -143,8 +143,8 @@ export function Hero({ boot = true }: { boot?: boolean }) {
               {t.copy}
             </p>
 
-            {/* Spacing: .hero-cta margin in globals.css (mobile only). Do not override with mt-* here. */}
-            <div className="hero-cta flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+            {/* Spacing: .hero-cta margin/gap in globals.css */}
+            <div className="hero-cta flex flex-col items-stretch sm:flex-row sm:items-center">
               <a href="#estimate" className="btn btn-primary btn-lg group">
                 {t.ctaPrimary}
                 <span className="btn-arrow" aria-hidden>
