@@ -45,10 +45,10 @@ export function Hero({ boot = true }: { boot?: boolean }) {
       className="relative w-full overflow-hidden bg-ink-deep text-paper"
       style={{ minHeight: "100svh" }}
     >
-      <div className="absolute inset-0">
-        <div className="hero-media absolute inset-0">
-          <div className="hero-media-inner absolute inset-0">
-            {/* Poster paints first — no black flash, no CLS */}
+      {/* Full-bleed media — never constrained by site container */}
+      <div className="hero-media-layer absolute inset-0 h-full w-full">
+        <div className="hero-media">
+          <div className="hero-media-inner">
             <Image
               src={heroMedia.poster}
               alt={t.imageAlt}
@@ -60,7 +60,7 @@ export function Hero({ boot = true }: { boot?: boolean }) {
             />
             {showVideo ? (
               <video
-                className={`absolute inset-0 h-full w-full object-cover object-[center_40%] transition-opacity duration-700 ease-out md:object-[center_38%] ${
+                className={`object-[center_40%] transition-opacity duration-700 ease-out md:object-[center_38%] ${
                   videoState === "ready" ? "opacity-100" : "opacity-0"
                 }`}
                 autoPlay
@@ -88,23 +88,22 @@ export function Hero({ boot = true }: { boot?: boolean }) {
           </div>
         </div>
 
-        {/* Cinematic overlay: light global wash + local gradient behind copy */}
         <div
-          className="absolute inset-0"
+          className="pointer-events-none absolute inset-0"
           style={{
             background:
               "linear-gradient(180deg, rgba(13,13,15,0.34) 0%, rgba(13,13,15,0.1) 38%, rgba(13,13,15,0.16) 100%)",
           }}
         />
         <div
-          className="absolute inset-0"
+          className="pointer-events-none absolute inset-0"
           style={{
             background:
               "linear-gradient(76deg, rgba(13,13,15,0.7) 0%, rgba(13,13,15,0.32) 40%, rgba(13,13,15,0) 66%)",
           }}
         />
         <div
-          className="absolute inset-x-0 bottom-0 h-[45%]"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%]"
           style={{
             background:
               "linear-gradient(180deg, rgba(13,13,15,0) 0%, rgba(13,13,15,0.58) 100%)",
@@ -112,9 +111,13 @@ export function Hero({ boot = true }: { boot?: boolean }) {
         />
       </div>
 
-      {/* Conversion cluster — left-aligned, slightly below vertical center on desktop */}
-      <div className="relative flex min-h-[100svh] flex-col justify-end lg:justify-center">
-        <div className="container-dtm hero-content w-full pb-[clamp(3rem,9svh,6.5rem)] pt-[calc(var(--header-h)+2rem)] lg:pb-[clamp(1.5rem,3svh,2.5rem)] lg:pt-[calc(var(--header-h)+0.25rem)] lg:translate-y-[clamp(0.75rem,2.5svh,1.75rem)]">
+      {/* Content independently containerized — mobile raised toward mid/usable center */}
+      <div className="relative flex min-h-[100svh] flex-col justify-center lg:justify-center">
+        {/*
+          Mobile vertical position lives in globals (.hero-content) so CTA margin
+          growth can be compensated — flex justify-center would otherwise lift the title.
+        */}
+        <div className="container-dtm hero-content w-full pt-[calc(var(--header-h)+1rem)] pb-[clamp(2.75rem,10svh,5rem)] lg:pb-[clamp(1.5rem,3svh,2.5rem)] lg:pt-[calc(var(--header-h)+0.25rem)]">
           <div className="hero-cluster max-w-[46rem] lg:max-w-[48rem] xl:max-w-[50rem] 2xl:max-w-[52rem]">
             <p className="hero-meta label flex items-center gap-3 text-paper/75">
               <span aria-hidden className="h-px w-8 bg-accent" />
@@ -123,7 +126,7 @@ export function Hero({ boot = true }: { boot?: boolean }) {
 
             <h1
               id="hero-heading"
-              className="hero-heading type-display mt-5 max-w-[12ch] text-paper md:mt-6 lg:max-w-[13ch] xl:max-w-[13.5ch]"
+              className="hero-heading type-display mt-4 max-w-[12ch] text-paper md:mt-6 lg:max-w-[13ch] xl:max-w-[13.5ch]"
             >
               <span className="mask-line hero-line-1">
                 <span>{t.line1}</span>
@@ -136,11 +139,12 @@ export function Hero({ boot = true }: { boot?: boolean }) {
               </span>
             </h1>
 
-            <p className="hero-copy mt-5 max-w-[33rem] text-[0.975rem] leading-relaxed text-paper/85 md:mt-6 md:text-base md:leading-relaxed lg:max-w-[36rem] xl:max-w-[38rem] xl:text-[1.0625rem] 2xl:text-[1.125rem]">
+            <p className="hero-copy mt-4 max-w-[33rem] text-[0.975rem] leading-relaxed text-paper/85 md:mt-6 md:text-base md:leading-relaxed lg:max-w-[36rem] xl:max-w-[38rem] xl:text-[1.0625rem] 2xl:text-[1.125rem]">
               {t.copy}
             </p>
 
-            <div className="hero-cta mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center md:mt-9">
+            {/* Spacing: .hero-cta margin in globals.css (mobile only). Do not override with mt-* here. */}
+            <div className="hero-cta flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
               <a href="#estimate" className="btn btn-primary btn-lg group">
                 {t.ctaPrimary}
                 <span className="btn-arrow" aria-hidden>

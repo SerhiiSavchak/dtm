@@ -122,6 +122,9 @@ html[data-theme="light"] {
   --text-h1: var(--text-h1);
   --text-h2: var(--text-h2);
   --text-h3: var(--text-h3);
+
+  /* Desktop nav stays visible until this width — not Tailwind's default xl (1280) */
+  --breakpoint-nav: 1100px;
 }
 
 * {
@@ -131,12 +134,22 @@ html[data-theme="light"] {
 html {
   background: var(--background);
   scroll-behavior: smooth;
+  /* Clip scrollbar-gutter mismatch from fixed inset-0 chrome (header/menu)
+     without masking unknown layout bugs in section content. */
+  overflow-x: clip;
+}
+
+/* Fixed header clearance for in-page anchors */
+main section[id],
+footer[id] {
+  scroll-margin-top: calc(var(--header-h) + 0.75rem);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -599,10 +612,27 @@ html[data-theme] {
 /* Hero sequence — orchestrated via [data-hero="ready"] */
 .hero-media {
   opacity: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .hero-media-inner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   transform: scale(1.03);
+}
+
+.hero-media-inner img,
+.hero-media-inner video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 [data-hero="ready"] .hero-media {
@@ -635,6 +665,41 @@ html[data-theme] {
 
 [data-hero="ready"] .hero-cta {
   animation: dtm-rise 0.65s var(--ease-out-expo) 0.74s both;
+}
+
+/*
+  Mobile Hero CTA — conversion zone below description.
+  Extra margin alone is half-cancelled by flex justify-center (cluster re-centers
+  and lifts the title). Compensate with a matching downward shift on .hero-content
+  so eyebrow/headline/copy stay put while only the CTA drops.
+*/
+.hero-cta {
+  /* Was ~64px; now ~112px on 390×844 (+~48px). Short phones scale down. */
+  margin-top: clamp(4.25rem, calc(1.75rem + 10svh), 8rem);
+}
+
+@media (max-width: 1023px) {
+  .hero-content {
+    /*
+      Prior lift: translateY(-clamp(0.75rem, 3.5svh, 2.25rem))
+      Plus ~half of the CTA margin delta (~24–32px) downward so title stays.
+    */
+    transform: translateY(
+      calc(
+        -1 * clamp(0.75rem, 3.5svh, 2.25rem) + clamp(1.25rem, 3svh, 2rem)
+      )
+    );
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-cta {
+    margin-top: 2.25rem;
+  }
+
+  .hero-content {
+    transform: translateY(clamp(0.75rem, 2.5svh, 1.75rem));
+  }
 }
 
 [data-hero="ready"] .hero-nav-settle {
@@ -922,68 +987,202 @@ html[data-theme="light"] .calc-panel {
 }
 
 /* ---------- Mobile menu ---------- */
+/* Always mounted. Enter/exit via CSS transitions on data-state.
+   data-motion="reduce" (from matchMedia) forces instant a11y path.
+   Keyframes alone were easy to kill via prefers-reduced-motion: reduce. */
 
-/* Mobile menu — quiet fade + rise, staggered items, utilities settle last */
 .mobile-menu {
   position: fixed;
   inset: 0;
-  z-index: 60;
-  background: var(--ink-deep);
-  color: var(--paper);
+  z-index: 80;
+  width: 100%;
+  height: 100svh;
+  background-color: var(--background);
+  color: var(--foreground);
   opacity: 0;
-  transform: translateY(-10px);
-  transition:
-    opacity 0.3s var(--ease-out-soft),
-    transform 0.34s var(--ease-out-expo),
-    visibility 0s linear 0.34s;
-  visibility: hidden;
+  transform: translateY(-8px);
   pointer-events: none;
   overflow-x: hidden;
   overflow-y: auto;
+  /* No visibility:hidden — it commonly skips opacity enter transitions */
+  transition:
+    opacity 320ms var(--ease-out-soft),
+    transform 320ms var(--ease-out-expo);
 }
 
-.mobile-menu.is-open {
+.mobile-menu[data-state="open"] {
   opacity: 1;
-  transform: none;
-  visibility: visible;
+  transform: translateY(0);
   pointer-events: auto;
-  transition:
-    opacity 0.3s var(--ease-out-soft),
-    transform 0.34s var(--ease-out-expo);
+}
+
+.mobile-menu[data-state="closing"] {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition-duration: 220ms, 220ms;
+}
+
+.mobile-menu[data-state="closed"] {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+
+.mobile-menu-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 100svh;
+  padding-block: 0.75rem calc(1.35rem + env(safe-area-inset-bottom, 0px));
+  gap: 0.25rem;
+}
+
+.mobile-menu-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 2.75rem;
+}
+
+/* Nav sits in upper-middle band (~42–50% visual mass), not stretched full height */
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  width: 100%;
+  min-height: 0;
+  margin-block: auto;
+  padding-block: clamp(0.35rem, 1.5svh, 0.85rem);
+  /* Pull the band slightly above true center for logo / utilities balance */
+  transform: translateY(clamp(-1.25rem, -3.5svh, -0.35rem));
+}
+
+.mobile-menu-link {
+  display: flex;
+  justify-content: center;
+  width: min(100%, 22rem);
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  padding-block: clamp(0.55rem, 1.55svh, 0.9rem);
+  font-size: clamp(1.75rem, 5.6vw, 2rem); /* ~28–32px */
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+  text-align: center;
+}
+
+.mobile-menu-link:last-child {
+  border-bottom-color: transparent;
+}
+
+.mobile-menu-link-inner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+/* Dot sits left of label without shifting optical center of the word */
+.mobile-menu-dot {
+  position: absolute;
+  right: calc(100% + 0.55rem);
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--orange);
+  transform: translateY(-50%);
+}
+
+.mobile-menu-utility {
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  padding-top: 1rem;
+}
+
+.mobile-menu-utility-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .mobile-menu-item {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(12px);
   transition:
-    opacity 0.35s var(--ease-out-soft),
-    transform 0.4s var(--ease-out-expo);
+    opacity 300ms var(--ease-out-soft),
+    transform 300ms var(--ease-out-expo);
 }
 
-.mobile-menu.is-open .mobile-menu-item {
+.mobile-menu[data-state="open"] .mobile-menu-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mobile-menu[data-state="closing"] .mobile-menu-item,
+.mobile-menu[data-state="closed"] .mobile-menu-item {
+  opacity: 0;
+  transform: translateY(8px);
+  transition-duration: 160ms;
+  transition-delay: 0s;
+}
+
+.mobile-menu[data-state="open"] .mobile-menu-top .mobile-menu-item:nth-child(1) {
+  transition-delay: 0.05s;
+}
+.mobile-menu[data-state="open"] .mobile-menu-top .mobile-menu-item:nth-child(2) {
+  transition-delay: 0.08s;
+}
+
+.mobile-menu[data-state="open"] .mobile-menu-nav .mobile-menu-item:nth-child(1) {
+  transition-delay: 0.1s;
+}
+.mobile-menu[data-state="open"] .mobile-menu-nav .mobile-menu-item:nth-child(2) {
+  transition-delay: 0.15s;
+}
+.mobile-menu[data-state="open"] .mobile-menu-nav .mobile-menu-item:nth-child(3) {
+  transition-delay: 0.2s;
+}
+.mobile-menu[data-state="open"] .mobile-menu-nav .mobile-menu-item:nth-child(4) {
+  transition-delay: 0.25s;
+}
+.mobile-menu[data-state="open"] .mobile-menu-nav .mobile-menu-item:nth-child(5) {
+  transition-delay: 0.3s;
+}
+
+.mobile-menu[data-state="open"] .mobile-menu-utility {
+  transition-delay: 0.36s;
+}
+
+/* Explicit reduce-motion path (also mirrored in @media below) */
+.mobile-menu[data-motion="reduce"],
+.mobile-menu[data-motion="reduce"] .mobile-menu-item {
+  transition: none !important;
+}
+
+.mobile-menu[data-motion="reduce"][data-state="open"] {
   opacity: 1;
   transform: none;
 }
 
-.mobile-menu.is-open .mobile-menu-item:nth-child(1) {
-  transition-delay: 0.06s;
-}
-.mobile-menu.is-open .mobile-menu-item:nth-child(2) {
-  transition-delay: 0.11s;
-}
-.mobile-menu.is-open .mobile-menu-item:nth-child(3) {
-  transition-delay: 0.16s;
-}
-.mobile-menu.is-open .mobile-menu-item:nth-child(4) {
-  transition-delay: 0.21s;
-}
-.mobile-menu.is-open .mobile-menu-item:nth-child(5) {
-  transition-delay: 0.26s;
+.mobile-menu[data-motion="reduce"][data-state="open"] .mobile-menu-item {
+  opacity: 1;
+  transform: none;
 }
 
-/* Lower controls arrive slightly after the navigation */
-.mobile-menu.is-open .mobile-menu-utility {
-  transition-delay: 0.34s;
+.mobile-menu[data-motion="reduce"][data-state="closed"],
+.mobile-menu[data-motion="reduce"][data-state="closing"] {
+  opacity: 0;
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .mobile-menu {
+    display: none !important;
+  }
 }
 
 /* FAQ accordion — grid rows + inner fade/translate */
@@ -1039,6 +1238,7 @@ html[data-theme="light"] .calc-panel {
   }
 
   .hero-media,
+  .hero-media-inner,
   .hero-meta,
   .hero-copy,
   .hero-cta,
@@ -1089,17 +1289,26 @@ html[data-theme="light"] .calc-panel {
     transform: translateX(-50%) scaleY(1) !important;
   }
 
-  .mobile-menu {
-    transform: none;
-    opacity: 1;
-  }
-
-  .mobile-menu:not(.is-open) {
-    display: none;
-  }
-
+  /* Instant open/close when OS reports reduced motion — still theme-aware */
+  .mobile-menu,
   .mobile-menu-item {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .mobile-menu[data-state="open"] {
     opacity: 1;
     transform: none;
+  }
+
+  .mobile-menu[data-state="open"] .mobile-menu-item {
+    opacity: 1;
+    transform: none;
+  }
+
+  .mobile-menu[data-state="closed"],
+  .mobile-menu[data-state="closing"] {
+    display: none;
+    opacity: 0;
   }
 }

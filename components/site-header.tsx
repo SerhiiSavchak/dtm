@@ -1,20 +1,40 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import { Logo } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
 import { useDictionary, useLocale } from "@/lib/i18n/locale-context";
 import { useTheme } from "@/lib/theme/theme-context";
 import { navHrefs } from "@/lib/i18n/dictionaries";
 
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export function SiteHeader({ boot = true }: { boot?: boolean }) {
   const t = useDictionary();
   const { locale, toggleLocale } = useLocale();
   const { theme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const closeRef = useRef<HTMLButtonElement>(null);
+  /** closed → open (enter) → closing (exit) → closed */
+  const [menuPhase, setMenuPhase] = useState<"closed" | "open" | "closing">(
+    "closed"
+  );
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const menuCloseRef = useRef<HTMLButtonElement>(null);
+  const burgerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
+  const menuVisible = menuPhase !== "closed";
+  const pendingAnchorRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
@@ -24,24 +44,112 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    if (menuOpen) closeRef.current?.focus();
+    document.body.style.overflow = menuVisible ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [menuOpen]);
+  }, [menuVisible]);
+
+  useEffect(() => {
+    if (menuPhase === "open") menuCloseRef.current?.focus();
+  }, [menuPhase]);
+
+  function openMenu() {
+    if (menuPhase !== "closed") return;
+    setMenuPhase("open");
+  }
+
+  function closeMenu() {
+    if (menuPhase !== "open") return;
+    setMenuPhase("closing");
+  }
+
+  function scrollToHash(hash: string) {
+    const id = hash.replace(/^#/, "");
+    if (!id) return;
+    const target = document.getElementById(id);
+    if (!target) return;
+    const behavior = prefersReducedMotion() ? "auto" : "smooth";
+    target.scrollIntoView({ behavior, block: "start" });
+    window.history.pushState(null, "", `#${id}`);
+  }
+
+  /** Menu link: close first, then smooth-scroll after exit (body overflow restored). */
+  function onMobileNavClick(
+    e: MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) {
+    if (!href.startsWith("#")) return;
+    e.preventDefault();
+    pendingAnchorRef.current = href;
+
+    if (menuPhase !== "open") {
+      const hash = pendingAnchorRef.current;
+      pendingAnchorRef.current = null;
+      if (hash) scrollToHash(hash);
+      return;
+    }
+
+    if (reduceMotion) {
+      setMenuPhase("closed");
+      // overflow clears on next paint
+      requestAnimationFrame(() => {
+        const hash = pendingAnchorRef.current;
+        pendingAnchorRef.current = null;
+        if (hash) scrollToHash(hash);
+      });
+      return;
+    }
+
+    setMenuPhase("closing");
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === "Escape" && menuPhase === "open") {
+        pendingAnchorRef.current = null;
+        closeMenu();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [menuPhase]);
 
-  const solid = scrolled || menuOpen;
-  const onDarkChrome = menuOpen || !solid || theme === "dark";
+  // Finish exit, then optional pending anchor scroll
+  useEffect(() => {
+    if (menuPhase !== "closing") return;
+    const el = menuRef.current;
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      setMenuPhase("closed");
+      const hash = pendingAnchorRef.current;
+      pendingAnchorRef.current = null;
+      // Wait until body overflow is restored, then scroll
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (hash) scrollToHash(hash);
+          else burgerRef.current?.focus();
+        });
+      });
+    };
+    const onEnd = (e: TransitionEvent) => {
+      if (e.target !== el || e.propertyName !== "opacity") return;
+      finish();
+    };
+    el?.addEventListener("transitionend", onEnd);
+    const fallback = window.setTimeout(finish, reduceMotion ? 0 : 280);
+    return () => {
+      el?.removeEventListener("transitionend", onEnd);
+      window.clearTimeout(fallback);
+    };
+  }, [menuPhase, reduceMotion]);
+
+  const solid = scrolled && !menuVisible;
+  const onDarkChrome = !solid || theme === "dark";
   const tone = onDarkChrome ? "paper" : "ink";
+  const menuLogoTone = theme === "dark" ? "paper" : "ink";
 
   const links = [
     { label: t.nav.services, href: navHrefs.services },
@@ -54,23 +162,21 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
   return (
     <>
       <header
-        className={`site-header fixed inset-x-0 top-0 z-[70] transition-[background-color,opacity,box-shadow] duration-500 ${
-          boot ? "opacity-100" : "opacity-0"
+        className={`site-header fixed inset-x-0 top-0 z-[70] transition-[background-color,opacity,box-shadow,visibility] duration-500 ${
+          !boot || menuVisible
+            ? "pointer-events-none invisible opacity-0"
+            : "opacity-100"
         } ${
-          menuOpen
-            ? "bg-ink-deep"
-            : solid
-              ? "site-header-solid bg-background"
-              : "bg-transparent"
+          solid ? "site-header-solid bg-background" : "bg-transparent"
         }`}
         style={{ height: "var(--header-h)" }}
+        aria-hidden={menuVisible}
       >
-        <div className="container-dtm flex h-full items-center justify-between gap-4">
+        <div className="container-dtm flex h-full items-center justify-between gap-3 nav:gap-4">
           <a
             href="#top"
             className="flex items-center"
             aria-label={t.nav.homeAria}
-            onClick={() => setMenuOpen(false)}
           >
             <Logo tone={tone} withDescriptor className="hidden sm:block" />
             <Logo tone={tone} withDescriptor={false} className="sm:hidden" />
@@ -78,14 +184,14 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
 
           <nav
             aria-label={t.nav.mainAria}
-            className="hidden items-center gap-8 xl:flex"
+            className="hidden items-center gap-5 min-[1280px]:gap-6 min-[1440px]:gap-8 nav:flex"
           >
             {links.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className={`group relative text-[0.9375rem] font-medium tracking-[-0.01em] transition-colors ${
-                  solid && !menuOpen
+                className={`group relative text-[0.9375rem] font-medium tracking-[-0.01em] transition-colors min-[1440px]:text-[1rem] ${
+                  solid
                     ? "text-foreground/75 hover:text-foreground"
                     : "text-paper/85 hover:text-paper"
                 }`}
@@ -96,13 +202,11 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* Theme + locale live in the mobile menu below xl */}
-            <div className="hidden xl:block">
-              {/* Transparent Hero: always light rim. Solid header: theme-aware. */}
+          <div className="flex items-center gap-2 min-[1280px]:gap-3">
+            <div className="hidden nav:block">
               <ThemeToggle
                 tone={
-                  !solid || menuOpen
+                  !solid
                     ? "on-dark"
                     : theme === "dark"
                       ? "on-dark"
@@ -117,8 +221,8 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               aria-label={
                 locale === "uk" ? "Switch to English" : "Перейти на українську"
               }
-              className={`label hidden px-1 transition-colors xl:inline-block ${
-                solid && !menuOpen
+              className={`label hidden px-1 transition-colors nav:inline-block ${
+                solid
                   ? "text-muted hover:text-foreground"
                   : "text-paper/65 hover:text-paper"
               }`}
@@ -126,39 +230,42 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               {locale === "uk" ? "EN" : "UA"}
             </button>
 
-            <a
-              href={navHrefs.estimate}
-              className={`btn btn-sm btn-compact whitespace-nowrap ${
-                menuOpen
-                  ? "btn-primary"
-                  : solid
+            <div className="hidden nav:block">
+              <a
+                href={navHrefs.estimate}
+                className={`btn btn-sm btn-compact whitespace-nowrap ${
+                  solid
                     ? theme === "dark"
                       ? "btn-primary"
                       : "btn-ink"
                     : "btn-primary"
-              }`}
-            >
-              {t.nav.estimate}
-            </a>
+                }`}
+              >
+                {t.nav.estimate}
+              </a>
+            </div>
 
             <button
               type="button"
-              ref={closeRef}
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-expanded={menuOpen}
+              ref={burgerRef}
+              onClick={openMenu}
+              aria-expanded={menuVisible}
               aria-controls={menuId}
-              aria-label={menuOpen ? t.nav.closeMenu : t.nav.openMenu}
-              className="relative z-[80] flex h-10 w-10 flex-col items-center justify-center gap-1.5 xl:hidden"
+              aria-label={t.nav.openMenu}
+              className="relative flex h-11 w-11 items-center justify-center nav:hidden"
             >
+              <span className="sr-only">{t.nav.openMenu}</span>
               <span
-                className={`block h-px w-6 origin-center transition-transform duration-300 ${
-                  menuOpen || !solid ? "bg-paper" : "bg-foreground"
-                } ${menuOpen ? "translate-y-[3.5px] rotate-45" : ""}`}
+                aria-hidden
+                className={`absolute block h-px w-6 transition-colors ${
+                  !solid ? "bg-paper" : "bg-foreground"
+                } -translate-y-[3.5px]`}
               />
               <span
-                className={`block h-px w-6 origin-center transition-transform duration-300 ${
-                  menuOpen || !solid ? "bg-paper" : "bg-foreground"
-                } ${menuOpen ? "-translate-y-[3.5px] -rotate-45" : ""}`}
+                aria-hidden
+                className={`absolute block h-px w-6 transition-colors ${
+                  !solid ? "bg-paper" : "bg-foreground"
+                } translate-y-[3.5px]`}
               />
             </button>
           </div>
@@ -166,36 +273,67 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
       </header>
 
       <div
+        ref={menuRef}
         id={menuId}
-        className={`mobile-menu xl:hidden ${menuOpen ? "is-open" : ""}`}
-        aria-hidden={!menuOpen}
-        inert={!menuOpen}
+        className="mobile-menu"
+        data-state={menuPhase}
+        data-motion={reduceMotion ? "reduce" : "full"}
+        aria-hidden={!menuVisible}
+        inert={!menuVisible}
       >
-        <div className="container-dtm flex h-full flex-col pb-8 pt-[calc(var(--header-h)+1rem)]">
-          <nav
-            aria-label={t.nav.mobileAria}
-            className="flex flex-1 flex-col justify-center"
-          >
+        <div className="mobile-menu-shell container-dtm">
+          <div className="mobile-menu-top">
+            <a
+              href="#top"
+              className="mobile-menu-item flex items-center"
+              aria-label={t.nav.homeAria}
+              onClick={(e) => onMobileNavClick(e, "#top")}
+            >
+              <Logo tone={menuLogoTone} withDescriptor={false} />
+            </a>
+            <button
+              type="button"
+              ref={menuCloseRef}
+              onClick={() => {
+                pendingAnchorRef.current = null;
+                closeMenu();
+              }}
+              aria-label={t.nav.closeMenu}
+              className="mobile-menu-item relative flex h-11 w-11 items-center justify-center"
+            >
+              <span className="sr-only">{t.nav.closeMenu}</span>
+              <span
+                aria-hidden
+                className="absolute block h-px w-6 rotate-45 bg-foreground"
+              />
+              <span
+                aria-hidden
+                className="absolute block h-px w-6 -rotate-45 bg-foreground"
+              />
+            </button>
+          </div>
+
+          <nav aria-label={t.nav.mobileAria} className="mobile-menu-nav">
             {links.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                onClick={() => setMenuOpen(false)}
-                className="mobile-menu-item group flex items-center gap-4 border-b border-white/10 py-[clamp(0.875rem,2.4svh,1.25rem)] text-[clamp(1.625rem,5.5vw,2.5rem)] font-semibold tracking-tight text-paper"
+                onClick={(e) => onMobileNavClick(e, item.href)}
+                className="mobile-menu-item mobile-menu-link"
               >
-                <span
-                  aria-hidden
-                  className="h-px w-5 shrink-0 bg-accent transition-all duration-300 group-hover:w-8 group-focus-visible:w-8"
-                />
-                {item.label}
+                <span className="mobile-menu-link-inner">
+                  <span aria-hidden className="mobile-menu-dot" />
+                  <span>{item.label}</span>
+                </span>
               </a>
             ))}
           </nav>
 
-          {/* Utility area: theme + language, then final CTA */}
-          <div className="mobile-menu-item mobile-menu-utility pt-6">
-            <div className="flex items-center justify-between border-t border-white/10 pt-6">
-              <ThemeToggle tone="on-dark" />
+          <div className="mobile-menu-item mobile-menu-utility">
+            <div className="mobile-menu-utility-row">
+              <ThemeToggle
+                tone={theme === "dark" ? "on-dark" : "on-light"}
+              />
               <div
                 className="flex items-center gap-1"
                 role="group"
@@ -212,7 +350,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
                     className={`label px-3 py-2 transition-colors ${
                       locale === code
                         ? "text-accent"
-                        : "text-paper/45 hover:text-paper"
+                        : "text-muted hover:text-foreground"
                     }`}
                   >
                     {code === "uk" ? "UA" : "EN"}
@@ -222,8 +360,8 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
             </div>
             <a
               href={navHrefs.estimate}
-              onClick={() => setMenuOpen(false)}
-              className="btn btn-primary mt-5 w-full"
+              onClick={(e) => onMobileNavClick(e, navHrefs.estimate)}
+              className="btn btn-primary mt-4 w-full"
             >
               {t.hero.ctaPrimary}
               <span className="btn-arrow" aria-hidden>
