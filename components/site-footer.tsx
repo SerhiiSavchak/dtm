@@ -101,7 +101,7 @@ export function SiteFooter() {
           </div>
 
           {/* Desktop — equal side tracks keep nav on the container center */}
-          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-start lg:gap-x-8 xl:gap-x-10">
+          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-x-8 xl:gap-x-10">
             <div className="flex min-w-0 flex-col items-start justify-self-start text-left">
               <Logo tone={theme === "dark" ? "paper" : "ink"} withDescriptor />
               <p className="type-body-sm mt-2.5 max-w-[22rem] text-muted">
@@ -111,7 +111,7 @@ export function SiteFooter() {
 
             <nav
               aria-label={t.nav.mainAria}
-              className="flex min-h-9 flex-nowrap items-center justify-center gap-x-5 justify-self-center xl:gap-x-6 2xl:gap-x-7"
+              className="flex flex-nowrap items-center justify-center gap-x-5 justify-self-center xl:gap-x-6 2xl:gap-x-7"
             >
               {links.map((item) => (
                 <a
@@ -128,7 +128,7 @@ export function SiteFooter() {
               href={socialLinks.instagram}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-9 items-center justify-self-end gap-2 type-body-sm text-foreground/80 transition-colors hover:text-accent"
+              className="inline-flex items-center justify-self-end gap-2.5 type-body text-foreground/80 transition-colors hover:text-accent"
             >
               <InstagramIcon />
               Instagram
@@ -150,8 +150,8 @@ export function SiteFooter() {
 function InstagramIcon() {
   return (
     <svg
-      width="18"
-      height="18"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden
