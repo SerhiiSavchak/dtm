@@ -34,7 +34,7 @@ function useProjectLabels(project: Project) {
 export function Projects() {
   const t = useDictionary().projects;
   const sectionRef = useRef<HTMLElement>(null);
-  const { trackRef, activeProjectIndex, moveBy, canPrev, canNext } =
+  const { viewportRef, activeProjectIndex, selectedSnapIndex, moveBy, canPrev, canNext, onSlideClick } =
     useProjectTrack(PROJECT_IDS);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [hintVisible, setHintVisible] = useState(false);
@@ -135,13 +135,14 @@ export function Projects() {
         </div>
 
         <div
-          ref={trackRef}
-          className="project-track mt-5 md:mt-8"
+          ref={viewportRef}
+          className="project-viewport mt-5 md:mt-8"
+          data-snap-index={selectedSnapIndex}
           tabIndex={0}
           role="region"
           aria-roledescription="carousel"
           aria-label={t.heading}
-          onScroll={dismissHint}
+          onPointerDown={dismissHint}
           onKeyDown={(e) => {
             if (e.key === "ArrowRight") {
               e.preventDefault();
@@ -153,15 +154,17 @@ export function Projects() {
             }
           }}
         >
-          {projects.map((project, i) => (
-            <ProjectSlide
-              key={project.slug}
-              project={project}
-              lead={i === 0}
-              active={i === activeProjectIndex}
-              onOpen={() => setOpenSlug(project.slug)}
-            />
-          ))}
+          <div className="project-track">
+            {projects.map((project, i) => (
+              <ProjectSlide
+                key={project.slug}
+                project={project}
+                lead={i === 0}
+                active={i === activeProjectIndex}
+                onOpen={() => onSlideClick(() => setOpenSlug(project.slug))}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -209,18 +212,20 @@ function ProjectSlide({
         <div className="project-media">
           <Reveal variant="clip" className="overflow-hidden bg-stone">
             <div
-              className={`relative w-full aspect-[4/5] md:aspect-[16/11] ${
+              className={`project-media-frame relative w-full aspect-[4/5] md:aspect-[16/11] ${
                 lead ? "lg:aspect-[16/10]" : ""
               }`}
             >
-              <MediaImage
-                src={project.cover}
-                alt={`DTM: ${labels.category}${labels.location ? `, ${labels.location}` : ""}`}
-                fill
-                quality={90}
-                sizes="(max-width: 1024px) 86vw, 70vw"
-                className="object-cover transition-transform duration-[900ms] ease-out group-hover/card:scale-[1.03]"
-              />
+              <div className="project-media-zoom">
+                <MediaImage
+                  src={project.cover}
+                  alt={`DTM: ${labels.category}${labels.location ? `, ${labels.location}` : ""}`}
+                  fill
+                  quality={90}
+                  sizes="(max-width: 1024px) 86vw, 70vw"
+                  className="object-cover"
+                />
+              </div>
             </div>
           </Reveal>
           <div className="project-arrow-slot">

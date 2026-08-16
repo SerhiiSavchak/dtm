@@ -221,7 +221,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
                 type="button"
                 onClick={toggleLocale}
                 aria-label={
-                  locale === "uk" ? "Switch to English" : "Перейти на українську"
+                  locale === "uk" ? t.lang.toEn : t.lang.toUk
                 }
                 className={`label hidden px-1.5 transition-colors nav:inline-block ${
                   solid
@@ -320,7 +320,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               <div
                 className="flex items-center gap-1"
                 role="group"
-                aria-label="Мова / Language"
+                aria-label={t.lang.groupAria}
               >
                 {(["uk", "en"] as const).map((code) => (
                   <button

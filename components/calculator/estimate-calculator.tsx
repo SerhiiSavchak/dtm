@@ -320,7 +320,7 @@ export function EstimateCalculator() {
             disabled={phase === "submitting"}
             className="btn btn-primary w-full sm:w-auto sm:min-w-[16rem]"
           >
-            {phase === "submitting" ? "…" : t.submit}
+            {phase === "submitting" ? t.sending : t.submit}
             <span className="btn-arrow" aria-hidden>
               →
             </span>

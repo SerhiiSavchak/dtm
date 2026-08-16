@@ -1320,45 +1320,31 @@ html[data-theme] {
   min-height: 0;
 }
 
-/* Project editorial track — native overflow; snap off while the pointer owns the gesture */
-.project-track {
-  display: flex;
-  min-width: 0;
+/* Project editorial track — Embla owns translation; viewport is overflow hidden */
+.project-viewport {
+  overflow: hidden;
   max-width: 100%;
-  gap: clamp(0.85rem, 2vw, 1.75rem);
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
   padding-bottom: 0.25rem;
   cursor: grab;
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
+  overscroll-behavior-x: contain;
 }
 
-.project-track:active,
-.project-track:active *,
-.project-track.is-dragging,
-.project-track.is-dragging * {
+.project-viewport[data-dragging="true"],
+.project-viewport[data-dragging="true"] * {
   cursor: grabbing;
 }
 
-.project-track.is-dragging {
-  scroll-snap-type: none;
-  scroll-behavior: auto;
-  will-change: scroll-position;
-}
-
-.project-track.is-overscroll [data-slide] {
-  transform: translate3d(var(--drag-rubber, 0px), 0, 0);
-}
-
-.project-track.is-snapping {
-  scroll-behavior: smooth;
+.project-track {
+  display: flex;
+  min-width: 0;
+  gap: clamp(0.85rem, 2vw, 1.75rem);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: none;
 }
 
 .project-track img,
@@ -1367,19 +1353,17 @@ html[data-theme] {
   user-select: none;
 }
 
-.project-track::-webkit-scrollbar {
-  display: none;
-}
-
 /* Mobile: equal cards, ~12–15% of the next slide peeks inside the track */
 .project-slide {
+  position: relative;
   flex: 0 0 86%;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+  min-width: 0;
+  touch-action: pan-y;
 }
 
 .project-slide button {
   cursor: grab;
+  touch-action: pan-y;
 }
 
 .project-slide button:focus-visible {
@@ -1391,8 +1375,29 @@ html[data-theme] {
   position: relative;
 }
 
-/* Overlay is the card media box. Sticky `right` keeps the arrow inside the
-   visible track when the slide is only peeking (clipped by overflow-x). */
+.project-media-frame {
+  overflow: hidden;
+}
+
+.project-media-zoom {
+  position: absolute;
+  inset: 0;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform 600ms var(--ease-out-soft);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project-viewport:not([data-dragging="true"]) .project-slide:hover .project-media-zoom {
+    transform: scale(1.045);
+  }
+}
+
+.project-viewport[data-dragging="true"] .project-media-zoom {
+  transform: scale(1);
+}
+
+/* Overlay sits on the card media. Overflow is clipped by the Embla viewport. */
 .project-arrow-slot {
   position: absolute;
   inset: 0;
@@ -1428,9 +1433,14 @@ html[data-theme] {
   font-size: 1.25rem;
 }
 
+.project-viewport[data-dragging="true"] .project-arrow-hover {
+  opacity: 0;
+  transform: translateX(-6px);
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .project-slide:hover .project-arrow-hover,
-  .project-slide:focus-within .project-arrow-hover {
+  .project-viewport:not([data-dragging="true"]) .project-slide:hover .project-arrow-hover,
+  .project-viewport:not([data-dragging="true"]) .project-slide:focus-within .project-arrow-hover {
     opacity: 1;
     transform: translateX(0);
   }
@@ -1970,13 +1980,9 @@ html[data-theme="light"] .calc-panel {
   .locale-fade,
   .btn-primary::before,
   .process-rail-fill,
-  .project-track.is-snapping {
+  .project-media-zoom {
     animation: none !important;
     transition: none !important;
-  }
-
-  .project-track.is-snapping {
-    scroll-behavior: auto;
   }
 
   .faq-answer {

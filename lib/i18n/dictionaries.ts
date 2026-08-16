@@ -177,6 +177,7 @@ export type Dictionary = {
       call: string;
       again: string;
     };
+    sending: string;
     errors: {
       required: string;
       area: string;
@@ -207,6 +208,9 @@ export type Dictionary = {
   };
   lang: {
     switchTo: string;
+    toEn: string;
+    toUk: string;
+    groupAria: string;
   };
 };
 
@@ -214,7 +218,7 @@ const uk: Dictionary = {
   meta: {
     title: "DTM — Дім Твоєї Мрії · Комплексний ремонт у Львові",
     description:
-      "DTM — комплексний ремонт квартир, будинків і комерційних просторів у Львові під ключ. Кошторис, організація робіт, прораб, комплектація та контроль виконання.",
+      "DTM — комплексний ремонт квартир, будинків і комерційних приміщень у Львові під ключ. Кошторис, організація робіт, прораб, комплектація та контроль виконання",
   },
   brand: {
     name: "DTM",
@@ -227,7 +231,7 @@ const uk: Dictionary = {
     about: "Про нас",
     contact: "Контакти",
     estimate: "Розрахувати",
-    estimateCta: "Розрахувати вартість",
+    estimateCta: "Попередній розрахунок",
     mainAria: "Головна навігація",
     mobileAria: "Мобільна навігація",
     openMenu: "Відкрити меню",
@@ -240,7 +244,7 @@ const uk: Dictionary = {
     line1: "Комплексний",
     line2: "ремонт",
     line3: "під ключ",
-    copy: "Квартири, будинки й комерційні простори у Львові — від першого кошторису до готового простору",
+    copy: "Квартири, будинки й комерційні приміщення у Львові — від першого кошторису до готового простору",
     ctaPrimary: "Отримати попередній розрахунок",
     ctaSecondary: "Дивитися роботи",
     imageAlt: "Інтер’єр після комплексного ремонту DTM у Львові",
@@ -251,31 +255,31 @@ const uk: Dictionary = {
     headingBefore: "Одна команда",
     headingAccent: "відповідає за весь процес",
     headingAfter: "",
-    body: "DTM веде ремонт як єдиний процес — вам не потрібно координувати окремих підрядників. Ви узгоджуєте результат, а ми беремо на себе організацію всього процесу",
+    body: "Вам не потрібно координувати окремих підрядників. Ми беремо на себе організацію всього процесу, а ви узгоджуєте результат",
     proposition: "Що DTM бере на себе",
     responsibilities: [
       {
         title: "Кошторис і планування",
-        text: "Зрозуміла структура робіт та етапів перед стартом",
+        text: "Зрозуміла структура робіт і етапів перед стартом",
       },
       {
         title: "Організація робіт і прораб",
-        text: "Команда, графік і керування процесом на об’єкті",
+        text: "Команда, графік і ведення процесу на об’єкті",
       },
       {
         title: "Закупівля та комплектація",
-        text: "Матеріали та комплектація під узгоджений результат",
+        text: "Матеріали й комплектація під узгоджений результат",
       },
       {
         title: "Контроль виконання",
-        text: "Перевірка якості та фото- й відеозвітність із об’єкта",
+        text: "Перевірка якості, фото- та відеозвітність із об’єкта",
       },
     ],
   },
   projects: {
     label: "Портфоліо",
     heading: "Вибрані роботи",
-    all: "Листати проєкти",
+    all: "Переглянути проєкти",
     areaPlaceholder: "[площа]",
     titlePlaceholder: "[Назва проєкту]",
     counter: "з",
@@ -288,7 +292,7 @@ const uk: Dictionary = {
     categories: {
       apartment: "Квартира",
       house: "Будинок",
-      commercial: "Комерція",
+      commercial: "Комерційне приміщення",
     },
   },
   services: {
@@ -300,7 +304,7 @@ const uk: Dictionary = {
         index: "01",
         title: "Ремонт квартир під ключ",
         description:
-          "Повний цикл — від демонтажу та чорнових робіт до фінішного оздоблення й меблювання",
+          "Повний цикл — від демонтажу та чорнових робіт до фінішного оздоблення",
       },
       {
         index: "02",
@@ -312,7 +316,7 @@ const uk: Dictionary = {
         index: "03",
         title: "Комерційні приміщення",
         description:
-          "Офіси, заклади та торгові простори — ремонт з дотриманням термінів і бюджету",
+          "Офіси, заклади та торгові простори — ремонт з узгодженими термінами й бюджетом",
       },
       {
         index: "04",
@@ -365,18 +369,18 @@ const uk: Dictionary = {
     label: "У роботі",
     labelRight: "Поточні об’єкти",
     heading: "Об’єкти зараз у роботі",
-    body: "Реальні кадри з поточних ремонтів DTM — хід робіт і звітність без інсценування",
+    body: "Реальні кадри з поточних ремонтів DTM — хід робіт і звітність",
     stages: {
       finishing: "Фінішні роботи",
       install: "Монтаж",
       detail: "Деталі",
-      handover: "Підготовка до здачі",
+      handover: "Підготовка до передачі",
     },
     captionPlaceholder: "[Об’єкт]",
     instagramCta: "Більше з процесу в Instagram",
   },
   faq: {
-    label: "FAQ",
+    label: "Запитання",
     heading: "Часті запитання",
     items: [
       {
@@ -385,7 +389,7 @@ const uk: Dictionary = {
       },
       {
         q: "Чи можна замовити ремонт без дизайн-проєкту?",
-        a: "Так. Можна починати без готового проєкту або проконсультуватися, чи він потрібен для вашого об’єкта",
+        a: "Так. Можна починати без готового дизайн-проєкту або проговорити на консультації, чи він потрібен для вашого об’єкта",
       },
       {
         q: "Чи працюєте ви з новобудовами?",
@@ -393,7 +397,7 @@ const uk: Dictionary = {
       },
       {
         q: "Чи можна замовити тільки окремі роботи?",
-        a: "Основний напрям — комплексний ремонт. Окремі роботи узгоджуємо індивідуально, залежно від обсягу й етапу",
+        a: "Основний напрям — комплексний ремонт. Окремі роботи обговорюємо залежно від обсягу й етапу",
       },
       {
         q: "Як відбувається контроль ремонту?",
@@ -401,7 +405,7 @@ const uk: Dictionary = {
       },
       {
         q: "Коли краще звертатися перед початком ремонту?",
-        a: "Що раніше — то краще: так можна спокійніше спланувати кошторис, комплектацію й старт робіт",
+        a: "Що раніше — то краще: так спокійніше спланувати кошторис, комплектацію й старт робіт",
       },
     ],
   },
@@ -411,12 +415,12 @@ const uk: Dictionary = {
     headingBefore: "Почнемо з",
     headingAccent: "параметрів вашого об’єкта",
     body: "Кілька коротких питань про тип, площу й стан. Після цього ви отримаєте попередній розрахунок і наступні кроки",
-    contactLink: "або звʼязатися напряму",
+    contactLink: "Зв’язатися напряму",
   },
   finalCta: {
     headingBefore: "Плануєте ремонт?",
     headingAfter: "Почнемо з попереднього розрахунку",
-    body: "Коротко опишіть задачу — і ми повернемося з наступними кроками",
+    body: "Кілька коротких питань про об’єкт — далі підготуємо попередній розрахунок і наступні кроки",
     primary: "Отримати попередній розрахунок",
     telegram: "Telegram",
     call: "Зателефонувати",
@@ -440,7 +444,7 @@ const uk: Dictionary = {
         title: "Яка орієнтовна площа?",
         hint: "Вкажіть орієнтовну площу в квадратних метрах",
         unit: "м²",
-        placeholder: "напр. 72",
+        placeholder: "наприклад 72",
       },
       rooms: {
         title: "Скільки кімнат?",
@@ -496,17 +500,18 @@ const uk: Dictionary = {
     },
     success: {
       title: "Запит отримано",
-      body: "DTM отримав вашу заявку. Ми зв’яжемося з вами найближчим часом, щоб уточнити деталі та підготувати попередній розрахунок",
+      body: "DTM отримав вашу заявку. Ми зв’яжемося з вами, щоб уточнити деталі та підготувати попередній розрахунок",
       telegram: "Написати в Telegram",
       call: "Зателефонувати",
       again: "Надіслати ще один запит",
     },
+    sending: "Надсилаємо",
     errors: {
       required: "Оберіть варіант, щоб продовжити",
       area: "Вкажіть площу від 1 до 2000 м²",
       phone: "Вкажіть коректний номер телефону",
       name: "Вкажіть ім’я",
-      submit: "Не вдалося надіслати запит. Спробуйте ще раз.",
+      submit: "Не вдалося надіслати запит. Спробуйте ще раз",
     },
     context: {
       object: "Об’єкт",
@@ -515,7 +520,7 @@ const uk: Dictionary = {
   },
   footer: {
     tagline:
-      "Комплексний ремонт квартир, будинків і комерційних просторів у Львові",
+      "Комплексний ремонт квартир, будинків і комерційних приміщень у Львові",
     locationLabel: "Локація",
     location: "Львів, Україна",
     socialLabel: "Соцмережі",
@@ -532,6 +537,9 @@ const uk: Dictionary = {
   },
   lang: {
     switchTo: "EN",
+    toEn: "Switch to English",
+    toUk: "Перейти на українську",
+    groupAria: "Мова",
   },
 };
 
@@ -539,7 +547,7 @@ const en: Dictionary = {
   meta: {
     title: "DTM — Dim Tvoyeyi Mriyi · Full-cycle renovation in Lviv",
     description:
-      "DTM delivers full-cycle renovation for apartments, houses and commercial spaces in Lviv — estimate, site management, procurement and quality control.",
+      "DTM delivers full-cycle renovation for apartments, houses and commercial spaces in Lviv — estimate, site management, procurement and quality control",
   },
   brand: {
     name: "DTM",
@@ -552,7 +560,7 @@ const en: Dictionary = {
     about: "About us",
     contact: "Contact",
     estimate: "Get an estimate",
-    estimateCta: "Estimate cost",
+    estimateCta: "Preliminary estimate",
     mainAria: "Primary navigation",
     mobileAria: "Mobile navigation",
     openMenu: "Open menu",
@@ -576,7 +584,7 @@ const en: Dictionary = {
     headingBefore: "One team",
     headingAccent: "owns the whole process",
     headingAfter: "",
-    body: "DTM runs renovation as a single process — so you don’t coordinate separate contractors. You approve the result; we own the organisation",
+    body: "You do not need to coordinate separate contractors. We take on organising the whole process, and you approve the result",
     proposition: "What DTM takes on",
     responsibilities: [
       {
@@ -613,7 +621,7 @@ const en: Dictionary = {
     categories: {
       apartment: "Apartment",
       house: "House",
-      commercial: "Commercial",
+      commercial: "Commercial space",
     },
   },
   services: {
@@ -625,7 +633,7 @@ const en: Dictionary = {
         index: "01",
         title: "Turnkey apartment renovation",
         description:
-          "Full cycle — from demolition and rough works to finishing and furnishing",
+          "Full cycle — from demolition and rough works to finishing",
       },
       {
         index: "02",
@@ -637,7 +645,7 @@ const en: Dictionary = {
         index: "03",
         title: "Commercial spaces",
         description:
-          "Offices, venues and retail — renovation with schedule and budget discipline",
+          "Offices, venues and retail — renovation with agreed schedule and budget",
       },
       {
         index: "04",
@@ -690,18 +698,18 @@ const en: Dictionary = {
     label: "In progress",
     labelRight: "Live sites",
     heading: "Projects currently in progress",
-    body: "Real frames from active DTM renovations — process, reporting and progress without staging",
+    body: "Real frames from active DTM renovations — process and reporting",
     stages: {
       finishing: "Finishing works",
       install: "Installation",
       detail: "Details",
-      handover: "Pre-handover",
+      handover: "Preparing for handover",
     },
     captionPlaceholder: "[Project]",
     instagramCta: "More process on Instagram",
   },
   faq: {
-    label: "FAQ",
+    label: "Questions",
     heading: "Frequently asked questions",
     items: [
       {
@@ -736,12 +744,12 @@ const en: Dictionary = {
     headingBefore: "Let’s start with",
     headingAccent: "your property parameters",
     body: "A few short questions about type, area and condition. DTM then follows up with an indicative preliminary estimate and next steps",
-    contactLink: "or contact us directly",
+    contactLink: "Contact us directly",
   },
   finalCta: {
     headingBefore: "Planning a renovation?",
     headingAfter: "Start with a preliminary estimate",
-    body: "Share a short brief — and we’ll come back with next steps",
+    body: "A few short questions about the property — then we prepare a preliminary estimate and next steps",
     primary: "Get a preliminary estimate",
     telegram: "Telegram",
     call: "Call us",
@@ -821,17 +829,18 @@ const en: Dictionary = {
     },
     success: {
       title: "Request received",
-      body: "DTM has received your request. We will contact you shortly to clarify details and prepare a preliminary estimate",
+      body: "DTM has received your request. We will contact you to clarify details and prepare a preliminary estimate",
       telegram: "Message on Telegram",
       call: "Call us",
       again: "Submit another request",
     },
+    sending: "Sending",
     errors: {
       required: "Choose an option to continue",
       area: "Enter an area between 1 and 2000 m²",
       phone: "Enter a valid phone number",
       name: "Enter your name",
-      submit: "Could not send the request. Please try again.",
+      submit: "Could not send the request. Please try again",
     },
     context: {
       object: "Property",
@@ -857,6 +866,9 @@ const en: Dictionary = {
   },
   lang: {
     switchTo: "UA",
+    toEn: "Switch to English",
+    toUk: "Switch to Ukrainian",
+    groupAria: "Language",
   },
 };
 
