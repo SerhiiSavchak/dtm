@@ -595,7 +595,6 @@ input:disabled {
 .btn-secondary:hover {
   border-color: var(--accent);
   color: var(--accent);
-  background: color-mix(in oklab, var(--accent) 6%, transparent);
 }
 
 .btn-ink {
@@ -1145,6 +1144,23 @@ html[data-theme] {
   outline-offset: 4px;
 }
 
+.project-media {
+  position: relative;
+}
+
+/* Overlay is the card media box. Sticky `right` keeps the arrow inside the
+   visible track when the slide is only peeking (clipped by overflow-x). */
+.project-arrow-slot {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 1rem;
+  pointer-events: none;
+}
+
 .project-arrow {
   color: var(--accent);
   font-size: 1.35rem;
@@ -1153,10 +1169,9 @@ html[data-theme] {
 }
 
 .project-arrow-hover {
-  position: absolute;
-  right: 1rem;
+  position: sticky;
   top: 1rem;
-  z-index: 2;
+  right: 1rem;
   opacity: 0;
   transform: translateX(-6px);
   transition:

@@ -100,18 +100,18 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Desktop — equal side columns keep nav in the true center */}
-          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-start lg:gap-x-8 xl:gap-x-10 2xl:gap-x-12">
+          {/* Desktop — equal side tracks keep nav on the container center */}
+          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-start lg:gap-x-8 xl:gap-x-10">
             <div className="flex min-w-0 flex-col items-start justify-self-start text-left">
               <Logo tone={theme === "dark" ? "paper" : "ink"} withDescriptor />
-              <p className="type-body-sm mt-2.5 max-w-[20rem] text-muted">
+              <p className="type-body-sm mt-2.5 max-w-[22rem] text-muted">
                 {t.footer.tagline}
               </p>
             </div>
 
             <nav
               aria-label={t.nav.mainAria}
-              className="flex flex-nowrap items-center justify-center gap-x-5 pt-1.5 xl:gap-x-6 2xl:gap-x-7"
+              className="flex min-h-9 flex-nowrap items-center justify-center gap-x-5 justify-self-center xl:gap-x-6 2xl:gap-x-7"
             >
               {links.map((item) => (
                 <a
@@ -124,25 +124,15 @@ export function SiteFooter() {
               ))}
             </nav>
 
-            <div className="flex items-start justify-end justify-self-end gap-x-8 pt-1.5 xl:gap-x-10">
-              <div className="flex flex-col items-start text-left">
-                <span className="label text-muted">{t.footer.locationLabel}</span>
-                <p className="mt-2 type-body-sm text-foreground/80">
-                  {t.footer.location}
-                </p>
-              </div>
-              <div className="flex flex-col items-start text-left">
-                <span className="label text-muted">{t.footer.socialLabel}</span>
-                <a
-                  href={socialLinks.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 type-body-sm text-foreground/80 transition-colors hover:text-accent"
-                >
-                  Instagram
-                </a>
-              </div>
-            </div>
+            <a
+              href={socialLinks.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-9 items-center justify-self-end gap-2 type-body-sm text-foreground/80 transition-colors hover:text-accent"
+            >
+              <InstagramIcon />
+              Instagram
+            </a>
           </div>
         </div>
 
@@ -154,5 +144,30 @@ export function SiteFooter() {
         </div>
       </div>
     </footer>
+  );
+}
+
+function InstagramIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+      className="shrink-0"
+    >
+      <rect
+        x="3.25"
+        y="3.25"
+        width="17.5"
+        height="17.5"
+        rx="5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="17.15" cy="6.85" r="1.05" fill="currentColor" />
+    </svg>
   );
 }

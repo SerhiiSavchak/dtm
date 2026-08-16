@@ -263,7 +263,7 @@ function ProjectSlide({
   return (
     <article
       data-slide
-      className={`project-slide group ${lead ? "is-lead" : ""}`}
+      className={`project-slide group/card ${lead ? "is-lead" : ""}`}
     >
       <button
         type="button"
@@ -271,7 +271,7 @@ function ProjectSlide({
         className="block w-full text-left"
         aria-label={`${t.open}: ${labels.title}`}
       >
-        <div className="relative">
+        <div className="project-media">
           <Reveal variant="clip" className="overflow-hidden bg-stone">
             <div
               className={`relative w-full aspect-[4/5] md:aspect-[16/11] ${
@@ -284,18 +284,20 @@ function ProjectSlide({
                 fill
                 quality={90}
                 sizes="(max-width: 1024px) 86vw, 70vw"
-                className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]"
+                className="object-cover transition-transform duration-[900ms] ease-out group-hover/card:scale-[1.03]"
               />
             </div>
           </Reveal>
-          <span aria-hidden className="project-arrow project-arrow-hover">
-            →
-          </span>
+          <div className="project-arrow-slot">
+            <span aria-hidden className="project-arrow project-arrow-hover">
+              →
+            </span>
+          </div>
         </div>
 
         <div className="mt-4 flex items-baseline justify-between gap-4 border-t border-border pt-3">
           <div className="min-w-0">
-            <p className="type-title flex items-baseline gap-3 text-foreground transition-colors duration-300 group-hover:text-accent">
+            <p className="type-title flex items-baseline gap-3 text-foreground transition-colors duration-300 group-hover/card:text-accent">
               <span>{labels.title}</span>
               <span className="project-arrow project-arrow-caption" aria-hidden>
                 →
