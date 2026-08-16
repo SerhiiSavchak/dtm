@@ -8,8 +8,18 @@ type SectionHeadProps = {
   onDark?: boolean;
 };
 
-/** Shared section label + rule — consistent spacing across the page */
+/**
+ * Strip legacy template counters: "(01) — Label" → "Label".
+ * Keeps SectionHead reusable as copy is cleaned over time.
+ */
+export function cleanSectionLabel(label: string) {
+  return label.replace(/^\(\d{1,2}\)\s*[—–-]\s*/u, "").trim();
+}
+
+/** Shared section eyebrow — orange rule + label, no decorative numbering */
 export function SectionHead({ label, right, onDark = false }: SectionHeadProps) {
+  const text = cleanSectionLabel(label);
+
   return (
     <Reveal
       as="div"
@@ -17,7 +27,10 @@ export function SectionHead({ label, right, onDark = false }: SectionHeadProps) 
         onDark ? "border-white/15" : "border-border"
       }`}
     >
-      <span className="label text-accent">{label}</span>
+      <span className="flex items-center gap-3">
+        <span aria-hidden className="h-px w-7 shrink-0 bg-accent" />
+        <span className="label text-accent">{text}</span>
+      </span>
       {right ? (
         <span
           className={`label hidden sm:block ${

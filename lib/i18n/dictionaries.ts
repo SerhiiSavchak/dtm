@@ -237,7 +237,7 @@ const uk: Dictionary = {
     imageAlt: "Інтер’єр після комплексного ремонту DTM у Львові",
   },
   intro: {
-    label: "(01) — Відповідальність",
+    label: "Відповідальність",
     labelRight: "Модель роботи",
     headingBefore: "Один підрядник —",
     headingAccent: "весь ремонт під контролем.",
@@ -264,7 +264,7 @@ const uk: Dictionary = {
     ],
   },
   projects: {
-    label: "(02) — Портфоліо",
+    label: "Портфоліо",
     heading: "Вибрані роботи",
     all: "Листати проєкти",
     areaPlaceholder: "[площа]",
@@ -282,7 +282,7 @@ const uk: Dictionary = {
     },
   },
   services: {
-    label: "(03) — Послуги",
+    label: "Послуги",
     labelRight: "Напрями DTM",
     heading: "Напрями, з якими працюємо",
     items: [
@@ -313,7 +313,7 @@ const uk: Dictionary = {
     ],
   },
   process: {
-    label: "(04) — Процес",
+    label: "Процес",
     labelRight: "Від запиту до передачі",
     heading: "Як ми ведемо ремонт",
     body: "Чітка послідовність етапів — щоб ви завжди розуміли, що відбувається з об’єктом.",
@@ -351,7 +351,7 @@ const uk: Dictionary = {
     ],
   },
   inProgress: {
-    label: "(05) — У роботі",
+    label: "У роботі",
     labelRight: "Живі об’єкти",
     heading: "Об’єкти зараз у роботі",
     body: "Реальні кадри з поточних ремонтів DTM — процес, звітність і хід робіт без постановки.",
@@ -365,7 +365,7 @@ const uk: Dictionary = {
     instagramCta: "Більше процесів в Instagram",
   },
   faq: {
-    label: "(07) — FAQ",
+    label: "FAQ",
     heading: "Часті запитання",
     items: [
       {
@@ -395,7 +395,7 @@ const uk: Dictionary = {
     ],
   },
   estimate: {
-    label: "(06) — Кошторис",
+    label: "Кошторис",
     labelRight: "Без зобов’язань",
     headingBefore: "Розкажіть про проєкт — підготуємо",
     headingAccent: "попередній розрахунок.",
@@ -554,7 +554,7 @@ const en: Dictionary = {
     imageAlt: "Interior after a DTM full-cycle renovation in Lviv",
   },
   intro: {
-    label: "(01) — Responsibility",
+    label: "Responsibility",
     labelRight: "How we work",
     headingBefore: "One contractor —",
     headingAccent: "the whole renovation under control.",
@@ -581,7 +581,7 @@ const en: Dictionary = {
     ],
   },
   projects: {
-    label: "(02) — Portfolio",
+    label: "Portfolio",
     heading: "Selected projects",
     all: "Browse projects",
     areaPlaceholder: "[area]",
@@ -599,7 +599,7 @@ const en: Dictionary = {
     },
   },
   services: {
-    label: "(03) — Services",
+    label: "Services",
     labelRight: "DTM directions",
     heading: "What we work on",
     items: [
@@ -630,7 +630,7 @@ const en: Dictionary = {
     ],
   },
   process: {
-    label: "(04) — Process",
+    label: "Process",
     labelRight: "From enquiry to handover",
     heading: "How we run a renovation",
     body: "A clear sequence of stages — so you always know what is happening on site.",
@@ -668,7 +668,7 @@ const en: Dictionary = {
     ],
   },
   inProgress: {
-    label: "(05) — In progress",
+    label: "In progress",
     labelRight: "Live sites",
     heading: "Projects currently in progress",
     body: "Real frames from active DTM renovations — process, reporting and progress without staging.",
@@ -682,7 +682,7 @@ const en: Dictionary = {
     instagramCta: "More process on Instagram",
   },
   faq: {
-    label: "(07) — FAQ",
+    label: "FAQ",
     heading: "Frequently asked questions",
     items: [
       {
@@ -712,7 +712,7 @@ const en: Dictionary = {
     ],
   },
   estimate: {
-    label: "(06) — Estimate",
+    label: "Estimate",
     labelRight: "No obligation",
     headingBefore: "Tell us about the project — we’ll prepare a",
     headingAccent: "preliminary estimate.",

@@ -183,6 +183,14 @@ body {
   margin-bottom: var(--section-head-gap);
 }
 
+/* Intro lead — editorial two-column band on desktop */
+@media (min-width: 1024px) {
+  .intro-lead {
+    /* Keep lead content from stretching across the full ultra-wide container */
+    max-width: 68rem;
+  }
+}
+
 .grid-12 {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
