@@ -377,25 +377,31 @@ input:disabled {
 
 .dtm-lockup {
   display: block;
-  height: 2.45rem;
+  height: 3.35rem;
   width: auto;
+  overflow: visible;
+  flex-shrink: 0;
 }
 
 .dtm-lockup.is-full {
-  height: 3.15rem;
-}
-
-.dtm-lockup-wordmark {
-  font-family: var(--font-inter-tight), "Inter Tight", sans-serif;
+  height: 4.5rem;
 }
 
 .dtm-lockup-tagline {
-  font-family: var(--font-mono-dtm), "JetBrains Mono", ui-monospace, monospace;
+  font-family: var(--font-inter-tight), "Inter Tight", sans-serif;
   text-transform: uppercase;
 }
 
 .page-loader .dtm-lockup.is-full {
-  height: 3.6rem;
+  height: 5.25rem;
+}
+
+footer .dtm-lockup.is-full {
+  height: 4.75rem;
+}
+
+.site-header .dtm-lockup.is-full {
+  height: 3.85rem;
 }
 
 /* Tablet / small-desktop chrome below the nav breakpoint */
@@ -404,12 +410,9 @@ input:disabled {
     padding-inline: clamp(1rem, 4.5vw, 1.25rem);
   }
 
-  .site-header .dtm-lockup {
-    height: 2.55rem;
-  }
-
+  .site-header .dtm-lockup,
   .site-header .dtm-lockup.is-full {
-    height: 3.25rem;
+    height: 3.65rem;
   }
 }
 
@@ -421,8 +424,9 @@ input:disabled {
     padding-inline: var(--mobile-chrome-inline);
   }
 
-  .site-header .dtm-lockup {
-    height: 2.7rem;
+  .site-header .dtm-lockup,
+  .site-header .dtm-lockup.is-full {
+    height: 3.35rem;
   }
 }
 

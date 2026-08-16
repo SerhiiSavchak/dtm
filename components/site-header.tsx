@@ -176,8 +176,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               if (menuPhase === "open") onMobileNavClick(e, "#top");
             }}
           >
-            <Logo tone={tone} withDescriptor className="hidden sm:block" />
-            <Logo tone={tone} withDescriptor={false} className="sm:hidden" />
+            <Logo tone={tone} withDescriptor />
           </a>
 
           <nav
