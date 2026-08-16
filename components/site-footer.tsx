@@ -3,7 +3,7 @@
 import { Logo } from "./logo";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { navHrefs } from "@/lib/i18n/dictionaries";
-import { socialLinks } from "@/data/media";
+import { externalLinkProps, socialLinks } from "@/data/media";
 import { useTheme } from "@/lib/theme/theme-context";
 import { Reveal } from "./reveal";
 
@@ -39,16 +39,8 @@ export function SiteFooter() {
                 </span>
               </a>
               <a
-                href={socialLinks.telegram}
+                {...externalLinkProps(socialLinks.telegram)}
                 className="btn btn-secondary group max-lg:w-full"
-                target={
-                  socialLinks.telegram.startsWith("http") ? "_blank" : undefined
-                }
-                rel={
-                  socialLinks.telegram.startsWith("http")
-                    ? "noopener noreferrer"
-                    : undefined
-                }
               >
                 {t.finalCta.telegram}
                 <span className="btn-arrow" aria-hidden>
@@ -89,14 +81,7 @@ export function SiteFooter() {
               <p className="flex min-h-11 items-center text-base text-foreground/80">
                 {t.footer.location}
               </p>
-              <a
-                href={socialLinks.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex min-h-11 items-center text-base text-foreground/80 transition-colors hover:text-accent"
-              >
-                Instagram
-              </a>
+              <FooterSocial />
             </div>
           </div>
 
@@ -124,15 +109,7 @@ export function SiteFooter() {
               ))}
             </nav>
 
-            <a
-              href={socialLinks.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-self-end gap-2.5 type-body text-foreground/80 transition-colors hover:text-accent"
-            >
-              <InstagramIcon />
-              Instagram
-            </a>
+            <FooterSocial className="justify-self-end" />
           </div>
         </div>
 
@@ -147,15 +124,38 @@ export function SiteFooter() {
   );
 }
 
+function FooterSocial({ className = "" }: { className?: string }) {
+  const t = useDictionary().footer;
+
+  return (
+    <nav aria-label={t.socialLabel} className={`footer-social ${className}`}>
+      <a
+        {...externalLinkProps(socialLinks.instagram)}
+        aria-label={t.instagramAria}
+      >
+        <InstagramIcon />
+        <span>{t.instagram}</span>
+      </a>
+      <a
+        {...externalLinkProps(socialLinks.telegram)}
+        aria-label={t.telegramAria}
+      >
+        <TelegramIcon />
+        <span>{t.telegram}</span>
+      </a>
+    </nav>
+  );
+}
+
 function InstagramIcon() {
   return (
     <svg
-      width="20"
-      height="20"
+      width="22"
+      height="22"
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden
-      className="shrink-0"
+      className="footer-social-icon"
     >
       <rect
         x="3.25"
@@ -168,6 +168,32 @@ function InstagramIcon() {
       />
       <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" />
       <circle cx="17.15" cy="6.85" r="1.05" fill="currentColor" />
+    </svg>
+  );
+}
+
+function TelegramIcon() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+      className="footer-social-icon"
+    >
+      <path
+        d="M20.75 4.35 3.9 11.2c-.95.38-.9 1.74.08 2.04l4.32 1.32 1.66 5.12c.28.86 1.38.98 1.84.2l2.38-4.08 4.72 3.46c.86.63 2.08.2 2.24-.86l1.72-12.1c.18-1.22-1.08-2.08-2.11-1.67Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9.05 13.2 19.4 6.55"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

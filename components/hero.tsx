@@ -85,14 +85,14 @@ export function Hero({ boot = true }: { boot?: boolean }) {
               {t.copy}
             </p>
 
-            <div className="hero-cta flex flex-col items-stretch lg:flex-row lg:items-center">
-              <a href="#estimate" className="btn btn-primary btn-lg group w-full lg:w-auto">
+            <div className="hero-cta flex flex-col items-start lg:flex-row lg:items-center">
+              <a href="#estimate" className="btn btn-primary btn-lg group">
                 {t.ctaPrimary}
                 <span className="btn-arrow" aria-hidden>
                   →
                 </span>
               </a>
-              <a href="#projects" className="btn btn-ghost btn-lg group w-full lg:w-auto">
+              <a href="#projects" className="btn btn-ghost btn-lg group">
                 {t.ctaSecondary}
                 <span className="btn-arrow" aria-hidden>
                   →

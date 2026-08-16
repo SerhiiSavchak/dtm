@@ -194,6 +194,10 @@ export type Dictionary = {
     locationLabel: string;
     location: string;
     socialLabel: string;
+    instagram: string;
+    telegram: string;
+    instagramAria: string;
+    telegramAria: string;
     copyright: string;
     localeMark: string;
   };
@@ -515,6 +519,10 @@ const uk: Dictionary = {
     locationLabel: "Локація",
     location: "Львів, Україна",
     socialLabel: "Соцмережі",
+    instagram: "Instagram",
+    telegram: "Telegram",
+    instagramAria: "Instagram DTM",
+    telegramAria: "Telegram DTM",
     copyright: "DTM — Дім Твоєї Мрії",
     localeMark: "Львів · Україна",
   },
@@ -836,6 +844,10 @@ const en: Dictionary = {
     locationLabel: "Location",
     location: "Lviv, Ukraine",
     socialLabel: "Social",
+    instagram: "Instagram",
+    telegram: "Telegram",
+    instagramAria: "Instagram DTM",
+    telegramAria: "Telegram DTM",
     copyright: "DTM — Dim Tvoyeyi Mriyi",
     localeMark: "Lviv · Ukraine",
   },

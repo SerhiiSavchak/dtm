@@ -263,7 +263,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               aria-controls={menuId}
               aria-label={menuVisible ? t.nav.closeMenu : t.nav.openMenu}
               data-open={menuVisible ? "true" : "false"}
-              className="header-menu-toggle relative flex h-12 w-12 shrink-0 items-center justify-center nav:hidden"
+              className="header-menu-toggle relative flex shrink-0 items-center justify-center nav:hidden"
             >
               <span className="sr-only">
                 {menuVisible ? t.nav.closeMenu : t.nav.openMenu}

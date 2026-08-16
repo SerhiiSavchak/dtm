@@ -9,10 +9,13 @@ import {
 } from "react";
 import { projects, type Project } from "@/data/projects";
 import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
+import { useProjectTrack } from "@/lib/project-track";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { MediaImage } from "./media-image";
 import { Reveal } from "./reveal";
 import { SectionHead } from "./section-head";
+
+const PROJECT_IDS = projects.map((project) => project.slug);
 
 function useProjectLabels(project: Project) {
   const t = useDictionary().projects;
@@ -30,9 +33,9 @@ function useProjectLabels(project: Project) {
 
 export function Projects() {
   const t = useDictionary().projects;
-  const trackRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
-  const [index, setIndex] = useState(0);
+  const { trackRef, activeProjectIndex, moveBy, canPrev, canNext } =
+    useProjectTrack(PROJECT_IDS);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [hintVisible, setHintVisible] = useState(false);
   const hintDismissed = useRef(false);
@@ -43,92 +46,13 @@ export function Projects() {
     setHintVisible(false);
   }, []);
 
-  const scrollTo = useCallback((i: number) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const slides = track.querySelectorAll<HTMLElement>("[data-slide]");
-    const target = slides[i];
-    if (!target) return;
-    track.scrollTo({ left: target.offsetLeft, behavior: "smooth" });
-    setIndex(i);
-  }, []);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const onScroll = () => {
-      const slides = [...track.querySelectorAll<HTMLElement>("[data-slide]")];
-      if (!slides.length) return;
-      const left = track.scrollLeft;
-      let best = 0;
-      let bestDist = Infinity;
-      slides.forEach((slide, i) => {
-        const dist = Math.abs(slide.offsetLeft - left);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
-      });
-      setIndex(best);
-    };
-    track.addEventListener("scroll", onScroll, { passive: true });
-    return () => track.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    let dragging = false;
-    let moved = false;
-    let startX = 0;
-    let startScroll = 0;
-    const suppressClick = { current: false };
-
-    const onPointerDown = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse" || e.button !== 0) return;
-      dragging = true;
-      moved = false;
-      startX = e.clientX;
-      startScroll = track.scrollLeft;
-    };
-
-    const onPointerMove = (e: PointerEvent) => {
-      if (!dragging) return;
-      const dx = e.clientX - startX;
-      if (Math.abs(dx) > 6) moved = true;
-      if (!moved) return;
-      track.classList.add("is-dragging");
-      track.scrollLeft = startScroll - dx;
+  const step = useCallback(
+    (delta: number) => {
       dismissHint();
-    };
-
-    const onPointerUp = () => {
-      if (!dragging) return;
-      dragging = false;
-      track.classList.remove("is-dragging");
-      if (moved) suppressClick.current = true;
-    };
-
-    const onClickCapture = (e: MouseEvent) => {
-      if (!suppressClick.current) return;
-      e.preventDefault();
-      e.stopPropagation();
-      suppressClick.current = false;
-    };
-
-    track.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    track.addEventListener("click", onClickCapture, true);
-
-    return () => {
-      track.removeEventListener("pointerdown", onPointerDown);
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-      track.removeEventListener("click", onClickCapture, true);
-    };
-  }, [dismissHint]);
+      moveBy(delta);
+    },
+    [dismissHint, moveBy]
+  );
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -172,8 +96,11 @@ export function Projects() {
           <Reveal delay={0.06}>
             <div className="flex flex-col items-start gap-2 md:items-end">
               <div className="flex items-center gap-4">
-                <span className="font-mono type-small tabular-nums tracking-wide text-muted">
-                  {String(index + 1).padStart(2, "0")} {t.counter}{" "}
+                <span
+                  className="font-mono type-small tabular-nums tracking-wide text-muted"
+                  aria-live="polite"
+                >
+                  {String(activeProjectIndex + 1).padStart(2, "0")} {t.counter}{" "}
                   {String(projects.length).padStart(2, "0")}
                 </span>
                 <div className="flex items-center gap-2">
@@ -181,8 +108,8 @@ export function Projects() {
                     type="button"
                     className="btn btn-sm btn-secondary"
                     aria-label={t.prev}
-                    onClick={() => scrollTo(Math.max(0, index - 1))}
-                    disabled={index === 0}
+                    onClick={() => step(-1)}
+                    disabled={!canPrev}
                   >
                     ←
                   </button>
@@ -190,10 +117,8 @@ export function Projects() {
                     type="button"
                     className="btn btn-sm btn-secondary"
                     aria-label={t.next}
-                    onClick={() =>
-                      scrollTo(Math.min(projects.length - 1, index + 1))
-                    }
-                    disabled={index === projects.length - 1}
+                    onClick={() => step(1)}
+                    disabled={!canNext}
                   >
                     →
                   </button>
@@ -213,16 +138,18 @@ export function Projects() {
           ref={trackRef}
           className="project-track mt-5 md:mt-8"
           tabIndex={0}
+          role="region"
+          aria-roledescription="carousel"
           aria-label={t.heading}
           onScroll={dismissHint}
           onKeyDown={(e) => {
             if (e.key === "ArrowRight") {
               e.preventDefault();
-              scrollTo(Math.min(projects.length - 1, index + 1));
+              step(1);
             }
             if (e.key === "ArrowLeft") {
               e.preventDefault();
-              scrollTo(Math.max(0, index - 1));
+              step(-1);
             }
           }}
         >
@@ -231,6 +158,7 @@ export function Projects() {
               key={project.slug}
               project={project}
               lead={i === 0}
+              active={i === activeProjectIndex}
               onOpen={() => setOpenSlug(project.slug)}
             />
           ))}
@@ -252,10 +180,12 @@ export function Projects() {
 function ProjectSlide({
   project,
   lead,
+  active,
   onOpen,
 }: {
   project: Project;
   lead: boolean;
+  active: boolean;
   onOpen: () => void;
 }) {
   const t = useDictionary().projects;
@@ -264,10 +194,14 @@ function ProjectSlide({
   return (
     <article
       data-slide
+      data-project={project.slug}
+      aria-current={active ? "true" : undefined}
       className={`project-slide group/card ${lead ? "is-lead" : ""}`}
     >
       <button
         type="button"
+        draggable={false}
+        onDragStart={(event) => event.preventDefault()}
         onClick={onOpen}
         className="block w-full text-left"
         aria-label={`${t.open}: ${labels.title}`}

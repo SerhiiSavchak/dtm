@@ -2,6 +2,7 @@
 
 import { useId, useMemo, useState } from "react";
 import { useDictionary, useLocale } from "@/lib/i18n/locale-context";
+import { externalLinkProps, socialLinks } from "@/data/media";
 import {
   getStepSequence,
   initialEstimateState,
@@ -215,13 +216,13 @@ export function EstimateCalculator() {
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           <a
-            href={process.env.NEXT_PUBLIC_TELEGRAM_URL || "#contacts"}
+            {...externalLinkProps(socialLinks.telegram)}
             className="btn btn-primary"
           >
             {t.success.telegram}
           </a>
           <a
-            href={process.env.NEXT_PUBLIC_PHONE_URL || "#contacts"}
+            {...externalLinkProps(socialLinks.phone)}
             className="btn btn-ghost"
           >
             {t.success.call}

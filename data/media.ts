@@ -52,9 +52,30 @@ export const inProgressMedia = {
   ],
 } as const;
 
+/**
+ * Public social URLs. Sourced from env so components never hardcode them.
+ * `NEXT_PUBLIC_TELEGRAM_URL` must be the verified DTM Telegram link
+ * (https://t.me/…). Until it is set, telegram uses the contacts anchor —
+ * not a real Telegram profile.
+ */
+export const TELEGRAM_URL_PLACEHOLDER = "#contacts" as const;
+
 export const socialLinks = {
   instagram:
     process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/",
-  telegram: process.env.NEXT_PUBLIC_TELEGRAM_URL || "#contacts",
+  telegram: process.env.NEXT_PUBLIC_TELEGRAM_URL || TELEGRAM_URL_PLACEHOLDER,
   phone: process.env.NEXT_PUBLIC_PHONE_URL || "#contacts",
 } as const;
+
+export function isHttpUrl(href: string) {
+  return href.startsWith("https://") || href.startsWith("http://");
+}
+
+export function externalLinkProps(href: string) {
+  if (!isHttpUrl(href)) return { href };
+  return {
+    href,
+    target: "_blank" as const,
+    rel: "noopener noreferrer" as const,
+  };
+}

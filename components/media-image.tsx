@@ -78,6 +78,7 @@ export function MediaImage({
         priority={priority}
         fetchPriority={priority ? "high" : "auto"}
         placeholder="empty"
+        draggable={false}
         className={`media-full ${shown && !failed ? "is-shown" : ""} ${
           failed ? "is-failed" : ""
         } ${className}`}
