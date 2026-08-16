@@ -80,7 +80,8 @@ export type Dictionary = {
   process: {
     label: string;
     labelRight: string;
-    heading: string;
+    headingBefore: string;
+    headingAccent: string;
     body: string;
     stages: { index: string; title: string; text: string }[];
   };
@@ -246,7 +247,7 @@ const uk: Dictionary = {
     headingBefore: "Одна команда",
     headingAccent: "відповідає за весь процес",
     headingAfter: "",
-    body: "DTM веде ремонт як єдиний процес — без потреби клієнту координувати окремих підрядників. Ви узгоджуєте результат; організацію беремо на себе ми",
+    body: "DTM веде ремонт як єдиний процес — вам не потрібно координувати окремих підрядників. Ви узгоджуєте результат, а ми беремо на себе організацію всього процесу",
     proposition: "Що DTM бере на себе",
     responsibilities: [
       {
@@ -263,7 +264,7 @@ const uk: Dictionary = {
       },
       {
         title: "Контроль виконання",
-        text: "Перевірка якості та фото / відео звітність ходу робіт",
+        text: "Перевірка якості та фото- й відеозвітність із об’єкта",
       },
     ],
   },
@@ -278,7 +279,7 @@ const uk: Dictionary = {
     next: "Наступний",
     prev: "Попередній",
     open: "Відкрити проєкт",
-    swipeHint: "Свайпайте →",
+    swipeHint: "Гортайте →",
     location: { lviv: "Львів" },
     categories: {
       apartment: "Квартира",
@@ -289,7 +290,7 @@ const uk: Dictionary = {
   services: {
     label: "Послуги",
     labelRight: "Напрями DTM",
-    heading: "Напрями, з якими працюємо",
+    heading: "Напрями, у яких працюємо",
     items: [
       {
         index: "01",
@@ -320,7 +321,8 @@ const uk: Dictionary = {
   process: {
     label: "Процес",
     labelRight: "Від запиту до передачі",
-    heading: "Як ми ведемо ремонт",
+    headingBefore: "Як ми",
+    headingAccent: "ведемо ремонт",
     body: "Чітка послідовність етапів — щоб ви завжди розуміли, що відбувається з об’єктом",
     stages: [
       {
@@ -336,7 +338,7 @@ const uk: Dictionary = {
       {
         index: "03",
         title: "Кошторис і планування",
-        text: "Формуємо попередній розрахунок і логіку робіт",
+        text: "Формуємо попередній розрахунок і план робіт",
       },
       {
         index: "04",
@@ -351,15 +353,15 @@ const uk: Dictionary = {
       {
         index: "06",
         title: "Передача готового об’єкта",
-        text: "Завершуємо фініш і передаємо простір до користування",
+        text: "Завершуємо фінішні роботи й передаємо простір у користування",
       },
     ],
   },
   inProgress: {
     label: "У роботі",
-    labelRight: "Живі об’єкти",
+    labelRight: "Поточні об’єкти",
     heading: "Об’єкти зараз у роботі",
-    body: "Реальні кадри з поточних ремонтів DTM — процес, звітність і хід робіт без постановки",
+    body: "Реальні кадри з поточних ремонтів DTM — хід робіт і звітність без інсценування",
     stages: {
       finishing: "Фінішні роботи",
       install: "Монтаж",
@@ -367,7 +369,7 @@ const uk: Dictionary = {
       handover: "Підготовка до здачі",
     },
     captionPlaceholder: "[Об’єкт]",
-    instagramCta: "Більше процесів в Instagram",
+    instagramCta: "Більше з процесу в Instagram",
   },
   faq: {
     label: "FAQ",
@@ -379,7 +381,7 @@ const uk: Dictionary = {
       },
       {
         q: "Чи можна замовити ремонт без дизайн-проєкту?",
-        a: "Так. Можна стартувати без готового проєкту або отримати консультацію щодо його потреби для вашого об’єкта",
+        a: "Так. Можна починати без готового проєкту або проконсультуватися, чи він потрібен для вашого об’єкта",
       },
       {
         q: "Чи працюєте ви з новобудовами?",
@@ -387,11 +389,11 @@ const uk: Dictionary = {
       },
       {
         q: "Чи можна замовити тільки окремі роботи?",
-        a: "Основний фокус — комплексний ремонт. Окремі роботи обговорюються індивідуально залежно від обсягу й етапу",
+        a: "Основний напрям — комплексний ремонт. Окремі роботи узгоджуємо індивідуально, залежно від обсягу й етапу",
       },
       {
         q: "Як відбувається контроль ремонту?",
-        a: "Процес веде відповідальний з боку DTM: організація робіт, прораб на об’єкті та регулярна фото / відео звітність",
+        a: "Контроль веде відповідальний від DTM: організація робіт, прораб на об’єкті та регулярна фото- й відеозвітність",
       },
       {
         q: "Коли краще звертатися перед початком ремонту?",
@@ -402,9 +404,9 @@ const uk: Dictionary = {
   estimate: {
     label: "Розрахунок",
     labelRight: "Без зобов’язань",
-    headingBefore: "Почнемо з параметрів",
-    headingAccent: "вашого об’єкта",
-    body: "Кілька коротких питань про тип, площу й стан. Після цього DTM повернеться з орієнтовним попереднім розрахунком і наступними кроками",
+    headingBefore: "Почнемо з",
+    headingAccent: "параметрів вашого об’єкта",
+    body: "Кілька коротких питань про тип, площу й стан. Після цього ви отримаєте попередній розрахунок і наступні кроки",
     contactLink: "або звʼязатися напряму",
   },
   finalCta: {
@@ -431,7 +433,7 @@ const uk: Dictionary = {
         ],
       },
       area: {
-        title: "Яка приблизна площа?",
+        title: "Яка орієнтовна площа?",
         hint: "Вкажіть орієнтовну площу в квадратних метрах",
         unit: "м²",
         placeholder: "напр. 72",
@@ -485,7 +487,7 @@ const uk: Dictionary = {
         telegramPlaceholder: "@username",
         telegramOptional: "необов’язково",
         disclaimer:
-          "Ми не обіцяємо точну автоматичну вартість. Після запиту менеджер DTM зв’яжеться з вами з орієнтовним розрахунком",
+          "Ми не обіцяємо точну автоматичну вартість. Після запиту менеджер DTM зв’яжеться з вами й передасть орієнтовний розрахунок",
       },
     },
     success: {
@@ -640,7 +642,8 @@ const en: Dictionary = {
   process: {
     label: "Process",
     labelRight: "From enquiry to handover",
-    heading: "How we run a renovation",
+    headingBefore: "How we",
+    headingAccent: "run a renovation",
     body: "A clear sequence of stages — so you always know what is happening on site",
     stages: [
       {
@@ -722,8 +725,8 @@ const en: Dictionary = {
   estimate: {
     label: "Estimate",
     labelRight: "No obligation",
-    headingBefore: "Let’s start with your",
-    headingAccent: "property parameters",
+    headingBefore: "Let’s start with",
+    headingAccent: "your property parameters",
     body: "A few short questions about type, area and condition. DTM then follows up with an indicative preliminary estimate and next steps",
     contactLink: "or contact us directly",
   },

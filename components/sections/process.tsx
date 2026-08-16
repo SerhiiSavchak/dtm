@@ -220,8 +220,12 @@ export function Process() {
         <div className="grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12">
           <div className="lg:col-span-4 lg:self-start">
             <Reveal>
-              <h2 id="process-heading" className="type-h2 text-foreground">
-                {t.heading}
+              <h2
+                id="process-heading"
+                className="type-h2 text-balance text-foreground"
+              >
+                {t.headingBefore}{" "}
+                <span className="text-accent">{t.headingAccent}</span>
               </h2>
             </Reveal>
             <Reveal delay={0.06}>
