@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
   useCallback,
   useEffect,
@@ -9,7 +8,9 @@ import {
   useState,
 } from "react";
 import { projects, type Project } from "@/data/projects";
+import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { MediaImage } from "./media-image";
 import { Reveal } from "./reveal";
 import { SectionHead } from "./section-head";
 
@@ -278,7 +279,7 @@ function ProjectSlide({
                 lead ? "lg:aspect-[16/10]" : ""
               }`}
             >
-              <Image
+              <MediaImage
                 src={project.cover}
                 alt={`DTM: ${labels.category}${labels.location ? `, ${labels.location}` : ""}`}
                 fill
@@ -336,11 +337,10 @@ function ProjectModal({
   const titleId = useId();
 
   useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockScroll();
     closeRef.current?.focus();
     return () => {
-      document.body.style.overflow = prev;
+      unlockScroll();
     };
   }, []);
 
@@ -392,14 +392,14 @@ function ProjectModal({
         }}
       >
         <div className="relative aspect-[4/5] bg-ink-soft lg:col-span-7 lg:aspect-auto lg:min-h-[32rem]">
-          <Image
+          <MediaImage
+            key={project.gallery[galleryIndex] ?? project.cover}
             src={project.gallery[galleryIndex] ?? project.cover}
             alt=""
             fill
             quality={90}
             sizes="(max-width: 1024px) 100vw, 55vw"
             className="object-cover"
-            priority
           />
         </div>
 
@@ -443,7 +443,7 @@ function ProjectModal({
                         : "border-white/20 opacity-70 hover:opacity-100"
                     }`}
                   >
-                    <Image
+                    <MediaImage
                       src={src}
                       alt=""
                       fill

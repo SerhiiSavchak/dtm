@@ -1,39 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { Logo } from "./logo";
+import {
+  getLoaderElapsedMs,
+  getLoaderPhase,
+  getServerLoaderPhase,
+  isBootComplete,
+  startLoaderSession,
+  subscribeLoader,
+} from "@/lib/boot-session";
 
 /**
- * Brief first-paint loader — covers real prep only, then hands off to hero.
- * Does not invent a multi-second fake wait.
+ * Single global first-paint overlay. Session state lives in lib/boot-session
+ * so Strict Mode remounts cannot restart the sequence.
  */
 export function PageLoader({ onDone }: { onDone?: () => void }) {
-  const [phase, setPhase] = useState<"in" | "out" | "gone">("in");
+  const phase = useSyncExternalStore(
+    subscribeLoader,
+    getLoaderPhase,
+    getServerLoaderPhase
+  );
+  const onDoneRef = useRef(onDone);
+  const signaled = useRef(false);
 
   useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduced) {
-      const id = window.setTimeout(() => {
-        setPhase("gone");
-        onDone?.();
-      }, 0);
-      return () => window.clearTimeout(id);
-    }
-
-    const outTimer = window.setTimeout(() => setPhase("out"), 700);
-    const goneTimer = window.setTimeout(() => {
-      setPhase("gone");
-      onDone?.();
-    }, 1100);
-
-    return () => {
-      window.clearTimeout(outTimer);
-      window.clearTimeout(goneTimer);
-    };
+    onDoneRef.current = onDone;
   }, [onDone]);
 
+  useEffect(() => {
+    startLoaderSession();
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "out" && phase !== "gone") return;
+    if (signaled.current) return;
+    signaled.current = true;
+    onDoneRef.current?.();
+  }, [phase]);
+
+  useEffect(() => {
+    if (!isBootComplete()) return;
+    if (signaled.current) return;
+    signaled.current = true;
+    onDoneRef.current?.();
+  }, []);
+
   if (phase === "gone") return null;
+
+  const elapsed = getLoaderElapsedMs();
 
   return (
     <div
@@ -43,7 +58,10 @@ export function PageLoader({ onDone }: { onDone?: () => void }) {
       aria-hidden="true"
     >
       <Logo tone="paper" withDescriptor />
-      <div className="page-loader-line mt-8" />
+      <div
+        className="page-loader-line mt-8"
+        style={{ animationDelay: `-${elapsed}ms` }}
+      />
     </div>
   );
 }

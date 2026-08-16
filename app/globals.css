@@ -16,7 +16,9 @@
   --section-space: clamp(4rem, 6.5vw, 6.5rem);
   --section-space-sm: clamp(3rem, 5vw, 4.75rem);
   --section-head-gap: clamp(1.35rem, 2.2vw, 2rem);
-  --header-h: 4rem;
+  --header-bar: 4.5rem;
+  --header-h: calc(var(--header-bar) + env(safe-area-inset-top, 0px));
+  --scrollbar-comp: 0px;
   --grid-gap: clamp(1.25rem, 2.2vw, 2rem);
 
   /* Brand constants — never invert in cinematic sections */
@@ -77,7 +79,8 @@
 
 @media (min-width: 768px) {
   :root {
-    --header-h: 5rem;
+    --header-bar: 5rem;
+    --header-h: calc(var(--header-bar) + env(safe-area-inset-top, 0px));
   }
 }
 
@@ -146,6 +149,7 @@ html[data-theme="light"] {
 html {
   background: var(--background);
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 /* Fixed header clearance for in-page anchors */
@@ -341,6 +345,10 @@ input:disabled {
 
 /* Header — no light hairline strip under the bar */
 .site-header {
+  box-sizing: border-box;
+  height: var(--header-h);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-right: var(--scrollbar-comp);
   box-shadow: none;
   border-bottom: 0;
 }
@@ -358,13 +366,17 @@ input:disabled {
 }
 
 @media (max-width: 1279px) {
+  .site-header .container-dtm {
+    padding-inline: clamp(1rem, 4.5vw, 1.25rem);
+  }
+
   .site-header .dtm-logo-mark {
-    width: 38px;
-    height: 38px;
+    width: 2.75rem;
+    height: 2.75rem;
   }
 
   .site-header .dtm-wordmark {
-    font-size: 1.55rem;
+    font-size: 1.75rem;
   }
 }
 
@@ -412,11 +424,11 @@ input:disabled {
 }
 
 .header-menu-toggle .header-menu-line-1 {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
 }
 
 .header-menu-toggle .header-menu-line-2 {
-  transform: translateY(5px);
+  transform: translateY(6px);
 }
 
 .header-menu-toggle[data-open="true"] .header-menu-line-1 {
@@ -767,12 +779,19 @@ html[data-theme] {
 
 .mask-line > span {
   display: block;
-  animation: dtm-mask-line 0.75s var(--ease-out-expo) both;
 }
 
-/* Hero sequence — orchestrated via [data-hero="ready"] */
+/* Hero layers: media (isolated) → contrast → copy. Header stays above the section. */
+.hero-media-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  isolation: isolate;
+  width: 100%;
+  height: 100%;
+}
+
 .hero-media {
-  opacity: 0;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -784,7 +803,6 @@ html[data-theme] {
   inset: 0;
   width: 100%;
   height: 100%;
-  transform: scale(1.03);
 }
 
 .hero-media-inner img,
@@ -794,38 +812,94 @@ html[data-theme] {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 40%;
 }
 
-[data-hero="ready"] .hero-media {
-  animation: dtm-media-reveal 0.85s var(--ease-out-expo) both;
+@media (min-width: 768px) {
+  .hero-media-inner img,
+  .hero-media-inner video {
+    object-position: center 38%;
+  }
 }
 
-[data-hero="ready"] .hero-media-inner {
-  animation: dtm-scale-settle 1.2s var(--ease-out-soft) both;
+.hero-contrast {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
 }
 
-[data-hero="ready"] .hero-meta {
-  animation: dtm-fade 0.55s ease 0.2s both;
+.hero-contrast-tint,
+.hero-contrast-top,
+.hero-contrast-copy,
+.hero-contrast-floor {
+  position: absolute;
+  inset: 0;
 }
 
-[data-hero="ready"] .hero-line-1 > span {
-  animation: dtm-mask-line 0.7s var(--ease-out-expo) 0.32s both;
+/* Light cinematic veil — keeps the interior readable, not crushed */
+.hero-contrast-tint {
+  background: rgba(13, 13, 15, 0.14);
 }
 
-[data-hero="ready"] .hero-line-2 > span {
-  animation: dtm-mask-line 0.7s var(--ease-out-expo) 0.42s both;
+/* Header clearance on bright frames */
+.hero-contrast-top {
+  background: linear-gradient(
+    180deg,
+    rgba(13, 13, 15, 0.58) 0%,
+    rgba(13, 13, 15, 0.22) 22%,
+    rgba(13, 13, 15, 0) 48%
+  );
 }
 
-[data-hero="ready"] .hero-line-3 > span {
-  animation: dtm-mask-line 0.7s var(--ease-out-expo) 0.52s both;
+/* Localized shade behind copy + CTAs — not a flat full-bleed overlay */
+.hero-contrast-copy {
+  background: linear-gradient(
+    90deg,
+    rgba(13, 13, 15, 0.72) 0%,
+    rgba(13, 13, 15, 0.48) 28%,
+    rgba(13, 13, 15, 0.18) 52%,
+    rgba(13, 13, 15, 0) 72%
+  );
 }
 
-[data-hero="ready"] .hero-copy {
-  animation: dtm-rise 0.65s var(--ease-out-expo) 0.62s both;
+.hero-contrast-floor {
+  top: auto;
+  height: 42%;
+  background: linear-gradient(
+    180deg,
+    rgba(13, 13, 15, 0) 0%,
+    rgba(13, 13, 15, 0.42) 100%
+  );
 }
 
-[data-hero="ready"] .hero-cta {
-  animation: dtm-rise 0.65s var(--ease-out-expo) 0.74s both;
+.hero-copy-layer {
+  position: relative;
+  z-index: 2;
+}
+
+/* Copy is visible by default. Entrance is transform-only and never required. */
+.hero-meta,
+.hero-copy,
+.hero-cta,
+.mask-line > span {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-hero="ready"] .hero-cluster {
+    animation: dtm-hero-settle 0.7s var(--ease-out-expo);
+  }
+}
+
+@keyframes dtm-hero-settle {
+  from {
+    transform: translateY(12px);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 /*
@@ -868,31 +942,6 @@ html[data-theme] {
   }
 }
 
-[data-hero="ready"] .hero-nav-settle {
-  animation: dtm-fade 0.5s ease 0.1s both;
-}
-
-.hero-meta,
-.hero-copy,
-.hero-cta,
-.mask-line > span {
-  opacity: 0;
-}
-
-[data-hero="ready"] .hero-meta,
-[data-hero="ready"] .hero-copy,
-[data-hero="ready"] .hero-cta,
-[data-hero="ready"] .mask-line > span {
-  opacity: 1;
-}
-
-/* Before ready, keep lines invisible via transform */
-.hero-line-1 > span,
-.hero-line-2 > span,
-.hero-line-3 > span {
-  transform: translateY(105%);
-}
-
 /* ---------- Scroll reveals ---------- */
 
 .fx {
@@ -911,6 +960,9 @@ html[data-theme] {
 }
 
 .fx-clip {
+  position: relative;
+  display: block;
+  height: 100%;
   clip-path: inset(0 0 100% 0);
   transition: clip-path 0.95s var(--ease-out-expo);
   transition-delay: var(--fx-delay, 0s);
@@ -1363,6 +1415,59 @@ html[data-theme="light"] .calc-panel {
   animation: dtm-loader-line 0.7s var(--ease-out-expo) both;
 }
 
+/* Progressive stills — image-specific LQIP, then fade the decoded file */
+.media-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--foreground) 7%, var(--stone));
+}
+
+.media-frame .media-lqip {
+  position: absolute;
+  inset: -5%;
+  width: 110%;
+  height: 110%;
+  max-width: none;
+  object-fit: cover;
+  transform: scale(1.05);
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.media-full {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 450ms var(--ease-out-soft);
+}
+
+.media-full.is-shown {
+  opacity: 1;
+}
+
+.media-full.is-failed {
+  opacity: 0;
+}
+
+.media-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 500ms var(--ease-out-soft);
+  pointer-events: none;
+}
+
+.media-video.is-shown {
+  opacity: 1;
+}
+
 /* ---------- Mobile menu ---------- */
 /* Always mounted. Enter/exit via CSS transitions on data-state.
    data-motion="reduce" (from matchMedia) forces instant a11y path.
@@ -1376,6 +1481,7 @@ html[data-theme="light"] .calc-panel {
   left: 0;
   z-index: 80;
   width: 100%;
+  padding-right: var(--scrollbar-comp);
   background-color: var(--background);
   color: var(--foreground);
   opacity: 0;
@@ -1618,19 +1724,14 @@ html[data-theme="light"] .calc-panel {
   .calc-step-enter,
   .calc-step-enter-back,
   .calc-step-exit,
-  [data-hero="ready"] .hero-media,
-  [data-hero="ready"] .hero-media-inner,
-  [data-hero="ready"] .hero-meta,
-  [data-hero="ready"] .hero-copy,
-  [data-hero="ready"] .hero-cta,
-  [data-hero="ready"] .hero-line-1 > span,
-  [data-hero="ready"] .hero-line-2 > span,
-  [data-hero="ready"] .hero-line-3 > span {
+  [data-hero="ready"] .hero-cluster,
+  .hero-cluster {
     animation: none !important;
   }
 
   .hero-media,
   .hero-media-inner,
+  .hero-cluster,
   .hero-meta,
   .hero-copy,
   .hero-cta,
@@ -1641,6 +1742,15 @@ html[data-theme="light"] .calc-panel {
     opacity: 1 !important;
     transform: none !important;
     clip-path: none !important;
+  }
+
+  .media-frame .media-lqip {
+    transform: none;
+  }
+
+  .media-full,
+  .media-video {
+    transition: none !important;
   }
 
   .fx,

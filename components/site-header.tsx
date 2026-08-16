@@ -6,6 +6,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { useDictionary, useLocale } from "@/lib/i18n/locale-context";
 import { useTheme } from "@/lib/theme/theme-context";
 import { navHrefs } from "@/lib/i18n/dictionaries";
+import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -43,9 +44,10 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = menuVisible ? "hidden" : "";
+    if (!menuVisible) return;
+    lockScroll();
     return () => {
-      document.body.style.overflow = "";
+      unlockScroll();
     };
   }, [menuVisible]);
 
@@ -103,7 +105,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && menuPhase === "open") {
         pendingAnchorRef.current = null;
-        closeMenu();
+        setMenuPhase("closing");
       }
     };
     window.addEventListener("keydown", onKey);
@@ -163,7 +165,6 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
         } ${
           solid ? "site-header-solid bg-background" : "bg-transparent"
         }`}
-        style={{ height: "var(--header-h)" }}
         aria-hidden={!boot}
       >
         <div className="container-dtm grid h-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 nav:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
@@ -262,20 +263,20 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               aria-controls={menuId}
               aria-label={menuVisible ? t.nav.closeMenu : t.nav.openMenu}
               data-open={menuVisible ? "true" : "false"}
-              className="header-menu-toggle relative flex h-12 w-12 items-center justify-center nav:hidden"
+              className="header-menu-toggle relative flex h-12 w-12 shrink-0 items-center justify-center nav:hidden"
             >
               <span className="sr-only">
                 {menuVisible ? t.nav.closeMenu : t.nav.openMenu}
               </span>
               <span
                 aria-hidden
-                className={`header-menu-line header-menu-line-1 absolute block h-0.5 w-7 ${
+                className={`header-menu-line header-menu-line-1 absolute block h-0.5 w-8 ${
                   !solid ? "bg-paper" : "bg-foreground"
                 }`}
               />
               <span
                 aria-hidden
-                className={`header-menu-line header-menu-line-2 absolute block h-0.5 w-7 ${
+                className={`header-menu-line header-menu-line-2 absolute block h-0.5 w-8 ${
                   !solid ? "bg-paper" : "bg-foreground"
                 }`}
               />

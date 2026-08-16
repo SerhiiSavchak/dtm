@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { DocumentMeta } from "./document-meta";
 import { SiteHeader } from "./site-header";
 import { Hero } from "./hero";
@@ -14,16 +14,24 @@ import { Faq } from "./sections/faq";
 import { SiteFooter } from "./site-footer";
 import { PageLoader } from "./page-loader";
 import { useLocale } from "@/lib/i18n/locale-context";
+import {
+  getLoaderPhase,
+  getServerLoaderPhase,
+  subscribeLoader,
+} from "@/lib/boot-session";
 
 export function HomeView() {
-  const [boot, setBoot] = useState(false);
+  const phase = useSyncExternalStore(
+    subscribeLoader,
+    getLoaderPhase,
+    getServerLoaderPhase
+  );
+  const boot = phase === "out" || phase === "gone";
   const { isSwitching } = useLocale();
-
-  const onLoaderDone = useCallback(() => setBoot(true), []);
 
   return (
     <>
-      <PageLoader onDone={onLoaderDone} />
+      <PageLoader />
       <DocumentMeta />
       <SiteHeader boot={boot} />
       <div className={`locale-fade min-w-0 ${isSwitching ? "is-switching" : ""}`}>

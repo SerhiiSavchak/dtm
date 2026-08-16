@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import { useCallback, useEffect, useId, useState, useSyncExternalStore } from "react";
+import { useCallback, useId, useState, useSyncExternalStore } from "react";
 import { serviceMedia } from "@/data/media";
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { MediaImage } from "./media-image";
 import { Reveal } from "./reveal";
 import { SectionHead } from "./section-head";
 
@@ -26,13 +26,6 @@ export function Services() {
     getHoverFine,
     () => false
   );
-
-  useEffect(() => {
-    serviceMedia.forEach((src) => {
-      const img = new window.Image();
-      img.src = src;
-    });
-  }, []);
 
   const activate = useCallback((index: number) => {
     setActive(index);
@@ -77,17 +70,21 @@ export function Services() {
 
             <div className="relative mb-8 aspect-[16/10] w-full overflow-hidden bg-stone lg:hidden">
               {serviceMedia.map((src, i) => (
-                <Image
+                <div
                   key={src}
-                  src={src}
-                  alt=""
-                  aria-hidden="true"
-                  fill
-                  quality={90}
-                  sizes="100vw"
-                  className="service-media object-cover"
+                  className="service-media absolute inset-0"
                   data-active={active === i ? "true" : "false"}
-                />
+                >
+                  <MediaImage
+                    src={src}
+                    alt=""
+                    aria-hidden="true"
+                    fill
+                    quality={90}
+                    sizes="(max-width: 1023px) 92vw, 40vw"
+                    className="object-cover"
+                  />
+                </div>
               ))}
             </div>
 
@@ -164,18 +161,21 @@ export function Services() {
                 className="relative aspect-[4/5] w-full overflow-hidden bg-stone"
               >
                 {serviceMedia.map((src, i) => (
-                  <Image
+                  <div
                     key={src}
-                    src={src}
-                    alt=""
-                    aria-hidden="true"
-                    fill
-                    quality={90}
-                    sizes="(max-width: 1280px) 40vw, 560px"
-                    className="service-media object-cover"
+                    className="service-media absolute inset-0"
                     data-active={active === i ? "true" : "false"}
-                    priority={i === 0}
-                  />
+                  >
+                    <MediaImage
+                      src={src}
+                      alt=""
+                      aria-hidden="true"
+                      fill
+                      quality={90}
+                      sizes="(max-width: 1280px) 40vw, 560px"
+                      className="object-cover"
+                    />
+                  </div>
                 ))}
                 <div
                   className="pointer-events-none absolute inset-x-0 bottom-0 h-28"
