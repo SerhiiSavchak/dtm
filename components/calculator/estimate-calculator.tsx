@@ -29,10 +29,8 @@ function OptionButton({
       id={id}
       onClick={onClick}
       aria-pressed={selected}
-      className={`w-full border px-6 py-5 text-left text-base font-medium transition-colors duration-300 md:text-lg ${
-        selected
-          ? "border-accent bg-accent text-white"
-          : "border-white/20 bg-transparent text-paper hover:border-white/50 hover:bg-white/5"
+      className={`w-full px-6 py-5 text-left type-body font-medium transition-colors duration-300 md:text-lg calc-option ${
+        selected ? "is-selected" : ""
       }`}
     >
       {children}
@@ -210,8 +208,8 @@ export function EstimateCalculator() {
       <div className="calc-step-enter space-y-8">
         <div>
           <p className="label text-accent">DTM</p>
-          <h3 className="mt-4 type-h2 text-paper">{t.success.title}</h3>
-          <p className="mt-4 max-w-lg type-body-lg text-paper/75">
+          <h3 className="mt-4 type-h2">{t.success.title}</h3>
+          <p className="calc-muted mt-4 max-w-lg type-body-lg">
             {t.success.body}
           </p>
         </div>
@@ -232,7 +230,7 @@ export function EstimateCalculator() {
         <button
           type="button"
           onClick={reset}
-          className="label text-paper/55 transition-colors hover:text-paper"
+          className="label calc-muted transition-colors hover:text-[var(--calc-fg)]"
         >
           {t.success.again}
         </button>
@@ -245,13 +243,13 @@ export function EstimateCalculator() {
       {/* Progress */}
       <div>
         <div className="mb-3 flex items-center justify-between gap-4">
-          <span className="label text-paper/55">
+          <span className="label calc-muted">
             {t.stepOf} {currentIndex + 1} / {steps.length}
           </span>
           <span className="label text-accent">{Math.round(progress)}%</span>
         </div>
         <div
-          className="h-0.5 w-full bg-white/15"
+          className="h-0.5 w-full calc-track"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
@@ -264,7 +262,7 @@ export function EstimateCalculator() {
           />
         </div>
         {(state.objectType || state.area) && (
-          <p className="mt-3 text-sm text-paper/50">
+          <p className="calc-muted type-body-sm mt-3">
             {state.objectType && (
               <span>
                 {t.context.object}: {objectLabel}
@@ -299,7 +297,7 @@ export function EstimateCalculator() {
       </div>
 
       {error && (
-        <p className="text-sm text-accent" role="alert">
+        <p className="type-body-sm text-accent" role="alert">
           {error}
         </p>
       )}
@@ -309,7 +307,7 @@ export function EstimateCalculator() {
           type="button"
           onClick={handleBack}
           disabled={currentIndex === 0 || phase === "submitting"}
-          className="label text-paper/55 transition-colors hover:text-paper disabled:opacity-30"
+          className="type-small calc-muted transition-colors hover:text-[var(--calc-fg)] disabled:opacity-30"
         >
           ← {t.back}
         </button>
@@ -319,7 +317,7 @@ export function EstimateCalculator() {
             type="button"
             onClick={handleSubmit}
             disabled={phase === "submitting"}
-            className="btn btn-primary min-w-[16rem]"
+            className="btn btn-primary w-full sm:w-auto sm:min-w-[16rem]"
           >
             {phase === "submitting" ? "…" : t.submit}
             <span className="btn-arrow" aria-hidden>
@@ -398,8 +396,8 @@ function StepBody({
           <label htmlFor={`${formId}-area`} className="calc-question">
             {t.steps.area.title}
           </label>
-          <p className="mt-2 text-sm text-paper/55">{t.steps.area.hint}</p>
-          <div className="mt-6 flex items-end gap-3 border-b border-white/25 pb-3">
+          <p className="calc-muted type-body-sm mt-2">{t.steps.area.hint}</p>
+          <div className="mt-6 flex items-end gap-3 border-b border-[color:var(--calc-line)] pb-3">
             <input
               id={`${formId}-area`}
               type="number"
@@ -409,7 +407,7 @@ function StepBody({
               placeholder={t.steps.area.placeholder}
               value={state.area}
               onChange={(e) => patch({ area: e.target.value })}
-              className="w-full bg-transparent text-4xl font-semibold tracking-tight text-paper outline-none placeholder:text-paper/25 md:text-5xl"
+              className="calc-field w-full bg-transparent text-4xl font-semibold tracking-tight outline-none md:text-5xl"
             />
             <span className="pb-1 font-mono text-sm text-accent">
               {t.steps.area.unit}
@@ -424,7 +422,7 @@ function StepBody({
           <label htmlFor={`${formId}-rooms`} className="calc-question">
             {t.steps.rooms.title}
           </label>
-          <p className="mt-2 text-sm text-paper/55">{t.steps.rooms.hint}</p>
+          <p className="calc-muted type-body-sm mt-2">{t.steps.rooms.hint}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <button
@@ -432,10 +430,8 @@ function StepBody({
                 type="button"
                 onClick={() => patch({ rooms: String(n) })}
                 aria-pressed={state.rooms === String(n)}
-                className={`min-h-14 min-w-14 border px-4 py-3 text-lg font-medium transition-colors ${
-                  state.rooms === String(n)
-                    ? "border-accent bg-accent text-white"
-                    : "border-white/20 text-paper hover:border-white/50"
+                className={`min-h-14 min-w-14 px-4 py-3 text-lg font-medium transition-colors calc-option ${
+                  state.rooms === String(n) ? "is-selected" : ""
                 }`}
               >
                 {n}
@@ -548,14 +544,14 @@ function StepBody({
       return (
         <div className="space-y-6">
           <h3 className="calc-question">{t.steps.lead.title}</h3>
-          <p className="max-w-lg text-sm leading-relaxed text-paper/55">
+          <p className="calc-muted type-body-sm max-w-lg">
             {t.steps.lead.disclaimer}
           </p>
           <div className="grid gap-5">
             <div>
               <label
                 htmlFor={`${formId}-name`}
-                className="label text-paper/55"
+                className="label calc-muted"
               >
                 {t.steps.lead.name}
               </label>
@@ -566,13 +562,13 @@ function StepBody({
                 placeholder={t.steps.lead.namePlaceholder}
                 value={state.name}
                 onChange={(e) => patch({ name: e.target.value })}
-                className="mt-2 w-full border-b border-white/25 bg-transparent py-3 text-lg text-paper outline-none placeholder:text-paper/30 focus:border-accent"
+                className="calc-field mt-2 w-full border-b bg-transparent py-3 text-lg outline-none focus:border-accent"
               />
             </div>
             <div>
               <label
                 htmlFor={`${formId}-phone`}
-                className="label text-paper/55"
+                className="label calc-muted"
               >
                 {t.steps.lead.phone}
               </label>
@@ -583,16 +579,16 @@ function StepBody({
                 placeholder={t.steps.lead.phonePlaceholder}
                 value={state.phone}
                 onChange={(e) => patch({ phone: e.target.value })}
-                className="mt-2 w-full border-b border-white/25 bg-transparent py-3 text-lg text-paper outline-none placeholder:text-paper/30 focus:border-accent"
+                className="calc-field mt-2 w-full border-b bg-transparent py-3 text-lg outline-none focus:border-accent"
               />
             </div>
             <div>
               <label
                 htmlFor={`${formId}-telegram`}
-                className="label text-paper/55"
+                className="label calc-muted"
               >
                 {t.steps.lead.telegram}{" "}
-                <span className="text-paper/35">
+                <span className="calc-faint">
                   ({t.steps.lead.telegramOptional})
                 </span>
               </label>
@@ -603,7 +599,7 @@ function StepBody({
                 placeholder={t.steps.lead.telegramPlaceholder}
                 value={state.telegram}
                 onChange={(e) => patch({ telegram: e.target.value })}
-                className="mt-2 w-full border-b border-white/25 bg-transparent py-3 text-lg text-paper outline-none placeholder:text-paper/30 focus:border-accent"
+                className="calc-field mt-2 w-full border-b bg-transparent py-3 text-lg outline-none focus:border-accent"
               />
             </div>
           </div>

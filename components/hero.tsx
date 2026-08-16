@@ -126,7 +126,7 @@ export function Hero({ boot = true }: { boot?: boolean }) {
 
             <h1
               id="hero-heading"
-              className="hero-heading type-display mt-4 max-w-[12ch] text-paper md:mt-6 lg:max-w-[13ch] xl:max-w-[13.5ch]"
+              className="hero-heading type-display mt-4 max-w-[12ch] text-paper md:mt-6 lg:max-w-[14ch] xl:max-w-[15ch]"
             >
               <span className="mask-line hero-line-1">
                 <span>{t.line1}</span>
@@ -139,19 +139,19 @@ export function Hero({ boot = true }: { boot?: boolean }) {
               </span>
             </h1>
 
-            <p className="hero-copy mt-4 max-w-[33rem] text-[0.975rem] leading-relaxed text-paper/85 md:mt-6 md:text-base md:leading-relaxed lg:max-w-[36rem] xl:max-w-[38rem] xl:text-[1.0625rem] 2xl:text-[1.125rem]">
+            <p className="hero-copy mt-5 text-paper/85 md:mt-6">
               {t.copy}
             </p>
 
             {/* Spacing: .hero-cta margin/gap in globals.css */}
-            <div className="hero-cta flex flex-col items-stretch sm:flex-row sm:items-center">
-              <a href="#estimate" className="btn btn-primary btn-lg group">
+            <div className="hero-cta flex flex-col items-stretch lg:flex-row lg:items-center">
+              <a href="#estimate" className="btn btn-primary btn-lg group w-full lg:w-auto">
                 {t.ctaPrimary}
                 <span className="btn-arrow" aria-hidden>
                   →
                 </span>
               </a>
-              <a href="#projects" className="btn btn-ghost btn-lg group">
+              <a href="#projects" className="btn btn-ghost btn-lg group w-full lg:w-auto">
                 {t.ctaSecondary}
                 <span className="btn-arrow" aria-hidden>
                   →

@@ -1,18 +1,32 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState, useSyncExternalStore } from "react";
 import { serviceMedia } from "@/data/media";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { Reveal } from "./reveal";
 import { SectionHead } from "./section-head";
 
+function subscribeHoverFine(cb: () => void) {
+  const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+
+function getHoverFine() {
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
 export function Services() {
   const t = useDictionary().services;
   const [active, setActive] = useState(0);
   const baseId = useId();
+  const hoverFine = useSyncExternalStore(
+    subscribeHoverFine,
+    getHoverFine,
+    () => false
+  );
 
-  // Preload service stills once mounted
   useEffect(() => {
     serviceMedia.forEach((src) => {
       const img = new window.Image();
@@ -28,7 +42,11 @@ export function Services() {
     if (e.key === "ArrowDown" || e.key === "ArrowRight") {
       e.preventDefault();
       activate(Math.min(t.items.length - 1, index + 1));
-      document.getElementById(`${baseId}-tab-${Math.min(t.items.length - 1, index + 1)}`)?.focus();
+      document
+        .getElementById(
+          `${baseId}-tab-${Math.min(t.items.length - 1, index + 1)}`
+        )
+        ?.focus();
     }
     if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
       e.preventDefault();
@@ -41,24 +59,23 @@ export function Services() {
     <section
       id="services"
       aria-labelledby="services-heading"
-      className="bg-ink-deep text-paper"
+      className="bg-bg text-foreground"
     >
       <div className="container-dtm section-pad">
-        <SectionHead label={t.label} right={t.labelRight} onDark />
+        <SectionHead label={t.label} right={t.labelRight} />
 
         <div className="grid grid-cols-1 gap-x-12 lg:grid-cols-12">
           <div className="lg:col-span-7">
             <Reveal>
               <h2
                 id="services-heading"
-                className="mb-6 type-h2 text-balance text-paper md:mb-8"
+                className="mb-6 type-h2 text-balance text-foreground md:mb-8"
               >
                 {t.heading}
               </h2>
             </Reveal>
 
-            {/* Mobile media frame — tap-driven */}
-            <div className="relative mb-8 aspect-[16/10] w-full overflow-hidden bg-ink-soft lg:hidden">
+            <div className="relative mb-8 aspect-[16/10] w-full overflow-hidden bg-stone lg:hidden">
               {serviceMedia.map((src, i) => (
                 <Image
                   key={src}
@@ -72,18 +89,10 @@ export function Services() {
                   data-active={active === i ? "true" : "false"}
                 />
               ))}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-ink-deep/80 to-transparent p-4">
-                <span className="label text-paper/90">
-                  {t.items[active].title}
-                </span>
-                <span className="font-mono text-xs text-accent">
-                  {t.items[active].index}
-                </span>
-              </div>
             </div>
 
             <ul
-              className="border-t border-white/15"
+              className="border-t border-border"
               role="tablist"
               aria-label={t.heading}
             >
@@ -98,32 +107,32 @@ export function Services() {
                       aria-selected={isActive}
                       aria-controls={`${baseId}-panel`}
                       tabIndex={isActive ? 0 : -1}
-                      onMouseEnter={() => activate(i)}
+                      onMouseEnter={() => {
+                        if (hoverFine) activate(i);
+                      }}
                       onFocus={() => activate(i)}
                       onClick={() => activate(i)}
                       onKeyDown={(e) => onKeyDown(e, i)}
-                      className="group grid w-full grid-cols-[3rem_1fr_auto] items-baseline gap-x-4 border-b border-white/15 py-5 text-left md:gap-x-8 md:py-6"
+                      className="group grid w-full grid-cols-[3rem_1fr_auto] items-baseline gap-x-4 border-b border-border py-5 text-left md:gap-x-8 md:py-6"
                     >
                       <span
-                        className={`font-mono text-xs tabular-nums transition-colors duration-300 ${
-                          isActive ? "text-accent" : "text-paper/45"
+                        className={`font-mono text-[0.8125rem] tabular-nums tracking-wide transition-colors duration-300 ${
+                          isActive ? "text-accent" : "text-muted"
                         }`}
                       >
                         {service.index}
                       </span>
                       <span>
                         <span
-                          className={`block font-sans font-medium tracking-[-0.01em] text-xl transition-colors duration-300 md:text-3xl lg:text-4xl ${
-                            isActive ? "text-accent" : "text-paper"
+                          className={`type-feature block transition-colors duration-300 ${
+                            isActive ? "text-accent" : "text-foreground"
                           }`}
                         >
                           {service.title}
                         </span>
                         <span
-                          className={`mt-2 block max-w-md text-sm leading-relaxed transition-[color,max-height,opacity] duration-300 md:text-base ${
-                            isActive
-                              ? "text-paper/80"
-                              : "text-paper/45 md:text-paper/55"
+                          className={`type-body-sm mt-2.5 block max-w-md transition-colors duration-300 ${
+                            isActive ? "text-foreground/75" : "text-muted"
                           }`}
                         >
                           {service.description}
@@ -134,7 +143,7 @@ export function Services() {
                         className={`self-center transition-all duration-300 ${
                           isActive
                             ? "translate-x-0 text-accent opacity-100"
-                            : "-translate-x-1 text-paper/40 opacity-50"
+                            : "-translate-x-1 text-muted opacity-50"
                         }`}
                       >
                         →
@@ -152,7 +161,7 @@ export function Services() {
                 id={`${baseId}-panel`}
                 role="tabpanel"
                 aria-labelledby={`${baseId}-tab-${active}`}
-                className="relative aspect-[4/5] w-full overflow-hidden bg-ink-soft"
+                className="relative aspect-[4/5] w-full overflow-hidden bg-stone"
               >
                 {serviceMedia.map((src, i) => (
                   <Image

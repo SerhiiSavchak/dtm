@@ -15,31 +15,31 @@ export function InProgress() {
     <section
       id="in-progress"
       aria-labelledby="in-progress-heading"
-      className="bg-ink-deep text-paper"
+      className="bg-bg text-foreground"
     >
       <div className="container-dtm section-pad">
-        <SectionHead label={t.label} right={t.labelRight} onDark />
+        <SectionHead label={t.label} right={t.labelRight} />
 
         {/* Editorial spread: text column + dominant documentary frame */}
         <div className="grid grid-cols-1 gap-x-8 gap-y-8 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-4 lg:pb-1">
             <Reveal>
-              <h2 id="in-progress-heading" className="type-h2 text-paper">
+              <h2 id="in-progress-heading" className="type-h2 text-foreground">
                 {t.heading}
               </h2>
             </Reveal>
             <Reveal delay={0.06}>
-              <p className="mt-4 max-w-sm text-[0.975rem] leading-relaxed text-paper/70 md:text-base">
+              <p className="type-body-lg mt-4 max-w-md text-foreground/70">
                 {t.body}
               </p>
             </Reveal>
             <Reveal delay={0.1}>
-              <p className="label mt-8 text-paper/40">{t.captionPlaceholder}</p>
+              <p className="label mt-8 text-muted">{t.captionPlaceholder}</p>
               <a
                 href={socialLinks.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-text group mt-4 text-paper"
+                className="btn btn-text group mt-4 text-foreground"
               >
                 {t.instagramCta}
                 <span className="btn-arrow" aria-hidden>
@@ -52,7 +52,7 @@ export function InProgress() {
           <div className="lg:col-span-8">
             <Reveal
               variant="clip"
-              className="relative aspect-[4/5] overflow-hidden bg-ink-soft sm:aspect-[16/10]"
+              className="relative aspect-[4/5] overflow-hidden bg-stone sm:aspect-[16/10]"
             >
               {videoOk && inProgressMedia.leadVideo ? (
                 <video
@@ -95,7 +95,7 @@ export function InProgress() {
                 key={tile.src}
                 variant="clip"
                 delay={0.04 + i * 0.05}
-                className={`group relative overflow-hidden bg-ink-soft lg:aspect-auto lg:h-[clamp(15rem,23vw,23rem)] ${spans}`}
+                className={`group relative overflow-hidden bg-stone lg:aspect-auto lg:h-[clamp(15rem,23vw,23rem)] ${spans}`}
               >
                 <Image
                   src={tile.src}

@@ -207,8 +207,8 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2 min-[1280px]:gap-3">
-            <div className="hidden nav:block">
+          <div className="flex items-center">
+            <div className="hidden items-center gap-3 nav:flex min-[1440px]:gap-3.5">
               <ThemeToggle
                 tone={
                   !solid
@@ -218,27 +218,27 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
                       : "on-light"
                 }
               />
+
+              <button
+                type="button"
+                onClick={toggleLocale}
+                aria-label={
+                  locale === "uk" ? "Switch to English" : "Перейти на українську"
+                }
+                className={`label hidden px-1.5 transition-colors nav:inline-block ${
+                  solid
+                    ? "text-muted hover:text-foreground"
+                    : "text-paper/65 hover:text-paper"
+                }`}
+              >
+                {locale === "uk" ? "EN" : "UA"}
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={toggleLocale}
-              aria-label={
-                locale === "uk" ? "Switch to English" : "Перейти на українську"
-              }
-              className={`label hidden px-1 transition-colors nav:inline-block ${
-                solid
-                  ? "text-muted hover:text-foreground"
-                  : "text-paper/65 hover:text-paper"
-              }`}
-            >
-              {locale === "uk" ? "EN" : "UA"}
-            </button>
-
-            <div className="hidden nav:block">
+            <div className="ml-6 hidden nav:block min-[1280px]:ml-8 min-[1440px]:ml-10">
               <a
                 href={navHrefs.estimate}
-                className={`btn btn-sm btn-compact whitespace-nowrap ${
+                className={`header-cta btn whitespace-nowrap ${
                   solid
                     ? theme === "dark"
                       ? "btn-primary"
@@ -257,20 +257,20 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               aria-expanded={menuVisible}
               aria-controls={menuId}
               aria-label={t.nav.openMenu}
-              className="relative flex h-11 w-11 items-center justify-center nav:hidden"
+              className="relative flex h-12 w-12 items-center justify-center nav:hidden"
             >
               <span className="sr-only">{t.nav.openMenu}</span>
               <span
                 aria-hidden
-                className={`absolute block h-px w-6 transition-colors ${
+                className={`absolute block h-0.5 w-7 transition-colors ${
                   !solid ? "bg-paper" : "bg-foreground"
-                } -translate-y-[3.5px]`}
+                } -translate-y-[5px]`}
               />
               <span
                 aria-hidden
-                className={`absolute block h-px w-6 transition-colors ${
+                className={`absolute block h-0.5 w-7 transition-colors ${
                   !solid ? "bg-paper" : "bg-foreground"
-                } translate-y-[3.5px]`}
+                } translate-y-[5px]`}
               />
             </button>
           </div>
@@ -304,16 +304,16 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
                 closeMenu();
               }}
               aria-label={t.nav.closeMenu}
-              className="mobile-menu-item relative flex h-11 w-11 items-center justify-center"
+              className="mobile-menu-item relative flex h-12 w-12 items-center justify-center"
             >
               <span className="sr-only">{t.nav.closeMenu}</span>
               <span
                 aria-hidden
-                className="absolute block h-px w-6 rotate-45 bg-foreground"
+                className="absolute block h-px w-7 rotate-45 bg-foreground"
               />
               <span
                 aria-hidden
-                className="absolute block h-px w-6 -rotate-45 bg-foreground"
+                className="absolute block h-px w-7 -rotate-45 bg-foreground"
               />
             </button>
           </div>
@@ -334,9 +334,10 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
             ))}
           </nav>
 
-          <div className="mobile-menu-item mobile-menu-utility">
+            <div className="mobile-menu-item mobile-menu-utility">
             <div className="mobile-menu-utility-row">
               <ThemeToggle
+                size="lg"
                 tone={theme === "dark" ? "on-dark" : "on-light"}
               />
               <div
@@ -352,7 +353,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
                       if (locale !== code) toggleLocale();
                     }}
                     aria-pressed={locale === code}
-                    className={`label px-3 py-2 transition-colors ${
+                    className={`min-h-11 min-w-11 px-3 text-sm font-medium tracking-[0.14em] transition-colors ${
                       locale === code
                         ? "text-accent"
                         : "text-muted hover:text-foreground"
@@ -366,7 +367,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
             <a
               href={navHrefs.estimate}
               onClick={(e) => onMobileNavClick(e, navHrefs.estimate)}
-              className="btn btn-primary mt-4 w-full"
+              className="btn btn-primary btn-lg mt-5 w-full"
             >
               {t.hero.ctaPrimary}
               <span className="btn-arrow" aria-hidden>

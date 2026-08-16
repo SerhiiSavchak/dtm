@@ -45,7 +45,7 @@ export function Faq() {
                         onClick={() => setOpen(isOpen ? null : i)}
                         className="flex w-full items-start justify-between gap-6 border-b border-border py-4 text-left md:py-5"
                       >
-                        <span className="text-base font-medium tracking-tight text-foreground md:text-lg">
+                        <span className="type-title text-foreground">
                           {item.q}
                         </span>
                         <span
@@ -65,7 +65,7 @@ export function Faq() {
                       className={`faq-panel ${isOpen ? "is-open" : ""}`}
                     >
                       <div>
-                        <p className="faq-answer max-w-[40rem] pb-7 pt-2 text-sm leading-[1.75] text-muted md:pb-8 md:pt-3 md:text-base">
+                        <p className="faq-answer type-body-sm max-w-[40rem] pb-7 pt-2 text-muted md:pb-8 md:pt-3">
                           {item.a}
                         </p>
                       </div>

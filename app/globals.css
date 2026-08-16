@@ -8,12 +8,14 @@
 
 :root {
   /* Layout tokens */
-  /* Wide premium container: ~1560px content at 1920, ~96px gutters */
-  --page-gutter: clamp(1.25rem, 4vw, 5.5rem);
+  /* Wide premium container: ~1560px content at 1920, ~96px gutters.
+     Mobile floor 1.5rem (24px) so text is not pinched to the viewport edge.
+     4vw still governs tablet/desktop, so those layouts stay unchanged. */
+  --page-gutter: clamp(1.5rem, 4vw, 5.5rem);
   --container-max: 1720px;
-  --section-space: clamp(3.5rem, 7vw, 6rem);
-  --section-space-sm: clamp(2.75rem, 5vw, 4.5rem);
-  --section-head-gap: clamp(1.5rem, 2.5vw, 2.25rem);
+  --section-space: clamp(4rem, 6.5vw, 6.5rem);
+  --section-space-sm: clamp(3rem, 5vw, 4.75rem);
+  --section-head-gap: clamp(1.35rem, 2.2vw, 2rem);
   --header-h: 4rem;
   --grid-gap: clamp(1.25rem, 2.2vw, 2rem);
 
@@ -51,15 +53,19 @@
   --radius: 0px;
   --header-edge: transparent;
 
-  /* Type scale */
-  --text-display: clamp(2.5rem, 5.8vw, 5.75rem);
-  --text-h1: clamp(2.15rem, 4.2vw, 4.25rem);
-  --text-h2: clamp(1.65rem, 2.8vw, 2.85rem);
-  --text-h3: clamp(1.25rem, 1.6vw, 1.5rem);
-  --text-body-lg: clamp(1.05rem, 1.15vw, 1.175rem);
-  --text-body: 1rem;
-  --text-small: 0.875rem;
-  --text-micro: 0.6875rem;
+  /* Type scale — designed per viewport, not shrunk desktop.
+     Floors serve phones; preferred vw covers tablet; caps serve 1440–1920. */
+  --text-display: clamp(2.75rem, 1.8rem + 4.6vw, 5.85rem);
+  --text-h1: clamp(2.25rem, 1.45rem + 3.2vw, 4.35rem);
+  --text-h2: clamp(2rem, 1.3rem + 2.5vw, 3.05rem);
+  --text-h3: clamp(1.3125rem, 1.12rem + 0.7vw, 1.625rem);
+  --text-title: clamp(1.25rem, 1.08rem + 0.5vw, 1.5rem);
+  --text-feature: clamp(1.375rem, 0.85rem + 2.2vw, 2.25rem);
+  --text-body-lg: clamp(1.0625rem, 0.92rem + 0.4vw, 1.25rem);
+  --text-body: clamp(1.0625rem, 0.98rem + 0.18vw, 1.125rem);
+  --text-body-sm: clamp(0.9375rem, 0.9rem + 0.12vw, 1rem);
+  --text-small: 0.9375rem;
+  --text-micro: 0.75rem;
 
   /* Motion */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -77,17 +83,17 @@
 
 /* Explicit light theme — opt-in only */
 html[data-theme="light"] {
-  --bg: #f4f4f2;
-  --stone: #e9e8e4;
-  --stone-line: #e2e1dc;
+  --bg: #ffffff;
+  --stone: #f3f2ee;
+  --stone-line: #e6e5e0;
   --graphite: #6c6c69;
 
-  --color-bg: #f4f4f2;
-  --color-bg-dark: var(--ink-deep);
-  --color-surface: #ffffff;
+  --color-bg: #ffffff;
+  --color-bg-dark: #ffffff;
+  --color-surface: #f7f6f3;
   --color-text: #141416;
-  --color-muted: #6c6c69;
-  --color-line: #e2e1dc;
+  --color-muted: #5c5c58;
+  --color-line: #e6e5e0;
   --color-on-dark: #ffffff;
   --color-line-on-dark: rgba(255, 255, 255, 0.15);
 
@@ -122,6 +128,11 @@ html[data-theme="light"] {
   --text-h1: var(--text-h1);
   --text-h2: var(--text-h2);
   --text-h3: var(--text-h3);
+  --text-title: var(--text-title);
+  --text-feature: var(--text-feature);
+  --text-body-lg: var(--text-body-lg);
+  --text-body: var(--text-body);
+  --text-body-sm: var(--text-body-sm);
 
   /* Desktop nav stays visible until this width — not Tailwind's default xl (1280) */
   --breakpoint-nav: 1100px;
@@ -169,7 +180,8 @@ body {
 }
 
 .section-pad {
-  padding-block: var(--section-space);
+  padding-top: var(--section-space);
+  padding-bottom: var(--section-space-sm);
 }
 
 .section-pad-sm {
@@ -183,11 +195,17 @@ body {
   margin-bottom: var(--section-head-gap);
 }
 
-/* Intro lead — editorial two-column band on desktop */
+/* Intro lead copy — full content column on mobile, editorial measure on desktop */
+.intro-lead-copy {
+  max-width: none;
+  font-size: var(--text-body-lg);
+  line-height: 1.5;
+}
+
 @media (min-width: 1024px) {
-  .intro-lead {
-    /* Keep lead content from stretching across the full ultra-wide container */
-    max-width: 68rem;
+  .intro-lead-copy {
+    max-width: min(28.5rem, 100%);
+    line-height: 1.5;
   }
 }
 
@@ -200,7 +218,7 @@ body {
 .label {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: var(--text-micro);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   font-weight: 500;
 }
@@ -257,12 +275,31 @@ body {
 
 .type-body-lg {
   font-size: var(--text-body-lg);
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 .type-body {
   font-size: var(--text-body);
-  line-height: 1.6;
+  line-height: 1.55;
+}
+
+.type-body-sm {
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+}
+
+.type-title {
+  font-size: var(--text-title);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  font-weight: 500;
+}
+
+.type-feature {
+  font-size: var(--text-feature);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  font-weight: 500;
 }
 
 .type-small {
@@ -283,6 +320,24 @@ body {
   box-shadow: inset 0 -1px 0 var(--color-line);
 }
 
+/* Mobile header identity — slightly larger mark/wordmark, still below Hero */
+.dtm-wordmark {
+  color: var(--orange);
+  font-size: 1.4rem;
+  line-height: 0.9;
+}
+
+@media (max-width: 1099px) {
+  .site-header .dtm-logo-mark {
+    width: 38px;
+    height: 38px;
+  }
+
+  .site-header .dtm-wordmark {
+    font-size: 1.55rem;
+  }
+}
+
 .btn {
   position: relative;
   display: inline-flex;
@@ -290,13 +345,16 @@ body {
   justify-content: center;
   gap: 0.55rem;
   min-height: 3.25rem;
-  padding: 1rem 1.75rem;
+  padding: 0.9rem 1.9rem 0.95rem 1.75rem;
   font-size: var(--text-small);
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.25;
   border-radius: 0;
-  overflow: hidden;
+  /* Clip the fill wipe horizontally; extra padding-end holds arrow travel */
+  overflow-x: clip;
+  overflow-y: visible;
   isolation: isolate;
+  text-box-trim: none;
   transition:
     color var(--motion-fast) var(--ease-out-soft),
     border-color var(--motion-fast) var(--ease-out-soft),
@@ -306,6 +364,22 @@ body {
 .btn-sm {
   min-height: 2.5rem;
   padding: 0.65rem 1.15rem;
+}
+
+/* Desktop header CTA — slightly more presence than compact btn-sm */
+.btn.header-cta {
+  min-height: 2.75rem;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+}
+
+@media (min-width: 1280px) {
+  .btn.header-cta {
+    min-height: 2.875rem;
+    padding-inline: 1.55rem;
+    font-size: 0.9rem;
+  }
 }
 
 /* Theme toggle — rim/background owned here so Tailwind `border` cannot
@@ -335,8 +409,8 @@ body {
 /* Hero-scale CTA — tactile, premium first-screen action */
 .btn-lg {
   min-height: 3.5rem;
-  padding: 1.1rem 2rem;
-  font-size: 0.9375rem;
+  padding: 1rem 2rem 1.05rem 1.85rem;
+  font-size: 1rem;
   letter-spacing: 0.01em;
 }
 
@@ -344,6 +418,18 @@ body {
 .hero-heading {
   line-height: 1.02;
   letter-spacing: -0.03em;
+}
+
+.hero-copy {
+  max-width: none;
+  font-size: var(--text-body-lg);
+  line-height: 1.5;
+}
+
+@media (min-width: 1024px) {
+  .hero-copy {
+    max-width: min(38rem, 100%);
+  }
 }
 
 @media (min-width: 1280px) {
@@ -461,6 +547,7 @@ body {
   gap: 0.4rem;
   color: inherit;
   background: transparent;
+  overflow: visible;
 }
 
 .btn-text::after {
@@ -482,12 +569,14 @@ body {
 
 .btn .btn-arrow {
   display: inline-block;
+  flex-shrink: 0;
+  translate: none;
   transition: transform var(--motion-fast) var(--ease-out-soft);
 }
 
 .btn:hover .btn-arrow,
 .group:hover .btn-arrow {
-  transform: translateX(4px);
+  transform: translateX(3px);
 }
 
 /* Theme surface transition — short; default CSS is already dark */
@@ -687,13 +776,14 @@ html[data-theme] {
 
 @media (max-width: 1023px) {
   .hero-content {
-    /* ~24–40px lower vs prior near-neutral translate; scales down on short svh */
     transform: translateY(clamp(1.25rem, 3.5svh, 2.5rem));
   }
+}
 
-  /* +~5–8% vs --text-display floor (2.5rem); desktop unchanged */
+@media (max-width: 639px) {
+  /* Phone-only: 44–50px. Tablet uses --text-display. */
   .hero-heading {
-    font-size: clamp(2.625rem, calc(2.45rem + 1.1vw), 2.7rem);
+    font-size: clamp(2.75rem, 2.15rem + 2.8vw, 3.15rem);
   }
 }
 
@@ -856,28 +946,26 @@ html[data-theme] {
   position: relative;
 }
 
-.process-rail-track,
-.process-rail-fill {
+.process-rail-track {
   position: absolute;
   left: var(--rail-x);
-  top: calc(var(--dot) / 2);
-  bottom: calc(var(--dot) / 2);
+  top: 0;
   width: 1px;
+  height: 0;
   transform: translateX(-50%);
-}
-
-.process-rail-track {
   background: var(--color-line);
+  pointer-events: none;
 }
 
 .process-rail-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 0;
   background: var(--accent);
-  bottom: auto;
-  height: calc(100% - var(--dot));
-  transform: translateX(-50%) scaleY(var(--process-progress, 0));
   transform-origin: top center;
-  transition: transform 120ms linear;
-  will-change: transform;
+  will-change: height;
 }
 
 .process-dot {
@@ -905,30 +993,138 @@ html[data-theme] {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
+.process-step-index {
+  color: var(--muted);
+  transition: color var(--motion-fast) var(--ease-out-soft);
+}
+
+.process-step.is-done .process-step-index,
+.process-step.is-active .process-step-index {
+  color: var(--accent);
+}
+
+.process-step-title {
+  color: color-mix(in oklab, var(--color-text) 55%, transparent);
+  transition: color var(--motion-fast) var(--ease-out-soft);
+}
+
+.process-step.is-done .process-step-title {
+  color: color-mix(in oklab, var(--color-text) 78%, transparent);
+}
+
+.process-step.is-active .process-step-title {
+  color: var(--color-text);
+}
+
+.process-step-text {
+  opacity: 0.68;
+  transition: opacity var(--motion-fast) var(--ease-out-soft);
+}
+
+.process-step.is-done .process-step-text {
+  opacity: 0.72;
+}
+
+.process-step.is-active .process-step-text {
+  opacity: 1;
+}
+
 .process-step {
   min-height: 0;
 }
 
-/* Project editorial track */
+/* Project editorial track — native scroll, vertical page scroll stays free */
 .project-track {
   display: flex;
-  gap: clamp(1rem, 2vw, 1.75rem);
+  gap: clamp(0.85rem, 2vw, 1.75rem);
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding-bottom: 0.25rem;
+  cursor: grab;
+}
+
+.project-track:active,
+.project-track.is-dragging,
+.project-track.is-dragging * {
+  cursor: grabbing;
+}
+
+.project-track.is-dragging {
+  scroll-behavior: auto;
+  user-select: none;
 }
 
 .project-track::-webkit-scrollbar {
   display: none;
 }
 
+/* Mobile: equal cards, ~12–15% of the next slide peeks inside the track */
 .project-slide {
-  flex: 0 0 min(84vw, 46rem);
+  flex: 0 0 86%;
   scroll-snap-align: start;
+}
+
+.project-slide button {
+  cursor: grab;
+}
+
+.project-slide button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.project-arrow {
+  color: var(--accent);
+  font-size: 1.35rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.project-arrow-hover {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  z-index: 2;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity 280ms var(--ease-out-soft),
+    transform 280ms var(--ease-out-expo);
+}
+
+.project-arrow-caption {
+  display: none;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project-slide:hover .project-arrow-hover,
+  .project-slide:focus-within .project-arrow-hover {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .project-arrow-hover {
+    display: none;
+  }
+
+  .project-arrow-caption {
+    display: inline-block;
+  }
+}
+
+@media (min-width: 768px) {
+  .project-slide {
+    flex-basis: 72%;
+  }
 }
 
 /* Editorial spread: dominant lead, next project clearly peeking */
@@ -942,6 +1138,32 @@ html[data-theme] {
   }
 }
 
+.project-swipe-hint {
+  pointer-events: none;
+  min-height: 1rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: var(--text-micro);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  transform: translateX(4px);
+  transition:
+    opacity 420ms var(--ease-out-soft),
+    transform 420ms var(--ease-out-expo);
+}
+
+.project-swipe-hint.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (min-width: 1024px) {
+  .project-swipe-hint {
+    display: none;
+  }
+}
+
 /* Modal */
 .project-modal-backdrop {
   background: rgba(13, 13, 15, 0.82);
@@ -949,12 +1171,72 @@ html[data-theme] {
 }
 
 .calc-panel {
+  --calc-fg: var(--paper);
+  --calc-muted: color-mix(in oklab, var(--paper) 62%, transparent);
+  --calc-faint: color-mix(in oklab, var(--paper) 35%, transparent);
+  --calc-line: rgba(255, 255, 255, 0.18);
+  --calc-hover: rgba(255, 255, 255, 0.05);
   background: var(--ink-deep);
-  color: var(--paper);
+  color: var(--calc-fg);
 }
 
 html[data-theme="light"] .calc-panel {
-  background: var(--ink-deep);
+  --calc-fg: var(--color-text);
+  --calc-muted: var(--color-muted);
+  --calc-faint: color-mix(in oklab, var(--color-text) 38%, transparent);
+  --calc-line: var(--color-line);
+  --calc-hover: color-mix(in oklab, var(--color-text) 4%, transparent);
+  background: var(--color-surface);
+  color: var(--calc-fg);
+  box-shadow: inset 0 0 0 1px var(--color-line);
+}
+
+.calc-muted {
+  color: var(--calc-muted);
+}
+
+.calc-faint {
+  color: var(--calc-faint);
+}
+
+.calc-track {
+  background: var(--calc-line);
+}
+
+.calc-option {
+  border: 1px solid var(--calc-line);
+  background: transparent;
+  color: var(--calc-fg);
+}
+
+.calc-option:hover {
+  border-color: color-mix(in oklab, var(--calc-fg) 45%, transparent);
+  background: var(--calc-hover);
+}
+
+.calc-option.is-selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.calc-panel .btn-ghost {
+  border-color: var(--calc-line);
+  color: var(--calc-fg);
+}
+
+.calc-panel .btn-ghost:hover {
+  border-color: var(--calc-fg);
+  background: var(--calc-hover);
+}
+
+.calc-field {
+  color: var(--calc-fg);
+  border-color: var(--calc-line);
+}
+
+.calc-field::placeholder {
+  color: var(--calc-faint);
 }
 
 /* Larger question typography — calculator is a primary conversion surface */
@@ -963,7 +1245,7 @@ html[data-theme="light"] .calc-panel {
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.15;
-  color: var(--paper);
+  color: var(--calc-fg);
   text-wrap: balance;
 }
 
@@ -1111,7 +1393,7 @@ html[data-theme="light"] .calc-panel {
 
 .mobile-menu-utility {
   border-top: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
-  padding-top: 1rem;
+  padding-top: 1.15rem;
 }
 
 .mobile-menu-utility-row {
@@ -1295,10 +1577,6 @@ html[data-theme="light"] .calc-panel {
   .faq-answer {
     opacity: 1 !important;
     transform: none !important;
-  }
-
-  .process-rail-fill {
-    transform: translateX(-50%) scaleY(1) !important;
   }
 
   /* Instant open/close when OS reports reduced motion — still theme-aware */

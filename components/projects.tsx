@@ -30,8 +30,17 @@ function useProjectLabels(project: Project) {
 export function Projects() {
   const t = useDictionary().projects;
   const trackRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const [index, setIndex] = useState(0);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const [hintVisible, setHintVisible] = useState(false);
+  const hintDismissed = useRef(false);
+
+  const dismissHint = useCallback(() => {
+    if (hintDismissed.current) return;
+    hintDismissed.current = true;
+    setHintVisible(false);
+  }, []);
 
   const scrollTo = useCallback((i: number) => {
     const track = trackRef.current;
@@ -65,8 +74,86 @@ export function Projects() {
     return () => track.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    let dragging = false;
+    let moved = false;
+    let startX = 0;
+    let startScroll = 0;
+    const suppressClick = { current: false };
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startScroll = track.scrollLeft;
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 6) moved = true;
+      if (!moved) return;
+      track.classList.add("is-dragging");
+      track.scrollLeft = startScroll - dx;
+      dismissHint();
+    };
+
+    const onPointerUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      track.classList.remove("is-dragging");
+      if (moved) suppressClick.current = true;
+    };
+
+    const onClickCapture = (e: MouseEvent) => {
+      if (!suppressClick.current) return;
+      e.preventDefault();
+      e.stopPropagation();
+      suppressClick.current = false;
+    };
+
+    track.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    track.addEventListener("click", onClickCapture, true);
+
+    return () => {
+      track.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      track.removeEventListener("click", onClickCapture, true);
+    };
+  }, [dismissHint]);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || hintDismissed.current) return;
+    let fadeTimer = 0;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting || hintDismissed.current) return;
+        setHintVisible(true);
+        io.disconnect();
+        fadeTimer = window.setTimeout(() => {
+          if (!hintDismissed.current) setHintVisible(false);
+        }, 4200);
+      },
+      { threshold: 0.35 }
+    );
+    io.observe(section);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(fadeTimer);
+    };
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       id="projects"
       aria-labelledby="projects-heading"
       className="bg-bg"
@@ -82,42 +169,51 @@ export function Projects() {
           </Reveal>
 
           <Reveal delay={0.06}>
-            <div className="flex items-center gap-4">
-              <span className="font-mono text-sm tabular-nums text-muted">
-                {String(index + 1).padStart(2, "0")} {t.counter}{" "}
-                {String(projects.length).padStart(2, "0")}
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-secondary"
-                  aria-label={t.prev}
-                  onClick={() => scrollTo(Math.max(0, index - 1))}
-                  disabled={index === 0}
-                >
-                  ←
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-secondary"
-                  aria-label={t.next}
-                  onClick={() =>
-                    scrollTo(Math.min(projects.length - 1, index + 1))
-                  }
-                  disabled={index === projects.length - 1}
-                >
-                  →
-                </button>
+            <div className="flex flex-col items-start gap-2 md:items-end">
+              <div className="flex items-center gap-4">
+                <span className="font-mono type-small tabular-nums tracking-wide text-muted">
+                  {String(index + 1).padStart(2, "0")} {t.counter}{" "}
+                  {String(projects.length).padStart(2, "0")}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    aria-label={t.prev}
+                    onClick={() => scrollTo(Math.max(0, index - 1))}
+                    disabled={index === 0}
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary"
+                    aria-label={t.next}
+                    onClick={() =>
+                      scrollTo(Math.min(projects.length - 1, index + 1))
+                    }
+                    disabled={index === projects.length - 1}
+                  >
+                    →
+                  </button>
+                </div>
               </div>
+              <span
+                className={`project-swipe-hint ${hintVisible ? "is-visible" : ""}`}
+                aria-hidden
+              >
+                {t.swipeHint}
+              </span>
             </div>
           </Reveal>
         </div>
 
         <div
           ref={trackRef}
-          className="project-track mt-7 md:mt-8"
+          className="project-track mt-5 md:mt-8"
           tabIndex={0}
           aria-label={t.heading}
+          onScroll={dismissHint}
           onKeyDown={(e) => {
             if (e.key === "ArrowRight") {
               e.preventDefault();
@@ -175,33 +271,35 @@ function ProjectSlide({
         className="block w-full text-left"
         aria-label={`${t.open}: ${labels.title}`}
       >
-        <Reveal variant="clip" className="relative overflow-hidden bg-stone">
-          <div
-            className={`relative w-full ${
-              lead ? "aspect-[16/10]" : "aspect-[4/5] md:aspect-[16/11]"
-            }`}
-          >
-            <Image
-              src={project.cover}
-              alt={`DTM: ${labels.category}${labels.location ? `, ${labels.location}` : ""}`}
-              fill
-              quality={90}
-              sizes="(max-width: 1024px) 86vw, 70vw"
-              className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]"
-            />
-          </div>
-          <span
-            aria-hidden
-            className="absolute right-4 top-4 flex h-11 w-11 translate-y-1 items-center justify-center bg-paper text-ink opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100"
-          >
+        <div className="relative">
+          <Reveal variant="clip" className="overflow-hidden bg-stone">
+            <div
+              className={`relative w-full aspect-[4/5] md:aspect-[16/11] ${
+                lead ? "lg:aspect-[16/10]" : ""
+              }`}
+            >
+              <Image
+                src={project.cover}
+                alt={`DTM: ${labels.category}${labels.location ? `, ${labels.location}` : ""}`}
+                fill
+                quality={90}
+                sizes="(max-width: 1024px) 86vw, 70vw"
+                className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]"
+              />
+            </div>
+          </Reveal>
+          <span aria-hidden className="project-arrow project-arrow-hover">
             →
           </span>
-        </Reveal>
+        </div>
 
         <div className="mt-4 flex items-baseline justify-between gap-4 border-t border-border pt-3">
-          <div>
-            <p className="text-lg font-medium text-foreground transition-colors duration-300 group-hover:text-accent md:text-xl">
-              {labels.title}
+          <div className="min-w-0">
+            <p className="type-title flex items-baseline gap-3 text-foreground transition-colors duration-300 group-hover:text-accent">
+              <span>{labels.title}</span>
+              <span className="project-arrow project-arrow-caption" aria-hidden>
+                →
+              </span>
             </p>
             <p className="label mt-1.5 text-muted">
               {labels.category}
@@ -209,7 +307,7 @@ function ProjectSlide({
             </p>
           </div>
           {labels.area ? (
-            <span className="font-mono text-sm text-muted">{labels.area}</span>
+            <span className="font-mono type-small tracking-wide text-muted">{labels.area}</span>
           ) : null}
         </div>
       </button>

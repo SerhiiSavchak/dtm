@@ -36,7 +36,7 @@ export function Logo({
           viewBox="0 0 40 40"
           fill="none"
           aria-hidden="true"
-          className="shrink-0"
+          className="dtm-logo-mark shrink-0"
         >
           <path
             d="M5 34 V17 L20 5.5 L35 17 V34"
@@ -55,10 +55,7 @@ export function Logo({
 
         {/* Wordmark + descriptor */}
         <span className="flex flex-col leading-none">
-          <span
-            className="font-sans font-bold tracking-[-0.02em]"
-            style={{ color: "var(--orange)", fontSize: "1.4rem", lineHeight: 0.9 }}
-          >
+          <span className="dtm-wordmark font-sans font-bold tracking-[-0.02em]">
             DTM
           </span>
           {withDescriptor && (

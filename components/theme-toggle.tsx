@@ -5,63 +5,62 @@ import { useTheme } from "@/lib/theme/theme-context";
 
 type ThemeToggleProps = {
   tone?: "on-dark" | "on-light" | "auto";
+  size?: "md" | "lg";
   className?: string;
 };
 
-function SunIcon({ className }: { className?: string }) {
+function SunIcon({ className, size }: { className?: string; size: number }) {
   return (
     <svg
-      width="15"
-      height="15"
+      width={size}
+      height={size}
       viewBox="0 0 16 16"
       fill="none"
       className={className}
       aria-hidden
     >
-      <circle cx="8" cy="8" r="2.7" stroke="currentColor" strokeWidth="1.4" />
+      <circle cx="8" cy="8" r="2.45" fill="currentColor" />
       <path
-        d="M8 1.5V3M8 13V14.5M1.5 8H3M13 8H14.5M3.4 3.4L4.5 4.5M11.5 11.5L12.6 12.6M12.6 3.4L11.5 4.5M4.5 11.5L3.4 12.6"
+        d="M8 1.6V3.05M8 12.95V14.4M1.6 8H3.05M12.95 8H14.4M3.5 3.5L4.52 4.52M11.48 11.48L12.5 12.5M12.5 3.5L11.48 4.52M4.52 11.48L3.5 12.5"
         stroke="currentColor"
-        strokeWidth="1.4"
+        strokeWidth="1.35"
         strokeLinecap="round"
       />
     </svg>
   );
 }
 
-function MoonIcon({ className }: { className?: string }) {
+function MoonIcon({ className, size }: { className?: string; size: number }) {
   return (
     <svg
-      width="15"
-      height="15"
+      width={size}
+      height={size}
       viewBox="0 0 16 16"
-      fill="none"
+      fill="currentColor"
       className={className}
       aria-hidden
     >
-      <path
-        d="M12.6 10.2A5.6 5.6 0 0 1 5.8 3.4a5.1 5.1 0 1 0 6.8 6.8Z"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
+      {/* Filled crescent; path mass is centered in the 16×16 viewBox */}
+      <path d="M8.35 2.4A5.7 5.7 0 1 0 13.05 11.7 4.75 4.75 0 0 1 8.35 2.4Z" />
     </svg>
   );
 }
 
 /**
  * Segmented light/dark control — pill-like geometry, orange thumb marks
- * the active segment. Thumb moves on transform only (no layout jumps).
- * Rim colors live in globals.css (.theme-toggle) so they are not overridden
- * by Tailwind's bare `border` utility setting --color-border.
+ * the active segment. Thumb width is always 50% of the inner track so both
+ * icons stay centered in identical slots; movement is transform-only.
  */
 export function ThemeToggle({
   tone = "auto",
+  size = "md",
   className = "",
 }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
   const t = useDictionary().theme;
   const isDark = theme === "dark";
+  const large = size === "lg";
+  const iconSize = large ? 17 : 14;
 
   return (
     <button
@@ -70,25 +69,39 @@ export function ThemeToggle({
       aria-label={isDark ? t.toLight : t.toDark}
       aria-pressed={isDark}
       data-tone={tone}
-      className={`theme-toggle relative inline-flex h-9 w-[4.5rem] shrink-0 items-center rounded-[10px] border p-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${className}`}
+      className={`theme-toggle relative grid shrink-0 grid-cols-2 items-stretch rounded-[10px] border p-1 leading-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+        large ? "h-11 w-[5.75rem]" : "h-9 w-[4.5rem]"
+      } ${className}`}
     >
       <span
         aria-hidden
-        className={`absolute left-1 top-1 h-7 w-8 rounded-[7px] bg-accent transition-transform duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
-          isDark ? "translate-x-[2rem]" : "translate-x-0"
+        className={`pointer-events-none absolute bottom-1 left-1 top-1 w-[calc(50%-0.25rem)] rounded-[7px] bg-accent transition-transform duration-200 ease-[cubic-bezier(0.2,0,0,1)] ${
+          isDark ? "translate-x-full" : "translate-x-0"
         }`}
       />
-      <span aria-hidden className="relative z-[1] grid w-full grid-cols-2">
-        <span className="flex h-7 items-center justify-center">
+      <span className="relative z-[1] flex items-center justify-center">
+        <span
+          className={`flex items-center justify-center leading-none ${
+            large ? "size-[18px]" : "size-[15px]"
+          }`}
+        >
           <SunIcon
-            className={`transition-colors duration-200 ${
+            size={iconSize}
+            className={`block size-full transition-colors duration-200 ${
               isDark ? "" : "text-white"
             }`}
           />
         </span>
-        <span className="flex h-7 items-center justify-center">
+      </span>
+      <span className="relative z-[1] flex items-center justify-center">
+        <span
+          className={`flex items-center justify-center leading-none ${
+            large ? "size-[18px]" : "size-[15px]"
+          }`}
+        >
           <MoonIcon
-            className={`transition-colors duration-200 ${
+            size={iconSize}
+            className={`block size-full transition-colors duration-200 ${
               isDark ? "text-white" : ""
             }`}
           />

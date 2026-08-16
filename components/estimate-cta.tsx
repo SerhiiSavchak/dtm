@@ -28,23 +28,23 @@ export function EstimateCta() {
               <div className="flex flex-col lg:col-span-4">
                 <h2
                   id="estimate-heading"
-                  className="type-h2 text-balance text-paper"
+                  className="type-h2 text-balance"
                 >
                   {t.headingBefore}{" "}
                   <span className="text-accent">{t.headingAccent}</span>
                 </h2>
-                <p className="mt-4 max-w-md text-[0.975rem] leading-relaxed text-paper/75 md:text-base">
+                <p className="calc-muted type-body-lg mt-4 max-w-md">
                   {t.body}
                 </p>
                 <a
                   href="#contacts"
-                  className="label mt-6 inline-block text-paper/55 transition-colors hover:text-paper lg:mt-auto lg:pt-10"
+                  className="label calc-muted mt-6 inline-block transition-colors hover:text-[var(--calc-fg)] lg:mt-auto lg:pt-10"
                 >
                   {t.contactLink}
                 </a>
               </div>
 
-              <div className="lg:col-span-8 lg:border-l lg:border-white/10 lg:pl-12">
+              <div className="lg:col-span-8 lg:border-l lg:border-[color:var(--calc-line)] lg:pl-12">
                 <EstimateCalculator />
               </div>
             </div>
