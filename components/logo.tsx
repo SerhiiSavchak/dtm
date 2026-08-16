@@ -1,18 +1,14 @@
 type LogoProps = {
-  /** Show the small "ДІМ ТВОЄЇ МРІЇ" descriptor line */
+  /** Show the Ukrainian descriptor under the integrated mark. */
   withDescriptor?: boolean;
-  /** Foreground of the house outline + descriptor. Wordmark stays DTM orange. */
+  /** House outline + tagline color. DTM letters stay brand orange. */
   tone?: "ink" | "paper";
   className?: string;
 };
 
 /**
- * DTM identity — clean scalable vector rebuilt from the supplied reference:
- * an architectural house outline (open bracket with a short foot) framing the
- * orange "DTM" wordmark, above the "ДІМ ТВОЄЇ МРІЇ" descriptor.
- *
- * Reference truth: house outline = white/ink, wordmark = DTM orange.
- * Flat and sharp at any size — no gradients, glow or shadow.
+ * Integrated DTM lockup: a thin architectural house whose walls and roof
+ * wrap the orange DTM wordmark. Not a generic icon placed beside type.
  */
 export function Logo({
   withDescriptor = true,
@@ -20,7 +16,7 @@ export function Logo({
   className,
 }: LogoProps) {
   const stroke = tone === "paper" ? "var(--paper)" : "var(--ink)";
-  const descColor = tone === "paper" ? "rgba(255,255,255,0.65)" : "var(--graphite)";
+  const tag = tone === "paper" ? "rgba(255,255,255,0.72)" : "var(--graphite)";
 
   return (
     <span
@@ -28,52 +24,54 @@ export function Logo({
       aria-label="DTM — Дім Твоєї Мрії"
       role="img"
     >
-      <span className="flex items-center gap-2.5">
-        {/* House mark: peaked roof + side walls + bottom-left foot */}
-        <svg
-          width="34"
-          height="34"
-          viewBox="0 0 40 40"
-          fill="none"
-          aria-hidden="true"
-          className="dtm-logo-mark shrink-0"
+      <svg
+        className={`dtm-lockup ${withDescriptor ? "is-full" : "is-compact"}`}
+        viewBox={withDescriptor ? "0 0 112 54" : "0 0 112 38"}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M6 33.5 V15.2 L56 3.4 L106 15.2 V33.5"
+          stroke={stroke}
+          strokeWidth="1.65"
+          strokeLinecap="square"
+          strokeLinejoin="miter"
+        />
+        <path
+          d="M6 33.5 H20"
+          stroke={stroke}
+          strokeWidth="1.65"
+          strokeLinecap="square"
+        />
+        <text
+          className="dtm-lockup-wordmark"
+          x="56"
+          y="29.8"
+          textAnchor="middle"
+          fill="#f26a1f"
+          fontSize="18.5"
+          fontWeight="700"
+          letterSpacing="-0.04em"
         >
-          <path
-            d="M5 34 V17 L20 5.5 L35 17 V34"
-            stroke={stroke}
-            strokeWidth="2.1"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-          />
-          <path
-            d="M5 34 H13"
-            stroke={stroke}
-            strokeWidth="2.1"
-            strokeLinecap="square"
-          />
-        </svg>
-
-        {/* Wordmark + descriptor */}
-        <span className="flex flex-col leading-none">
-          <span className="dtm-wordmark font-sans font-bold tracking-[-0.02em]">
-            DTM
-          </span>
-          {withDescriptor && (
-            <span
-              className="mt-[3px] font-mono"
-              style={{
-                color: descColor,
-                fontSize: "0.5rem",
-                letterSpacing: "0.24em",
-                fontWeight: 500,
-                textTransform: "uppercase",
-              }}
-            >
-              Дім твоєї мрії
-            </span>
-          )}
-        </span>
-      </span>
+          DTM
+        </text>
+        {withDescriptor ? (
+          <text
+            className="dtm-lockup-tagline"
+            x="56"
+            y="48.5"
+            fill={tag}
+            fontSize="6"
+            fontWeight="500"
+            letterSpacing="0.18em"
+            textAnchor="middle"
+          >
+            ДІМ ТВОЄЇ МРІЇ
+          </text>
+        ) : null}
+      </svg>
     </span>
   );
 }

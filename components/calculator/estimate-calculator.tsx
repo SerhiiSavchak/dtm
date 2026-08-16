@@ -1,7 +1,14 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
-import { useDictionary, useLocale } from "@/lib/i18n/locale-context";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
+import { Logo } from "@/components/logo";
 import { externalLinkProps, socialLinks } from "@/data/media";
 import {
   getStepSequence,
@@ -10,8 +17,31 @@ import {
   type EstimateFormState,
   type ObjectType,
 } from "@/lib/calculator/types";
+import { assembleLeadRequest } from "@/lib/leads/assemble";
+import {
+  visitorTelegramUrl,
+  validateStep,
+  type StepErrorKey,
+} from "@/lib/leads/format";
+import { formatAreaDisplay, parseArea, sanitizeAreaInput } from "@/lib/leads/parse-area";
+import { sanitizePhoneInput, normalizePhone } from "@/lib/leads/phone";
+import { sanitizePersonName } from "@/lib/leads/schema";
+import { leadInputSchema } from "@/lib/leads/schema";
+import { sourcePageFromLocation, utmFromSearch } from "@/lib/leads/utm";
+import { useDictionary, useLocale } from "@/lib/i18n/locale-context";
+import { useTheme } from "@/lib/theme/theme-context";
 
 type Phase = "form" | "submitting" | "success" | "error";
+
+type SuccessMeta = {
+  leadId: string;
+  visitorDraft: string;
+  telegramUrl: string;
+  popupBlocked: boolean;
+};
+
+const TRANSITION_MS = 220;
+const HANDOFF_NAME = "dtm-telegram-handoff";
 
 function OptionButton({
   selected,
@@ -24,13 +54,22 @@ function OptionButton({
   children: React.ReactNode;
   id?: string;
 }) {
+  function onKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === " " || event.key === "Enter") {
+      event.preventDefault();
+      onClick();
+    }
+  }
+
   return (
     <button
       type="button"
       id={id}
+      role="radio"
+      aria-checked={selected}
       onClick={onClick}
-      aria-pressed={selected}
-      className={`w-full px-6 py-5 text-left type-body font-medium transition-colors duration-300 md:text-lg calc-option ${
+      onKeyDown={onKeyDown}
+      className={`w-full px-6 py-5 text-left type-body font-medium calc-option ${
         selected ? "is-selected" : ""
       }`}
     >
@@ -39,17 +78,58 @@ function OptionButton({
   );
 }
 
+function FieldFeedback({
+  id,
+  message,
+}: {
+  id: string;
+  message: string | null;
+}) {
+  return (
+    <p
+      id={id}
+      className="calc-feedback"
+      role={message ? "alert" : undefined}
+      aria-live="polite"
+    >
+      {message ? <span className="calc-feedback-msg">{message}</span> : null}
+    </p>
+  );
+}
+
 export function EstimateCalculator() {
-  const t = useDictionary().calculator;
+  const dict = useDictionary().calculator;
   const { locale } = useLocale();
+  const { theme } = useTheme();
   const formId = useId();
 
   const [state, setState] = useState<EstimateFormState>(initialEstimateState);
   const [stepIndex, setStepIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("form");
   const [error, setError] = useState<string | null>(null);
-  const [animKey, setAnimKey] = useState(0);
+  const [fieldError, setFieldError] = useState<Partial<Record<string, string>>>(
+    {}
+  );
   const [direction, setDirection] = useState<1 | -1>(1);
+  const [animToken, setAnimToken] = useState(0);
+  const [success, setSuccess] = useState<SuccessMeta | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
+  const [statusLive, setStatusLive] = useState("");
+
+  const submissionIdRef = useRef<string | null>(null);
+  const startedAtRef = useRef<number | null>(null);
+  const submitLockRef = useRef(false);
+  const navLockRef = useRef(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  const utmRef = useRef<ReturnType<typeof utmFromSearch>>(undefined);
+
+  useEffect(() => {
+    submissionIdRef.current = crypto.randomUUID();
+    startedAtRef.current = Date.now();
+    utmRef.current = utmFromSearch(window.location.search);
+  }, []);
 
   const steps = useMemo(
     () => getStepSequence(state.objectType),
@@ -57,195 +137,279 @@ export function EstimateCalculator() {
   );
   const currentIndex = Math.min(stepIndex, steps.length - 1);
   const stepId = steps[currentIndex] ?? "objectType";
-  const progress = (currentIndex / Math.max(steps.length, 1)) * 100;
+  const progress = ((currentIndex + 1) / Math.max(steps.length, 1)) * 100;
+
+  function errorMessage(key: StepErrorKey): string {
+    return dict.errors[key];
+  }
 
   function patch(partial: Partial<EstimateFormState>) {
     setState((prev) => ({ ...prev, ...partial }));
     setError(null);
+    const keys = Object.keys(partial);
+    if (keys.length) {
+      setFieldError((prev) => {
+        const next = { ...prev };
+        for (const key of keys) delete next[key];
+        return next;
+      });
+    }
   }
 
   function goTo(index: number) {
+    if (navLockRef.current) return;
+    if (index === currentIndex) return;
+    navLockRef.current = true;
     setDirection(index < currentIndex ? -1 : 1);
-    setAnimKey((k) => k + 1);
+    setAnimToken((token) => token + 1);
     setStepIndex(index);
     setError(null);
+    window.setTimeout(() => {
+      navLockRef.current = false;
+    }, TRANSITION_MS);
   }
 
   function validateCurrent(): boolean {
-    switch (stepId) {
-      case "objectType":
-        if (!state.objectType) {
-          setError(t.errors.required);
-          return false;
-        }
-        return true;
-      case "area": {
-        const area = Number(state.area);
-        if (!Number.isFinite(area) || area < 1 || area > 2000) {
-          setError(t.errors.area);
-          return false;
-        }
-        return true;
-      }
-      case "rooms":
-        if (state.rooms) {
-          const rooms = Number(state.rooms);
-          if (!Number.isFinite(rooms) || rooms < 1 || rooms > 30) {
-            setError(t.errors.required);
-            return false;
-          }
-        }
-        return true;
-      case "renovationType":
-        if (!state.renovationType) {
-          setError(t.errors.required);
-          return false;
-        }
-        return true;
-      case "design":
-        if (!state.design) {
-          setError(t.errors.required);
-          return false;
-        }
-        return true;
-      case "condition":
-        if (!state.condition) {
-          setError(t.errors.required);
-          return false;
-        }
-        return true;
-      case "start":
-        if (!state.start) {
-          setError(t.errors.required);
-          return false;
-        }
-        return true;
-      case "lead": {
-        if (!state.name.trim()) {
-          setError(t.errors.name);
-          return false;
-        }
-        const digits = state.phone.replace(/\D/g, "");
-        if (digits.length < 9) {
-          setError(t.errors.phone);
-          return false;
-        }
-        return true;
-      }
-      default:
-        return true;
+    const result = validateStep(stepId, state);
+    if (result.ok) {
+      setError(null);
+      setFieldError({});
+      return true;
     }
+    const message = errorMessage(result.key);
+    setError(message);
+    if (result.field) {
+      setFieldError({ [result.field]: message });
+    }
+    return false;
+  }
+
+  function focusFirstInvalid() {
+    const invalid =
+      stageRef.current?.querySelector<HTMLElement>("[aria-invalid='true']") ??
+      stageRef.current?.querySelector<HTMLElement>("input, button[role='radio']");
+    invalid?.focus({ preventScroll: true });
   }
 
   function handleNext() {
-    if (!validateCurrent()) return;
-    if (currentIndex < steps.length - 1) {
-      goTo(currentIndex + 1);
+    if (phase !== "form" || navLockRef.current) return;
+    if (!validateCurrent()) {
+      focusFirstInvalid();
+      return;
     }
+    if (currentIndex < steps.length - 1) goTo(currentIndex + 1);
   }
 
   function handleBack() {
+    if (phase !== "form" || navLockRef.current) return;
     if (currentIndex > 0) goTo(currentIndex - 1);
   }
 
+  function handleSkipRooms() {
+    if (navLockRef.current) return;
+    patch({ rooms: "" });
+    if (currentIndex < steps.length - 1) goTo(currentIndex + 1);
+  }
+
   async function handleSubmit() {
-    if (!validateCurrent()) return;
+    if (submitLockRef.current || navLockRef.current || phase === "submitting") {
+      return;
+    }
+    if (!validateCurrent()) {
+      focusFirstInvalid();
+      return;
+    }
+
+    if (!submissionIdRef.current) submissionIdRef.current = crypto.randomUUID();
+    if (!startedAtRef.current) startedAtRef.current = Date.now();
+
+    const payload = assembleLeadRequest({
+      state,
+      locale,
+      submissionId: submissionIdRef.current,
+      formStartedAt: startedAtRef.current,
+      honeypot,
+      sourcePage:
+        typeof window === "undefined"
+          ? undefined
+          : sourcePageFromLocation(window.location.pathname, window.location.search),
+      utm: utmRef.current,
+    });
+
+    const parsed = leadInputSchema.safeParse(payload);
+    if (!parsed.success) {
+      const phoneIssue = parsed.error.issues.some((issue) =>
+        issue.path.includes("phone")
+      );
+      const nameIssue = parsed.error.issues.some((issue) =>
+        issue.path.includes("name")
+      );
+      if (nameIssue) {
+        const message = errorMessage("name");
+        setError(message);
+        setFieldError({ name: message });
+      } else if (phoneIssue) {
+        const message = errorMessage("phoneInvalid");
+        setError(message);
+        setFieldError({ phone: message });
+      } else {
+        setError(dict.errors.submit);
+      }
+      focusFirstInvalid();
+      return;
+    }
+
+    submitLockRef.current = true;
     setPhase("submitting");
     setError(null);
+    setStatusLive(dict.sending);
 
-    const payload = {
-      objectType: state.objectType,
-      area: Number(state.area),
-      rooms: state.rooms ? Number(state.rooms) : null,
-      renovationType: state.renovationType,
-      design: state.design,
-      condition: state.condition,
-      start: state.start,
-      name: state.name.trim(),
-      phone: state.phone.trim(),
-      telegram: state.telegram.trim() || undefined,
-      locale,
-    };
-
-    // Temporary debug visibility until Telegram/email delivery is wired
-    console.group("DTM Calculator Lead");
-    console.log(payload);
-    console.groupEnd();
+    let handoff: Window | null = null;
+    try {
+      handoff = window.open("/lead-handoff", HANDOFF_NAME);
+    } catch {
+      handoff = null;
+    }
 
     try {
-      const res = await fetch("/api/estimate", {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(20_000),
       });
+      const data = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        leadId?: string;
+        visitorDraft?: string;
+        delivered?: { telegram?: boolean; email?: boolean };
+      } | null;
 
-      if (!res.ok) {
+      const delivered =
+        Boolean(data?.delivered?.telegram) || Boolean(data?.delivered?.email);
+
+      if (!res.ok || !data?.ok || !data.leadId || !delivered) {
+        if (handoff && !handoff.closed) {
+          try {
+            handoff.close();
+          } catch {
+            /* ignore */
+          }
+        }
         setPhase("error");
-        setError(t.errors.submit);
+        setError(dict.errors.submit);
+        setStatusLive(dict.errors.submit);
+        submitLockRef.current = false;
         return;
       }
 
+      const draft = data.visitorDraft ?? "";
+      const telegramUrl = visitorTelegramUrl(draft);
+      let popupBlocked = !handoff || handoff.closed;
+
+      if (handoff && !handoff.closed) {
+        try {
+          handoff.location.href = telegramUrl;
+          popupBlocked = false;
+        } catch {
+          popupBlocked = true;
+        }
+      }
+
+      setSuccess({
+        leadId: data.leadId,
+        visitorDraft: draft,
+        telegramUrl,
+        popupBlocked,
+      });
       setPhase("success");
+      setStatusLive(dict.success.title);
     } catch {
+      if (handoff && !handoff.closed) {
+        try {
+          handoff.close();
+        } catch {
+          /* ignore */
+        }
+      }
       setPhase("error");
-      setError(t.errors.submit);
+      setError(dict.errors.submit);
+      setStatusLive(dict.errors.submit);
+      submitLockRef.current = false;
     }
   }
 
   function reset() {
+    submissionIdRef.current = crypto.randomUUID();
+    startedAtRef.current = Date.now();
+    submitLockRef.current = false;
     setState(initialEstimateState);
     setStepIndex(0);
     setPhase("form");
     setError(null);
-    setAnimKey((k) => k + 1);
+    setFieldError({});
+    setSuccess(null);
+    setCopied(false);
+    setHoneypot("");
+    setStatusLive("");
+    setAnimToken((token) => token + 1);
   }
+
+  useEffect(() => {
+    if (phase !== "form") return;
+    const heading = stageRef.current?.querySelector<HTMLElement>(
+      ".calc-question, legend"
+    );
+    heading?.setAttribute("tabindex", "-1");
+    heading?.focus({ preventScroll: true });
+
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+    const active = document.activeElement;
+    if (
+      active instanceof HTMLInputElement ||
+      active instanceof HTMLTextAreaElement
+    ) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      if (!(heading instanceof HTMLElement)) return;
+      const rect = heading.getBoundingClientRect();
+      const header = 96;
+      if (rect.top >= header && rect.top <= window.innerHeight * 0.4) return;
+      heading.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "start",
+      });
+    }, TRANSITION_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [stepId, animToken, phase]);
+
+  useEffect(() => {
+    if (phase === "error") {
+      errorRef.current?.focus();
+    }
+  }, [phase]);
 
   const objectLabel =
-    t.steps.objectType.options.find((o) => o.value === state.objectType)
+    dict.steps.objectType.options.find((opt) => opt.value === state.objectType)
       ?.label ?? "—";
 
-  if (phase === "success") {
-    return (
-      <div className="calc-step-enter space-y-8">
-        <div>
-          <p className="label text-accent">DTM</p>
-          <h3 className="mt-4 type-h2">{t.success.title}</h3>
-          <p className="calc-muted mt-4 max-w-lg type-body-lg">
-            {t.success.body}
-          </p>
-        </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <a
-            {...externalLinkProps(socialLinks.telegram)}
-            className="btn btn-primary"
-          >
-            {t.success.telegram}
-          </a>
-          <a
-            {...externalLinkProps(socialLinks.phone)}
-            className="btn btn-ghost"
-          >
-            {t.success.call}
-          </a>
-        </div>
-        <button
-          type="button"
-          onClick={reset}
-          className="label calc-muted transition-colors hover:text-[var(--calc-fg)]"
-        >
-          {t.success.again}
-        </button>
-      </div>
-    );
-  }
+  const busy = phase === "submitting";
 
   return (
-    <div className="space-y-8">
-      {/* Progress */}
-      <div>
+    <div className="calc-shell">
+      <div className="sr-only" aria-live="polite">
+        {statusLive}
+      </div>
+
+      <div className="calc-progress">
         <div className="mb-3 flex items-center justify-between gap-4">
           <span className="label calc-muted">
-            {t.stepOf} {currentIndex + 1} / {steps.length}
+            {dict.stepOf} {currentIndex + 1} / {steps.length}
           </span>
           <span className="label text-accent">{Math.round(progress)}%</span>
         </div>
@@ -255,103 +419,266 @@ export function EstimateCalculator() {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(progress)}
-          aria-label={t.progress}
+          aria-label={dict.progress}
         >
           <div
-            className="h-0.5 bg-accent transition-[width] duration-500 ease-out"
+            className="h-0.5 bg-accent"
             style={{ width: `${progress}%` }}
           />
         </div>
-        {(state.objectType || state.area) && (
-          <p className="calc-muted type-body-sm mt-3">
-            {state.objectType && (
-              <span>
-                {t.context.object}: {objectLabel}
-              </span>
-            )}
-            {state.objectType && state.area && <span aria-hidden> · </span>}
-            {state.area && (
-              <span>
-                {t.context.area}: {state.area} {t.steps.area.unit}
-              </span>
-            )}
-          </p>
-        )}
-      </div>
-
-      <div
-        key={`${stepId}-${animKey}`}
-        className={`min-h-[15rem] md:min-h-[17rem] ${
-          direction < 0 ? "calc-step-enter-back" : "calc-step-enter"
-        }`}
-      >
-        <StepBody
-          stepId={stepId}
-          state={state}
-          patch={patch}
-          formId={formId}
-          onSelectObject={(value) => {
-            patch({ objectType: value });
-            // Rebuild sequence from object type immediately
-          }}
-        />
-      </div>
-
-      {error && (
-        <p className="type-body-sm text-accent" role="alert">
-          {error}
-        </p>
-      )}
-
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <button
-          type="button"
-          onClick={handleBack}
-          disabled={currentIndex === 0 || phase === "submitting"}
-          className="type-small calc-muted transition-colors hover:text-[var(--calc-fg)] disabled:opacity-30"
-        >
-          ← {t.back}
-        </button>
-
-        {stepId === "lead" ? (
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={phase === "submitting"}
-            className="btn btn-primary w-full sm:w-auto sm:min-w-[16rem]"
-          >
-            {phase === "submitting" ? t.sending : t.submit}
-            <span className="btn-arrow" aria-hidden>
-              →
+        <p className="calc-context type-body-sm">
+          {state.objectType ? (
+            <span>
+              {dict.context.object}: {objectLabel}
+              {state.area ? (
+                <span>
+                  {" "}
+                  · {dict.context.area}: {state.area} {dict.steps.area.unit}
+                </span>
+              ) : null}
             </span>
-          </button>
-        ) : stepId === "rooms" ? (
-          <div className="flex flex-col gap-3 sm:flex-row">
+          ) : null}
+        </p>
+      </div>
+
+      {phase === "success" && success ? (
+        <SuccessPanel
+          dict={dict}
+          success={success}
+          copied={copied}
+          onCopied={() => setCopied(true)}
+          onReset={reset}
+          logoTone={theme === "dark" ? "paper" : "ink"}
+        />
+      ) : (
+        <form
+          className="calc-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (stepId === "lead") void handleSubmit();
+            else handleNext();
+          }}
+        >
+          <div
+            ref={stageRef}
+            className="calc-stage"
+            data-direction={direction}
+          >
+            <div
+              key={`${stepId}-${animToken}`}
+              className={
+                direction < 0 ? "calc-step-panel is-back" : "calc-step-panel"
+              }
+            >
+              <StepBody
+                stepId={stepId}
+                state={state}
+                patch={patch}
+                formId={formId}
+                fieldError={fieldError}
+                onBlurField={(field, value) => {
+                  if (field === "phone") {
+                    if (!value.trim()) return;
+                    if (!normalizePhone(value)) {
+                      setFieldError((prev) => ({
+                        ...prev,
+                        phone: errorMessage("phoneInvalid"),
+                      }));
+                    }
+                    return;
+                  }
+                  if (field === "name") {
+                    if (!value.trim()) return;
+                    if (!sanitizePersonName(value)) {
+                      setFieldError((prev) => ({
+                        ...prev,
+                        name: errorMessage("name"),
+                      }));
+                    }
+                    return;
+                  }
+                  if (field === "area" && value.trim()) {
+                    const parsed = parseArea(value);
+                    if (!parsed.ok) {
+                      const key =
+                        parsed.reason === "zero" ? "areaZero" : "areaDigits";
+                      setFieldError((prev) => ({
+                        ...prev,
+                        area: errorMessage(key),
+                      }));
+                    }
+                  }
+                }}
+                onSelectObject={(value) => {
+                  setState((prev) => ({
+                    ...prev,
+                    objectType: value,
+                    rooms: value === "commercial" ? "" : prev.rooms,
+                  }));
+                  setError(null);
+                  setFieldError({});
+                }}
+              />
+            </div>
+          </div>
+
+          <p
+            ref={errorRef}
+            className="calc-feedback"
+            tabIndex={-1}
+            role={error && !fieldError.area && !fieldError.phone && !fieldError.name ? "alert" : undefined}
+          >
+            {error && !fieldError.area && !fieldError.phone && !fieldError.name ? (
+              <span className="calc-feedback-msg">{error}</span>
+            ) : null}
+          </p>
+
+          <div className="calc-nav">
             <button
               type="button"
-              onClick={() => {
-                patch({ rooms: "" });
-                goTo(currentIndex + 1);
-              }}
-              className="btn btn-ghost"
+              onClick={handleBack}
+              disabled={currentIndex === 0 || busy}
+              className="type-small calc-muted transition-colors hover:text-[var(--calc-fg)] disabled:opacity-30"
             >
-              {t.steps.rooms.skip}
+              ← {dict.back}
             </button>
-            <button type="button" onClick={handleNext} className="btn btn-primary">
-              {t.next}
-              <span className="btn-arrow" aria-hidden>
-                →
-              </span>
-            </button>
+
+            <div className="calc-nav-actions">
+              {stepId === "rooms" ? (
+                <button
+                  type="button"
+                  onClick={handleSkipRooms}
+                  disabled={busy}
+                  className="btn btn-ghost"
+                >
+                  {dict.steps.rooms.skip}
+                </button>
+              ) : null}
+
+              {stepId === "lead" ? (
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="btn btn-primary calc-submit"
+                  aria-busy={busy}
+                >
+                  {busy ? dict.sending : phase === "error" ? dict.retry : dict.submit}
+                  <span className="btn-arrow" aria-hidden>
+                    →
+                  </span>
+                </button>
+              ) : (
+                <button type="submit" disabled={busy} className="btn btn-primary">
+                  {dict.next}
+                  <span className="btn-arrow" aria-hidden>
+                    →
+                  </span>
+                </button>
+              )}
+            </div>
           </div>
-        ) : (
-          <button type="button" onClick={handleNext} className="btn btn-primary">
-            {t.next}
-            <span className="btn-arrow" aria-hidden>
-              →
-            </span>
-          </button>
-        )}
+
+          {phase === "error" ? (
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <a
+                {...externalLinkProps(socialLinks.telegram)}
+                className="btn btn-ghost"
+              >
+                {dict.success.telegram}
+              </a>
+              <a {...externalLinkProps(socialLinks.phone)} className="btn btn-ghost">
+                {dict.success.call}
+              </a>
+            </div>
+          ) : null}
+
+          <div className="calc-hp" hidden inert>
+            <input
+              id={`${formId}-website`}
+              name="website"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              value={honeypot}
+              onChange={(event) => setHoneypot(event.target.value)}
+            />
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+
+function SuccessPanel({
+  dict,
+  success,
+  copied,
+  onCopied,
+  onReset,
+  logoTone,
+}: {
+  dict: ReturnType<typeof useDictionary>["calculator"];
+  success: SuccessMeta;
+  copied: boolean;
+  onCopied: () => void;
+  onReset: () => void;
+  logoTone: "ink" | "paper";
+}) {
+  async function copyDraft() {
+    try {
+      await navigator.clipboard.writeText(success.visitorDraft);
+      onCopied();
+    } catch {
+      const input = document.createElement("textarea");
+      input.value = success.visitorDraft;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      input.remove();
+      onCopied();
+    }
+  }
+
+  return (
+    <div className="calc-success">
+      <Logo tone={logoTone} withDescriptor />
+      <h3 className="mt-6 type-h2">{dict.success.title}</h3>
+      <p className="calc-muted mt-3 type-body-lg">{dict.success.body}</p>
+      <p className="mt-4 font-mono text-sm text-accent">
+        {dict.success.leadId}: {success.leadId}
+      </p>
+      {success.popupBlocked ? (
+        <p className="calc-feedback-msg mt-4" role="status">
+          {dict.success.popupBlocked}
+        </p>
+      ) : null}
+      <p className="calc-muted type-body-sm mt-4">{dict.success.telegramHint}</p>
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <a
+          {...externalLinkProps(success.telegramUrl)}
+          className="btn btn-primary"
+        >
+          {dict.success.telegram}
+        </a>
+        <button type="button" onClick={() => void copyDraft()} className="btn btn-ghost">
+          {copied ? dict.success.copied : dict.success.copy}
+        </button>
+        <a {...externalLinkProps(socialLinks.phone)} className="btn btn-ghost">
+          {dict.success.call}
+        </a>
+      </div>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <a href="#top" className="label calc-muted hover:text-[var(--calc-fg)]">
+          {dict.success.returnSite}
+        </a>
+        <button
+          type="button"
+          onClick={onReset}
+          className="label calc-muted transition-colors hover:text-[var(--calc-fg)]"
+        >
+          {dict.success.again}
+        </button>
       </div>
     </div>
   );
@@ -362,22 +689,31 @@ function StepBody({
   state,
   patch,
   formId,
+  fieldError,
+  onBlurField,
   onSelectObject,
 }: {
   stepId: CalcStepId;
   state: EstimateFormState;
   patch: (partial: Partial<EstimateFormState>) => void;
   formId: string;
+  fieldError: Partial<Record<string, string>>;
+  onBlurField: (field: "area" | "name" | "phone", value: string) => void;
   onSelectObject: (value: ObjectType) => void;
 }) {
   const t = useDictionary().calculator;
+  const areaHintId = `${formId}-area-hint`;
+  const areaErrorId = `${formId}-area-error`;
+  const phoneHintId = `${formId}-phone-hint`;
+  const phoneErrorId = `${formId}-phone-error`;
+  const nameErrorId = `${formId}-name-error`;
 
   switch (stepId) {
     case "objectType":
       return (
         <fieldset>
           <legend className="calc-question">{t.steps.objectType.title}</legend>
-          <div className="mt-7 grid gap-3">
+          <div className="mt-7 grid gap-3" role="radiogroup" aria-label={t.steps.objectType.title}>
             {t.steps.objectType.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -397,41 +733,58 @@ function StepBody({
           <label htmlFor={`${formId}-area`} className="calc-question">
             {t.steps.area.title}
           </label>
-          <p className="calc-muted type-body-sm mt-2">{t.steps.area.hint}</p>
-          <div className="mt-6 flex items-end gap-3 border-b border-[color:var(--calc-line)] pb-3">
+          <p id={areaHintId} className="calc-muted type-body-sm mt-2">
+            {t.steps.area.hint}
+          </p>
+          <div className="calc-area mt-6">
             <input
               id={`${formId}-area`}
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={2000}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
               placeholder={t.steps.area.placeholder}
               value={state.area}
-              onChange={(e) => patch({ area: e.target.value })}
-              className="calc-field w-full bg-transparent text-4xl font-semibold tracking-tight outline-none md:text-5xl"
+              aria-invalid={fieldError.area ? true : undefined}
+              aria-describedby={`${areaHintId} ${areaErrorId}`}
+              onChange={(event) => patch({ area: sanitizeAreaInput(event.target.value) })}
+              onBlur={() => {
+                const parsed = parseArea(state.area);
+                if (parsed.ok) patch({ area: formatAreaDisplay(parsed.value) });
+                onBlurField("area", state.area);
+              }}
+              onWheel={(event) => event.currentTarget.blur()}
+              className={`calc-field calc-area-input w-full bg-transparent text-4xl font-semibold tracking-tight outline-none md:text-5xl ${
+                fieldError.area ? "is-invalid" : ""
+              }`}
             />
-            <span className="pb-1 font-mono text-sm text-accent">
+            <span className="calc-area-suffix font-mono text-sm text-accent">
               {t.steps.area.unit}
             </span>
           </div>
+          <FieldFeedback id={areaErrorId} message={fieldError.area ?? null} />
         </div>
       );
 
     case "rooms":
       return (
         <div>
-          <label htmlFor={`${formId}-rooms`} className="calc-question">
+          <p className="calc-question" id={`${formId}-rooms-label`}>
             {t.steps.rooms.title}
-          </label>
+          </p>
           <p className="calc-muted type-body-sm mt-2">{t.steps.rooms.hint}</p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div
+            className="mt-6 flex flex-wrap gap-3"
+            role="radiogroup"
+            aria-labelledby={`${formId}-rooms-label`}
+          >
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <button
                 key={n}
                 type="button"
+                role="radio"
+                aria-checked={state.rooms === String(n)}
                 onClick={() => patch({ rooms: String(n) })}
-                aria-pressed={state.rooms === String(n)}
-                className={`min-h-14 min-w-14 px-4 py-3 text-lg font-medium transition-colors calc-option ${
+                className={`min-h-14 min-w-14 px-4 py-3 text-lg font-medium calc-option ${
                   state.rooms === String(n) ? "is-selected" : ""
                 }`}
               >
@@ -439,36 +792,21 @@ function StepBody({
               </button>
             ))}
           </div>
-          <input
-            id={`${formId}-rooms`}
-            type="number"
-            inputMode="numeric"
-            min={1}
-            max={30}
-            value={state.rooms}
-            onChange={(e) => patch({ rooms: e.target.value })}
-            className="sr-only"
-            tabIndex={-1}
-            aria-hidden
-          />
         </div>
       );
 
     case "renovationType":
       return (
         <fieldset>
-          <legend className="calc-question">
-            {t.steps.renovationType.title}
-          </legend>
-          <div className="mt-7 grid gap-3">
+          <legend className="calc-question">{t.steps.renovationType.title}</legend>
+          <div className="mt-7 grid gap-3" role="radiogroup">
             {t.steps.renovationType.options.map((opt) => (
               <OptionButton
                 key={opt.value}
                 selected={state.renovationType === opt.value}
                 onClick={() =>
                   patch({
-                    renovationType:
-                      opt.value as EstimateFormState["renovationType"],
+                    renovationType: opt.value as EstimateFormState["renovationType"],
                   })
                 }
               >
@@ -483,7 +821,7 @@ function StepBody({
       return (
         <fieldset>
           <legend className="calc-question">{t.steps.design.title}</legend>
-          <div className="mt-6 grid gap-3">
+          <div className="mt-6 grid gap-3" role="radiogroup">
             {t.steps.design.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -503,7 +841,7 @@ function StepBody({
       return (
         <fieldset>
           <legend className="calc-question">{t.steps.condition.title}</legend>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2" role="radiogroup">
             {t.steps.condition.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -525,7 +863,7 @@ function StepBody({
       return (
         <fieldset>
           <legend className="calc-question">{t.steps.start.title}</legend>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2" role="radiogroup">
             {t.steps.start.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -543,65 +881,78 @@ function StepBody({
 
     case "lead":
       return (
-        <div className="space-y-6">
+        <div>
           <h3 className="calc-question">{t.steps.lead.title}</h3>
-          <p className="calc-muted type-body-sm max-w-lg">
+          <p className="calc-muted type-body-sm mt-2 max-w-lg">
             {t.steps.lead.disclaimer}
           </p>
-          <div className="grid gap-5">
+          <p className="calc-muted type-body-sm mt-3 max-w-lg">
+            {t.steps.lead.handoffDisclosure}
+          </p>
+          <div className="mt-6 grid gap-2">
             <div>
-              <label
-                htmlFor={`${formId}-name`}
-                className="label calc-muted"
-              >
+              <label htmlFor={`${formId}-name`} className="label calc-muted">
                 {t.steps.lead.name}
               </label>
               <input
                 id={`${formId}-name`}
                 type="text"
                 autoComplete="name"
+                maxLength={80}
                 placeholder={t.steps.lead.namePlaceholder}
                 value={state.name}
-                onChange={(e) => patch({ name: e.target.value })}
-                className="calc-field mt-2 w-full border-b bg-transparent py-3 text-lg outline-none focus:border-accent"
+                aria-invalid={fieldError.name ? true : undefined}
+                aria-describedby={nameErrorId}
+                onChange={(event) => patch({ name: event.target.value })}
+                onBlur={() => onBlurField("name", state.name)}
+                className={`calc-field mt-2 w-full border-b bg-transparent py-3 text-lg outline-none ${
+                  fieldError.name ? "is-invalid" : ""
+                }`}
               />
+              <FieldFeedback id={nameErrorId} message={fieldError.name ?? null} />
             </div>
             <div>
-              <label
-                htmlFor={`${formId}-phone`}
-                className="label calc-muted"
-              >
+              <label htmlFor={`${formId}-phone`} className="label calc-muted">
                 {t.steps.lead.phone}
               </label>
               <input
                 id={`${formId}-phone`}
                 type="tel"
+                inputMode="tel"
                 autoComplete="tel"
                 placeholder={t.steps.lead.phonePlaceholder}
                 value={state.phone}
-                onChange={(e) => patch({ phone: e.target.value })}
-                className="calc-field mt-2 w-full border-b bg-transparent py-3 text-lg outline-none focus:border-accent"
+                aria-invalid={fieldError.phone ? true : undefined}
+                aria-describedby={`${phoneHintId} ${phoneErrorId}`}
+                onChange={(event) =>
+                  patch({ phone: sanitizePhoneInput(event.target.value) })
+                }
+                onBlur={() => onBlurField("phone", state.phone)}
+                className={`calc-field mt-2 w-full border-b bg-transparent py-3 text-lg outline-none ${
+                  fieldError.phone ? "is-invalid" : ""
+                }`}
               />
+              <p id={phoneHintId} className="calc-muted type-body-sm mt-2">
+                {t.steps.lead.phoneHint}
+              </p>
+              <FieldFeedback id={phoneErrorId} message={fieldError.phone ?? null} />
             </div>
             <div>
-              <label
-                htmlFor={`${formId}-telegram`}
-                className="label calc-muted"
-              >
+              <label htmlFor={`${formId}-telegram`} className="label calc-muted">
                 {t.steps.lead.telegram}{" "}
-                <span className="calc-faint">
-                  ({t.steps.lead.telegramOptional})
-                </span>
+                <span className="calc-faint">({t.steps.lead.telegramOptional})</span>
               </label>
               <input
                 id={`${formId}-telegram`}
                 type="text"
                 autoComplete="off"
+                maxLength={64}
                 placeholder={t.steps.lead.telegramPlaceholder}
                 value={state.telegram}
-                onChange={(e) => patch({ telegram: e.target.value })}
-                className="calc-field mt-2 w-full border-b bg-transparent py-3 text-lg outline-none focus:border-accent"
+                onChange={(event) => patch({ telegram: event.target.value })}
+                className="calc-field mt-2 w-full border-b bg-transparent py-3 text-lg outline-none"
               />
+              <FieldFeedback id={`${formId}-telegram-error`} message={null} />
             </div>
           </div>
         </div>

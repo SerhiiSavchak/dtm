@@ -160,24 +160,36 @@ export type Dictionary = {
         namePlaceholder: string;
         phone: string;
         phonePlaceholder: string;
+        phoneHint: string;
         telegram: string;
         telegramPlaceholder: string;
         telegramOptional: string;
         disclaimer: string;
+        handoffDisclosure: string;
       };
     };
     success: {
       title: string;
       body: string;
+      leadId: string;
       telegram: string;
+      telegramHint: string;
+      copy: string;
+      copied: string;
       call: string;
       again: string;
+      returnSite: string;
+      popupBlocked: string;
     };
     sending: string;
+    retry: string;
     errors: {
       required: string;
-      area: string;
-      phone: string;
+      areaEmpty: string;
+      areaZero: string;
+      areaDigits: string;
+      phoneEmpty: string;
+      phoneInvalid: string;
       name: string;
       submit: string;
     };
@@ -482,28 +494,43 @@ const uk: Dictionary = {
         name: "Ім’я",
         namePlaceholder: "Ваше ім’я",
         phone: "Телефон",
-        phonePlaceholder: "+380 …",
+        phonePlaceholder: "+380 67 123 45 67",
+        phoneHint: "Наприклад, +380 67 123 45 67",
         telegram: "Telegram",
         telegramPlaceholder: "@username",
         telegramOptional: "необов’язково",
         disclaimer:
           "Ми не обіцяємо точну автоматичну вартість. Після запиту менеджер DTM зв’яжеться з вами й передасть орієнтовний розрахунок",
+        handoffDisclosure:
+          "Після відправлення відкриється Telegram із заповненим повідомленням. Перевірте його та натисніть «Надіслати».",
       },
     },
     success: {
-      title: "Запит отримано",
-      body: "DTM отримав вашу заявку. Ми зв’яжемося з вами, щоб уточнити деталі та підготувати попередній розрахунок",
-      telegram: "Написати в Telegram",
+      title: "Дякуємо, заявку отримано",
+      body: "Інформацію надіслано команді DTM. Ми зв’яжемося з вами, щоб уточнити деталі та підготувати попередній розрахунок",
+      leadId: "Номер заявки",
+      telegram: "Відкрити Telegram",
+      telegramHint:
+        "У Telegram підготовлене повідомлення. Перевірте його та натисніть «Надіслати»",
+      copy: "Скопіювати повідомлення",
+      copied: "Скопійовано",
       call: "Зателефонувати",
       again: "Надіслати ще один запит",
+      returnSite: "Повернутися на сайт",
+      popupBlocked:
+        "Заявку вже отримано. Браузер заблокував автоматичне відкриття Telegram — натисніть кнопку нижче.",
     },
-    sending: "Надсилаємо",
+    sending: "Надсилаємо заявку…",
+    retry: "Спробувати ще раз",
     errors: {
       required: "Оберіть варіант, щоб продовжити",
-      area: "Вкажіть площу від 1 до 2000 м²",
-      phone: "Вкажіть коректний номер телефону",
+      areaEmpty: "Вкажіть орієнтовну площу",
+      areaZero: "Площа має бути більшою за 0",
+      areaDigits: "Введіть площу цифрами",
+      phoneEmpty: "Вкажіть номер телефону",
+      phoneInvalid: "Перевірте номер телефону",
       name: "Вкажіть ім’я",
-      submit: "Не вдалося надіслати запит. Спробуйте ще раз",
+      submit: "Не вдалося надіслати запит. Дані збережено — спробуйте ще раз",
     },
     context: {
       object: "Об’єкт",
@@ -807,28 +834,43 @@ const en: Dictionary = {
         name: "Name",
         namePlaceholder: "Your name",
         phone: "Phone",
-        phonePlaceholder: "+380 …",
+        phonePlaceholder: "+380 67 123 45 67",
+        phoneHint: "For example, +380 67 123 45 67",
         telegram: "Telegram",
         telegramPlaceholder: "@username",
         telegramOptional: "optional",
         disclaimer:
           "We do not promise an exact automatic price. After your request, a DTM manager will contact you with an indicative estimate",
+        handoffDisclosure:
+          "After sending, Telegram will open with a prepared message. Review it and tap Send.",
       },
     },
     success: {
-      title: "Request received",
-      body: "DTM has received your request. We will contact you to clarify details and prepare a preliminary estimate",
-      telegram: "Message on Telegram",
+      title: "Thank you, we have received your request",
+      body: "Your details were sent to the DTM team. We will contact you to clarify the brief and prepare a preliminary estimate",
+      leadId: "Request number",
+      telegram: "Open Telegram",
+      telegramHint:
+        "Telegram contains a prepared message. Review it and tap Send",
+      copy: "Copy message",
+      copied: "Copied",
       call: "Call us",
       again: "Submit another request",
+      returnSite: "Back to the site",
+      popupBlocked:
+        "Your request was received. The browser blocked Telegram from opening automatically — use the button below.",
     },
-    sending: "Sending",
+    sending: "Sending your request…",
+    retry: "Try again",
     errors: {
       required: "Choose an option to continue",
-      area: "Enter an area between 1 and 2000 m²",
-      phone: "Enter a valid phone number",
+      areaEmpty: "Enter an approximate area",
+      areaZero: "Area must be greater than 0",
+      areaDigits: "Enter the area in numbers",
+      phoneEmpty: "Enter a phone number",
+      phoneInvalid: "Check the phone number",
       name: "Enter your name",
-      submit: "Could not send the request. Please try again",
+      submit: "Could not send the request. Your answers are saved — try again",
     },
     context: {
       object: "Property",

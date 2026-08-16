@@ -6,6 +6,11 @@
  * do not present PNG stock/renders (project-01…04, hero.png) as DTM work.
  */
 
+import {
+  PUBLIC_INSTAGRAM_URL,
+  PUBLIC_TELEGRAM_URL,
+} from "@/lib/leads/labels";
+
 export const heroMedia = {
   webm: null as string | null,
   /**
@@ -98,17 +103,15 @@ export const inProgressMedia: InProgressItem[] = [
 ];
 
 /**
- * Public social URLs. Sourced from env so components never hardcode them.
- * `NEXT_PUBLIC_TELEGRAM_URL` must be the verified DTM Telegram link
- * (https://t.me/…). Until it is set, telegram uses the contacts anchor —
- * not a real Telegram profile.
+ * Public social URLs. Verified DTM destinations are the defaults.
+ * Optional NEXT_PUBLIC_* overrides remain for staging, but public Telegram
+ * is never a Bot API chat id.
  */
-export const TELEGRAM_URL_PLACEHOLDER = "#contacts" as const;
+export const TELEGRAM_URL_PLACEHOLDER = PUBLIC_TELEGRAM_URL;
 
 export const socialLinks = {
-  instagram:
-    process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://www.instagram.com/",
-  telegram: process.env.NEXT_PUBLIC_TELEGRAM_URL || TELEGRAM_URL_PLACEHOLDER,
+  instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || PUBLIC_INSTAGRAM_URL,
+  telegram: process.env.NEXT_PUBLIC_TELEGRAM_URL || PUBLIC_TELEGRAM_URL,
   phone: process.env.NEXT_PUBLIC_PHONE_URL || "#contacts",
 } as const;
 
