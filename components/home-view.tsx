@@ -26,8 +26,8 @@ export function HomeView() {
       <PageLoader onDone={onLoaderDone} />
       <DocumentMeta />
       <SiteHeader boot={boot} />
-      <div className={`locale-fade ${isSwitching ? "is-switching" : ""}`}>
-        <main>
+      <div className={`locale-fade min-w-0 ${isSwitching ? "is-switching" : ""}`}>
+        <main className="min-w-0">
           <Hero boot={boot} />
           <Intro />
           <Projects />

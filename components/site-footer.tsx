@@ -61,7 +61,7 @@ export function SiteFooter() {
 
         <div className="mt-12 border-t border-border pt-8 md:mt-14 md:pt-10 lg:mt-14 lg:pt-8">
           {/* Mobile / tablet — stacked, centered. Unchanged composition. */}
-          <div className="mx-auto flex max-w-5xl flex-col items-center gap-8 text-center md:gap-10 lg:hidden">
+          <div className="mx-auto flex max-w-5xl flex-col items-center gap-8 text-center md:gap-10 nav:hidden">
             <div className="flex flex-col items-center">
               <Logo tone={theme === "dark" ? "paper" : "ink"} withDescriptor />
               <p className="type-body-sm mt-4 max-w-sm text-muted">
@@ -101,7 +101,7 @@ export function SiteFooter() {
           </div>
 
           {/* Desktop — equal side tracks keep nav on the container center */}
-          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-x-8 xl:gap-x-10">
+          <div className="hidden nav:grid nav:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] nav:items-center nav:gap-x-8 xl:gap-x-10">
             <div className="flex min-w-0 flex-col items-start justify-self-start text-left">
               <Logo tone={theme === "dark" ? "paper" : "ink"} withDescriptor />
               <p className="type-body-sm mt-2.5 max-w-[22rem] text-muted">
@@ -136,7 +136,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-2 border-t border-border pt-5 text-center sm:flex-row sm:gap-8 lg:mt-6 lg:items-center lg:justify-between lg:pt-4 lg:text-left">
+        <div className="mt-8 flex flex-col items-center justify-center gap-2 border-t border-border pt-5 text-center sm:flex-row sm:gap-8 nav:mt-6 nav:items-center nav:justify-between nav:pt-4 nav:text-left">
           <span className="label text-muted">
             © {new Date().getFullYear()} {t.footer.copyright}
           </span>

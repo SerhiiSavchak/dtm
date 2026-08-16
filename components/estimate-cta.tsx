@@ -24,8 +24,8 @@ export function EstimateCta() {
               className="absolute left-0 top-0 h-1 w-24 bg-accent"
             />
 
-            <div className="grid grid-cols-1 gap-x-12 gap-y-10 p-6 md:p-10 lg:grid-cols-12 lg:p-14 xl:p-16">
-              <div className="flex flex-col lg:col-span-4">
+            <div className="grid grid-cols-1 gap-x-12 gap-y-10 p-6 md:p-10 lg:p-14 xl:grid-cols-12 xl:p-16">
+              <div className="flex flex-col xl:col-span-4">
                 <h2
                   id="estimate-heading"
                   className="type-h2 text-balance"
@@ -38,13 +38,13 @@ export function EstimateCta() {
                 </p>
                 <a
                   href="#contacts"
-                  className="label calc-muted mt-6 inline-block transition-colors hover:text-[var(--calc-fg)] lg:mt-auto lg:pt-10"
+                  className="label calc-muted mt-6 inline-block transition-colors hover:text-[var(--calc-fg)] xl:mt-auto xl:pt-10"
                 >
                   {t.contactLink}
                 </a>
               </div>
 
-              <div className="lg:col-span-8 lg:border-l lg:border-[color:var(--calc-line)] lg:pl-12">
+              <div className="xl:col-span-8 xl:border-l xl:border-[color:var(--calc-line)] xl:pl-12">
                 <EstimateCalculator />
               </div>
             </div>

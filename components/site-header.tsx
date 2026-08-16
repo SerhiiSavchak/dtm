@@ -181,7 +181,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
 
           <nav
             aria-label={t.nav.mainAria}
-            className="hidden items-center gap-4 justify-self-center min-[1280px]:gap-6 min-[1440px]:gap-8 nav:flex"
+            className="hidden items-center gap-4 justify-self-center min-[1440px]:gap-6 min-[1600px]:gap-8 nav:flex"
           >
             {links.map((item) => (
               <a
@@ -204,7 +204,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
             ))}
           </nav>
 
-          <div className="col-start-2 flex items-center justify-self-end nav:col-start-3">
+          <div className="col-start-2 flex min-w-0 items-center justify-self-end nav:col-start-3">
             <div className="hidden items-center gap-3 nav:flex min-[1440px]:gap-3.5">
               <ThemeToggle
                 tone={
@@ -232,7 +232,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               </button>
             </div>
 
-            <div className="ml-6 hidden nav:block min-[1280px]:ml-8 min-[1440px]:ml-10">
+            <div className="ml-6 hidden nav:block min-[1440px]:ml-8 min-[1600px]:ml-10">
               <a
                 href={navHrefs.estimate}
                 className={`header-cta btn whitespace-nowrap ${
