@@ -1,12 +1,66 @@
 "use client";
 
 import { useState } from "react";
-import { inProgressMedia, socialLinks } from "@/data/media";
+import {
+  inProgressMedia,
+  socialLinks,
+  type InProgressItem,
+} from "@/data/media";
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { CopyText } from "../copy-text";
 import { MediaImage } from "../media-image";
 import { PosterVideo } from "../poster-video";
 import { Reveal } from "../reveal";
 import { SectionHead } from "../section-head";
+import { CornerFrame } from "../fx/corner-frame";
+import { InteractiveArrow } from "../fx/interactive-arrow";
+import { MediaParallax } from "../fx/media-parallax";
+import { MediaReveal } from "../fx/media-reveal";
+
+function shotSizes(layout: InProgressItem["layout"]) {
+  return layout === "feature"
+    ? "(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) calc(100vw - 5rem), min(1280px, calc(100vw - 11rem))"
+    : "(max-width: 1023px) calc(100vw - 3rem), min(630px, calc((100vw - 12rem) / 2))";
+}
+
+function InProgressShot({
+  item,
+  alt,
+}: {
+  item: InProgressItem;
+  alt: string;
+}) {
+  const sizes = shotSizes(item.layout);
+
+  return (
+    <div className="in-progress-visual">
+      {item.video ? (
+        <PosterVideo
+          poster={item.src}
+          alt={alt}
+          mp4={item.video}
+          sizes={sizes}
+          preload="metadata"
+          quality={75}
+          objectPosition={item.objectPosition}
+          className="absolute inset-0"
+          imageClassName="in-progress-image object-cover"
+          videoClassName="in-progress-image object-cover"
+        />
+      ) : (
+        <MediaImage
+          src={item.src}
+          alt={alt}
+          fill
+          quality={75}
+          sizes={sizes}
+          className="in-progress-image object-cover"
+          style={{ objectPosition: item.objectPosition }}
+        />
+      )}
+    </div>
+  );
+}
 
 export function InProgress() {
   const t = useDictionary().inProgress;
@@ -30,7 +84,9 @@ export function InProgress() {
           </Reveal>
           <div className="in-progress-intro-copy">
             <Reveal variant="fade" delay={0.08}>
-              <p className="type-body-lg text-foreground/70">{t.body}</p>
+              <p className="type-body-lg in-progress-body">
+                <CopyText>{t.body}</CopyText>
+              </p>
             </Reveal>
             <Reveal variant="fade" delay={0.14}>
               <a
@@ -40,61 +96,37 @@ export function InProgress() {
                 className="btn btn-text group mt-5 text-foreground"
               >
                 {t.instagramCta}
-                <span className="btn-arrow" aria-hidden>
-                  →
-                </span>
+                <InteractiveArrow />
               </a>
             </Reveal>
           </div>
         </div>
 
         <div className="in-progress-grid">
-          {inProgressMedia.map((item, i) => {
-            const sizes =
-              item.layout === "feature"
-                ? "(max-width: 1024px) 100vw, min(1120px, 88vw)"
-                : "(max-width: 1023px) 100vw, min(548px, 44vw)";
-
-            return (
-              <div
-                key={item.id}
-                className={`in-progress-item is-${item.layout}${
-                  item.mobilePriority ? "" : " is-deferred"
-                }${expanded ? " is-shown" : ""}`}
+          {inProgressMedia.map((item, i) => (
+            <div
+              key={item.id}
+              className={`in-progress-item is-${item.layout}${
+                item.mobilePriority ? "" : " is-deferred"
+              }${expanded ? " is-shown" : ""}`}
+            >
+              <MediaReveal
+                variant={item.layout === "feature" ? "primary" : "secondary"}
+                delay={item.layout === "feature" ? 0.04 : 0.06 + Math.max(0, i - 1) * 0.06}
+                className="in-progress-frame"
               >
-                <Reveal
-                  variant={item.layout === "feature" ? "clip" : i % 2 === 0 ? "fade" : "clip"}
-                  delay={item.layout === "feature" ? 0.04 : 0.06 + (i - 1) * 0.06}
-                  className="in-progress-frame"
-                >
-                  {item.video ? (
-                    <PosterVideo
-                      poster={item.src}
-                      alt={t.mediaAlt}
-                      mp4={item.video}
-                      sizes={sizes}
-                      preload="metadata"
-                      quality={75}
-                      objectPosition={item.objectPosition}
-                      className="absolute inset-0"
-                      imageClassName="object-cover"
-                      videoClassName="object-cover"
-                    />
-                  ) : (
-                    <MediaImage
-                      src={item.src}
-                      alt={t.mediaAlt}
-                      fill
-                      quality={75}
-                      sizes={sizes}
-                      className="in-progress-image object-cover"
-                      style={{ objectPosition: item.objectPosition }}
-                    />
-                  )}
-                </Reveal>
-              </div>
-            );
-          })}
+                {item.layout === "feature" ? (
+                  <CornerFrame className="absolute inset-0 h-full">
+                    <MediaParallax amount={14} className="absolute inset-0">
+                      <InProgressShot item={item} alt={t.mediaAlt} />
+                    </MediaParallax>
+                  </CornerFrame>
+                ) : (
+                  <InProgressShot item={item} alt={t.mediaAlt} />
+                )}
+              </MediaReveal>
+            </div>
+          ))}
         </div>
 
         {hiddenCount > 0 ? (

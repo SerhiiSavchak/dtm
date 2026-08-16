@@ -14,6 +14,10 @@ import { useDictionary } from "@/lib/i18n/locale-context";
 import { MediaImage } from "./media-image";
 import { Reveal } from "./reveal";
 import { SectionHead } from "./section-head";
+import { CornerFrame } from "./fx/corner-frame";
+import { HoverMediaLabel } from "./fx/hover-media-label";
+import { MediaParallax } from "./fx/media-parallax";
+import { MediaReveal } from "./fx/media-reveal";
 
 const PROJECT_IDS = projects.map((project) => project.slug);
 
@@ -216,19 +220,40 @@ function ProjectSlide({
                 lead ? "lg:aspect-[16/10]" : ""
               }`}
             >
-              <div className="project-media-zoom">
-                <MediaImage
-                  src={project.cover}
-                  alt={`DTM: ${labels.category}`}
-                  fill
-                  quality={75}
-                  sizes="(max-width: 1024px) 86vw, 70vw"
-                  className="object-cover"
-                  style={{ objectPosition: project.coverPosition }}
-                />
-              </div>
+              {lead ? (
+                <MediaReveal variant="primary" className="absolute inset-0">
+                  <CornerFrame className="absolute inset-0 h-full">
+                    <div className="project-media-zoom">
+                      <MediaParallax amount={12} className="absolute inset-0">
+                        <MediaImage
+                          src={project.cover}
+                          alt={`DTM: ${labels.category}`}
+                          fill
+                          quality={75}
+                          sizes="(max-width: 1024px) 86vw, 70vw"
+                          className="object-cover"
+                          style={{ objectPosition: project.coverPosition }}
+                        />
+                      </MediaParallax>
+                    </div>
+                  </CornerFrame>
+                </MediaReveal>
+              ) : (
+                <div className="project-media-zoom">
+                  <MediaImage
+                    src={project.cover}
+                    alt={`DTM: ${labels.category}`}
+                    fill
+                    quality={75}
+                    sizes="(max-width: 1024px) 86vw, 70vw"
+                    className="object-cover"
+                    style={{ objectPosition: project.coverPosition }}
+                  />
+                </div>
+              )}
             </div>
           </div>
+          <HoverMediaLabel label={t.look} />
           <div className="project-arrow-slot">
             <span aria-hidden className="project-arrow project-arrow-hover">
               →

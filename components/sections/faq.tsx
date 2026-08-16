@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { CopyText } from "../copy-text";
 import { Reveal } from "../reveal";
 import { SectionHead } from "../section-head";
 
@@ -35,7 +36,7 @@ export function Faq() {
                 const panelId = `${baseId}-panel-${i}`;
                 const btnId = `${baseId}-btn-${i}`;
                 return (
-                  <Reveal as="li" key={item.q} delay={i * 0.03}>
+                  <Reveal as="li" variant="fade" key={item.q} delay={i * 0.03}>
                     <h3>
                       <button
                         type="button"
@@ -64,7 +65,7 @@ export function Faq() {
                     >
                       <div>
                         <p className="faq-answer type-body-sm max-w-[40rem] pb-7 pt-2 text-muted md:pb-8 md:pt-3">
-                          {item.a}
+                          <CopyText>{item.a}</CopyText>
                         </p>
                       </div>
                     </div>

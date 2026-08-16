@@ -1,6 +1,7 @@
 "use client";
 
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { CopyText } from "./copy-text";
 import { Reveal } from "./reveal";
 import { SectionHead } from "./section-head";
 
@@ -40,7 +41,7 @@ export function Intro() {
             <Reveal variant="fade" delay={0.08}>
               <p className="label mb-3 text-muted lg:mb-4">{t.labelRight}</p>
               <p className="intro-lead-copy text-left text-foreground/70">
-                {t.body}
+                <CopyText>{t.body}</CopyText>
               </p>
             </Reveal>
           </div>
@@ -55,6 +56,7 @@ export function Intro() {
           {t.responsibilities.map((item, i) => (
             <Reveal
               as="div"
+              variant="fade"
               key={item.title}
               delay={0.05 + i * 0.05}
               className="flex flex-col items-center gap-3.5 border-b border-border py-6 text-center md:gap-4 md:py-7 lg:items-start lg:pr-8 lg:text-left xl:border-b-0 xl:py-8 xl:pl-8 xl:first:pl-0"
@@ -67,7 +69,7 @@ export function Intro() {
                   {item.title}
                 </h3>
                 <p className="type-body-sm mt-2.5 max-w-none text-muted lg:max-w-[28ch]">
-                  {item.text}
+                  <CopyText>{item.text}</CopyText>
                 </p>
               </div>
             </Reveal>

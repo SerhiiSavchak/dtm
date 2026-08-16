@@ -57,6 +57,7 @@ export type Dictionary = {
     next: string;
     prev: string;
     open: string;
+    look: string;
     swipeHint: string;
     location: {
       lviv: string;
@@ -295,6 +296,7 @@ const uk: Dictionary = {
     next: "Наступний",
     prev: "Попередній",
     open: "Відкрити проєкт",
+    look: "Дивитися",
     swipeHint: "Гортайте →",
     location: { lviv: "Львів" },
     categories: {
@@ -377,7 +379,7 @@ const uk: Dictionary = {
     label: "У роботі",
     labelRight: "Поточні об’єкти",
     heading: "Об’єкти зараз у роботі",
-    body: "Живі кадри з майданчиків, де роботи ще тривають. Це не відретушована реклама — більше процесу в Instagram",
+    body: "Живі кадри з майданчиків, де роботи ще тривають. Це не відретушована реклама.",
     mediaAlt: "Кадр з об’єкта DTM, де роботи ще тривають",
     instagramCta: "Більше з процесу в Instagram",
     showMore: "Показати більше",
@@ -635,6 +637,7 @@ const en: Dictionary = {
     next: "Next",
     prev: "Previous",
     open: "Open project",
+    look: "View",
     swipeHint: "Swipe →",
     location: { lviv: "Lviv" },
     categories: {
@@ -717,7 +720,7 @@ const en: Dictionary = {
     label: "In progress",
     labelRight: "Live sites",
     heading: "Projects currently in progress",
-    body: "Live frames from sites where work is still underway. This is not retouched advertising — more of the process is on Instagram",
+    body: "Live frames from sites where work is still underway. This is not retouched advertising.",
     mediaAlt: "Frame from a DTM site where work is still underway",
     instagramCta: "More process on Instagram",
     showMore: "Show more",

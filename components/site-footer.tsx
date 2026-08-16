@@ -5,11 +5,16 @@ import { useDictionary } from "@/lib/i18n/locale-context";
 import { navHrefs } from "@/lib/i18n/dictionaries";
 import { externalLinkProps, socialLinks } from "@/data/media";
 import { useTheme } from "@/lib/theme/theme-context";
+import { CopyText } from "./copy-text";
 import { Reveal } from "./reveal";
+import { ArchitecturalRule } from "./fx/architectural-rule";
+import { InteractiveArrow } from "./fx/interactive-arrow";
+import { useMagnetic } from "./fx/magnetic";
 
 export function SiteFooter() {
   const t = useDictionary();
   const { theme } = useTheme();
+  const ctaRef = useMagnetic<HTMLAnchorElement>(4);
 
   const links = [
     { label: t.nav.services, href: navHrefs.services },
@@ -23,29 +28,30 @@ export function SiteFooter() {
     <footer id="contacts" className="mt-auto bg-bg text-foreground">
       <div className="container-dtm section-pad-sm">
         <Reveal>
-          <div className="flex flex-col items-center border-t border-border pt-10 text-center md:pt-12">
+          <div className="final-cta-block flex flex-col items-center border-t-0 pt-10 text-center md:pt-12">
+            <ArchitecturalRule />
             <p className="type-h1 max-w-[18ch] text-balance text-foreground">
               {t.finalCta.headingBefore}{" "}
               <span className="text-accent">{t.finalCta.headingAfter}</span>
             </p>
             <p className="type-body-lg mt-5 max-w-lg text-muted lg:mt-6">
-              {t.finalCta.body}
+              <CopyText>{t.finalCta.body}</CopyText>
             </p>
             <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:w-auto lg:mt-10 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
-              <a href="#estimate" className="btn btn-primary group max-lg:w-full">
+              <a
+                ref={ctaRef}
+                href="#estimate"
+                className="btn btn-primary arch-magnetic group max-lg:w-full"
+              >
                 {t.finalCta.primary}
-                <span className="btn-arrow" aria-hidden>
-                  →
-                </span>
+                <InteractiveArrow />
               </a>
               <a
                 {...externalLinkProps(socialLinks.telegram)}
                 className="btn btn-secondary group max-lg:w-full"
               >
                 {t.finalCta.telegram}
-                <span className="btn-arrow" aria-hidden>
-                  →
-                </span>
+                <InteractiveArrow />
               </a>
             </div>
           </div>
@@ -69,7 +75,7 @@ export function SiteFooter() {
                 <a
                   key={item.href}
                   href={item.href}
-                  className="flex min-h-11 items-center text-base text-foreground/80 transition-colors hover:text-accent"
+                  className="flex min-h-11 items-center text-base text-foreground/80 arch-link hover:text-accent"
                 >
                   {item.label}
                 </a>
@@ -102,7 +108,7 @@ export function SiteFooter() {
                 <a
                   key={item.href}
                   href={item.href}
-                  className="type-body whitespace-nowrap py-1 text-foreground/80 transition-colors hover:text-accent"
+                  className="arch-link type-body whitespace-nowrap py-1 text-foreground/80 hover:text-accent"
                 >
                   {item.label}
                 </a>

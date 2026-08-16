@@ -422,8 +422,8 @@ export function EstimateCalculator() {
           aria-label={dict.progress}
         >
           <div
-            className="h-0.5 bg-accent"
-            style={{ width: `${progress}%` }}
+            className="h-0.5 calc-track-fill"
+            style={{ ["--calc-p" as string]: String(progress / 100) }}
           />
         </div>
         <p className="calc-context type-body-sm">
@@ -433,7 +433,8 @@ export function EstimateCalculator() {
               {state.area ? (
                 <span>
                   {" "}
-                  · {dict.context.area}: {state.area} {dict.steps.area.unit}
+                  · {dict.context.area}: {state.area}{"\u00A0"}
+                  {dict.steps.area.unit}
                 </span>
               ) : null}
             </span>

@@ -3,9 +3,12 @@
 import { useCallback, useId, useState, useSyncExternalStore } from "react";
 import { serviceMedia } from "@/data/media";
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { CopyText } from "./copy-text";
 import { MediaImage } from "./media-image";
 import { Reveal } from "./reveal";
 import { SectionHead } from "./section-head";
+import { CornerFrame } from "./fx/corner-frame";
+import { MediaReveal } from "./fx/media-reveal";
 
 function subscribeHoverFine(cb: () => void) {
   const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -68,7 +71,10 @@ export function Services() {
               </h2>
             </Reveal>
 
-            <Reveal variant="clip" className="relative mb-8 aspect-[16/10] w-full overflow-hidden bg-stone lg:hidden">
+            <MediaReveal
+              variant="secondary"
+              className="relative mb-8 aspect-[16/10] w-full overflow-hidden bg-stone lg:hidden"
+            >
               {serviceMedia.map((src, i) => (
                 <div
                   key={src}
@@ -86,7 +92,7 @@ export function Services() {
                   />
                 </div>
               ))}
-            </Reveal>
+            </MediaReveal>
 
             <ul
               className="border-t border-border"
@@ -132,7 +138,7 @@ export function Services() {
                             isActive ? "text-foreground/75" : "text-muted"
                           }`}
                         >
-                          {service.description}
+                          <CopyText>{service.description}</CopyText>
                         </span>
                       </span>
                       <span
@@ -160,25 +166,27 @@ export function Services() {
                 aria-labelledby={`${baseId}-tab-${active}`}
                 className="relative aspect-[4/5] w-full overflow-hidden bg-stone"
               >
-                <Reveal variant="clip" className="absolute inset-0">
-                {serviceMedia.map((src, i) => (
-                  <div
-                    key={src}
-                    className="service-media absolute inset-0"
-                    data-active={active === i ? "true" : "false"}
-                  >
-                    <MediaImage
-                      src={src}
-                      alt=""
-                      aria-hidden="true"
-                      fill
-                      quality={75}
-                      sizes="(max-width: 1280px) 40vw, 560px"
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-                </Reveal>
+                <MediaReveal variant="primary" className="absolute inset-0">
+                  <CornerFrame className="absolute inset-0 h-full">
+                    {serviceMedia.map((src, i) => (
+                      <div
+                        key={src}
+                        className="service-media absolute inset-0"
+                        data-active={active === i ? "true" : "false"}
+                      >
+                        <MediaImage
+                          src={src}
+                          alt=""
+                          aria-hidden="true"
+                          fill
+                          quality={75}
+                          sizes="(max-width: 1280px) 40vw, 560px"
+                          className="object-cover"
+                        />
+                      </div>
+                    ))}
+                  </CornerFrame>
+                </MediaReveal>
                 <div
                   className="pointer-events-none absolute inset-x-0 bottom-0 h-28"
                   style={{

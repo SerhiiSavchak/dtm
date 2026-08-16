@@ -1,5 +1,6 @@
 "use client";
 
+import { ArchitecturalRule } from "./fx/architectural-rule";
 import { Reveal } from "./reveal";
 
 type SectionHeadProps = {
@@ -16,22 +17,14 @@ export function cleanSectionLabel(label: string) {
   return label.replace(/^\(\d{1,2}\)\s*[—–-]\s*/u, "").trim();
 }
 
-/** Shared section eyebrow — orange rule + label, no decorative numbering */
+/** Shared section eyebrow — one drawing hairline + label, no decorative numbering */
 export function SectionHead({ label, right, onDark = false }: SectionHeadProps) {
   const text = cleanSectionLabel(label);
 
   return (
-    <div
-      className={`section-head flex items-center justify-between ${
-        onDark ? "border-white/15" : "border-border"
-      }`}
-    >
+    <div className="section-head flex items-center justify-between">
+      <ArchitecturalRule />
       <span className="flex items-center gap-3">
-        <Reveal
-          variant="rule"
-          as="span"
-          className="inline-block h-px w-7 shrink-0 bg-accent"
-        />
         <Reveal as="span" variant="fade" className="label text-accent">
           {text}
         </Reveal>

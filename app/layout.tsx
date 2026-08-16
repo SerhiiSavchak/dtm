@@ -47,6 +47,10 @@ const themeInitScript = `
   } catch (e) {
     document.documentElement.setAttribute('data-theme', 'dark');
   }
+  try {
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.documentElement.setAttribute('data-motion', reduce ? 'reduce' : 'ok');
+  } catch (e) {}
 })();
 `;
 

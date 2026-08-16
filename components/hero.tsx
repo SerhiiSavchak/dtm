@@ -11,6 +11,8 @@ import {
   subscribeHeroIntro,
 } from "@/lib/hero-intro";
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { CopyText } from "./copy-text";
+import { InteractiveArrow } from "./fx/interactive-arrow";
 import { PosterVideo } from "./poster-video";
 
 function subscribeReduced(cb: () => void) {
@@ -163,22 +165,20 @@ export function Hero({ boot = true }: { boot?: boolean }) {
             </h1>
 
             <p className="hero-copy mt-5 text-paper md:mt-6">
-              <span className="hero-copy-inner">{t.copy}</span>
+              <span className="hero-copy-inner">
+                <CopyText>{t.copy}</CopyText>
+              </span>
             </p>
 
             <div className="hero-cta flex flex-col items-start lg:flex-row lg:items-center">
               <a href="#estimate" className="btn btn-primary btn-lg group hero-cta-primary">
                 <span className="hero-cta-fill" aria-hidden="true" />
                 {t.ctaPrimary}
-                <span className="btn-arrow" aria-hidden>
-                  →
-                </span>
+                <InteractiveArrow />
               </a>
               <a href="#projects" className="btn btn-ghost btn-lg group hero-cta-secondary">
                 {t.ctaSecondary}
-                <span className="btn-arrow" aria-hidden>
-                  →
-                </span>
+                <InteractiveArrow />
               </a>
             </div>
           </div>

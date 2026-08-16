@@ -1,7 +1,9 @@
 "use client";
 
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { CopyText } from "./copy-text";
 import { EstimateCalculator } from "./calculator/estimate-calculator";
+import { LightTrace } from "./fx/light-trace";
 import { Reveal } from "./reveal";
 import { SectionHead } from "./section-head";
 
@@ -17,12 +19,9 @@ export function EstimateCta() {
       <div className="container-dtm section-pad">
         <SectionHead label={t.label} right={t.labelRight} />
 
-        <Reveal variant="clip">
+        <Reveal variant="fade">
           <div className="calc-panel relative overflow-hidden">
-            <span
-              aria-hidden="true"
-              className="absolute left-0 top-0 h-1 w-24 bg-accent"
-            />
+            <LightTrace className="absolute left-0 top-0" />
 
             <div className="grid grid-cols-1 gap-x-12 gap-y-10 p-6 md:p-10 lg:p-14 xl:grid-cols-12 xl:p-16">
               <div className="flex flex-col xl:col-span-4">
@@ -31,11 +30,11 @@ export function EstimateCta() {
                   <span className="text-accent">{t.headingAccent}</span>
                 </h2>
                 <p className="calc-muted type-body-lg mt-4 max-w-md">
-                  {t.body}
+                  <CopyText>{t.body}</CopyText>
                 </p>
                 <a
                   href="#contacts"
-                  className="label calc-muted mt-6 inline-block transition-colors hover:text-[var(--calc-fg)] xl:mt-auto xl:pt-10"
+                  className="label calc-muted arch-link mt-6 inline-block xl:mt-auto xl:pt-10"
                 >
                   {t.contactLink}
                 </a>

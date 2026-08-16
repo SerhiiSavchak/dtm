@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import { Logo } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
+import { useMagnetic } from "./fx/magnetic";
 import { useDictionary, useLocale } from "@/lib/i18n/locale-context";
 import { useTheme } from "@/lib/theme/theme-context";
 import { navHrefs } from "@/lib/i18n/dictionaries";
@@ -24,6 +25,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
   const [reduceMotion, setReduceMotion] = useState(false);
   const burgerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useMagnetic<HTMLAnchorElement>(3);
   const menuId = useId();
   const menuVisible = menuPhase !== "closed";
   const pendingAnchorRef = useRef<string | null>(null);
@@ -234,8 +236,9 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
 
             <div className="ml-6 hidden nav:block min-[1440px]:ml-8 min-[1600px]:ml-10">
               <a
+                ref={ctaRef}
                 href={navHrefs.estimate}
-                className={`header-cta btn whitespace-nowrap ${
+                className={`header-cta btn arch-magnetic whitespace-nowrap ${
                   solid
                     ? theme === "dark"
                       ? "btn-primary"

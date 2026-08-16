@@ -13,6 +13,8 @@ import { EstimateCta } from "./estimate-cta";
 import { Faq } from "./sections/faq";
 import { SiteFooter } from "./site-footer";
 import { PageLoader } from "./page-loader";
+import { ScrollProgress } from "./fx/scroll-progress";
+import { SubtleGrain } from "./fx/subtle-grain";
 import { useLocale } from "@/lib/i18n/locale-context";
 import {
   getLoaderPhase,
@@ -32,6 +34,8 @@ export function HomeView() {
   return (
     <>
       <PageLoader />
+      <SubtleGrain />
+      <ScrollProgress />
       <DocumentMeta />
       <SiteHeader boot={boot} />
       <div className={`locale-fade min-w-0 ${isSwitching ? "is-switching" : ""}`}>

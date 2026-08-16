@@ -2,6 +2,7 @@
 
 import { useCallback, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { CopyText } from "../copy-text";
 import { Reveal } from "../reveal";
 import { SectionHead } from "../section-head";
 
@@ -166,7 +167,7 @@ export function Process() {
       }
 
       if (fillRef.current) {
-        fillRef.current.style.height = `${smoothFill * 100}%`;
+        fillRef.current.style.transform = `scaleY(${smoothFill})`;
       }
       updateMarkerStates(raw);
 
@@ -230,7 +231,7 @@ export function Process() {
             </Reveal>
             <Reveal variant="fade" delay={0.08}>
               <p className="type-body-lg mt-4 max-w-md text-foreground/70">
-                {t.body}
+                <CopyText>{t.body}</CopyText>
               </p>
             </Reveal>
           </div>
