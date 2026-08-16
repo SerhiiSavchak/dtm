@@ -21,25 +21,32 @@ export function SectionHead({ label, right, onDark = false }: SectionHeadProps) 
   const text = cleanSectionLabel(label);
 
   return (
-    <Reveal
-      as="div"
+    <div
       className={`section-head flex items-center justify-between ${
         onDark ? "border-white/15" : "border-border"
       }`}
     >
       <span className="flex items-center gap-3">
-        <span aria-hidden className="h-px w-7 shrink-0 bg-accent" />
-        <span className="label text-accent">{text}</span>
+        <Reveal
+          variant="rule"
+          as="span"
+          className="inline-block h-px w-7 shrink-0 bg-accent"
+        />
+        <Reveal as="span" variant="fade" className="label text-accent">
+          {text}
+        </Reveal>
       </span>
       {right ? (
-        <span
-          className={`label hidden sm:block ${
-            onDark ? "text-paper/45" : "text-muted"
-          }`}
-        >
-          {right}
-        </span>
+        <Reveal variant="fade" delay={0.08} as="span">
+          <span
+            className={`label hidden sm:block ${
+              onDark ? "text-paper/45" : "text-muted"
+            }`}
+          >
+            {right}
+          </span>
+        </Reveal>
       ) : null}
-    </Reveal>
+    </div>
   );
 }

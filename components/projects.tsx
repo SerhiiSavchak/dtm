@@ -87,13 +87,13 @@ export function Projects() {
         <SectionHead label={t.label} />
 
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <Reveal>
+          <Reveal variant="mask">
             <h2 id="projects-heading" className="type-h2 text-foreground">
               {t.heading}
             </h2>
           </Reveal>
 
-          <Reveal delay={0.06}>
+          <Reveal delay={0.06} variant="fade">
             <div className="flex flex-col items-start gap-2 md:items-end">
               <div className="flex items-center gap-4">
                 <span
@@ -210,7 +210,7 @@ function ProjectSlide({
         aria-label={`${t.open}: ${labels.title}`}
       >
         <div className="project-media">
-          <Reveal variant="clip" className="overflow-hidden bg-stone">
+          <div className="overflow-hidden bg-stone">
             <div
               className={`project-media-frame relative w-full aspect-[4/5] md:aspect-[16/11] ${
                 lead ? "lg:aspect-[16/10]" : ""
@@ -219,15 +219,16 @@ function ProjectSlide({
               <div className="project-media-zoom">
                 <MediaImage
                   src={project.cover}
-                  alt={`DTM: ${labels.category}${labels.location ? `, ${labels.location}` : ""}`}
+                  alt={`DTM: ${labels.category}`}
                   fill
-                  quality={90}
+                  quality={75}
                   sizes="(max-width: 1024px) 86vw, 70vw"
                   className="object-cover"
+                  style={{ objectPosition: project.coverPosition }}
                 />
               </div>
             </div>
-          </Reveal>
+          </div>
           <div className="project-arrow-slot">
             <span aria-hidden className="project-arrow project-arrow-hover">
               →
@@ -336,9 +337,10 @@ function ProjectModal({
             src={project.gallery[galleryIndex] ?? project.cover}
             alt=""
             fill
-            quality={90}
+            quality={75}
             sizes="(max-width: 1024px) 100vw, 55vw"
             className="object-cover"
+            style={{ objectPosition: project.coverPosition }}
           />
         </div>
 

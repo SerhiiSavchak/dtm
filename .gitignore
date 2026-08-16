@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local audit / encode scratch
+/tmp/
+/scripts/_media-audit.js
+
 # vercel
 .vercel
 

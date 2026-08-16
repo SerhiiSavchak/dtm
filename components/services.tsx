@@ -59,7 +59,7 @@ export function Services() {
 
         <div className="grid grid-cols-1 gap-x-12 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <Reveal>
+            <Reveal variant="mask">
               <h2
                 id="services-heading"
                 className="mb-6 type-h2 text-balance text-foreground md:mb-8"
@@ -68,7 +68,7 @@ export function Services() {
               </h2>
             </Reveal>
 
-            <div className="relative mb-8 aspect-[16/10] w-full overflow-hidden bg-stone lg:hidden">
+            <Reveal variant="clip" className="relative mb-8 aspect-[16/10] w-full overflow-hidden bg-stone lg:hidden">
               {serviceMedia.map((src, i) => (
                 <div
                   key={src}
@@ -80,13 +80,13 @@ export function Services() {
                     alt=""
                     aria-hidden="true"
                     fill
-                    quality={90}
+                    quality={75}
                     sizes="(max-width: 1023px) 92vw, 40vw"
                     className="object-cover"
                   />
                 </div>
               ))}
-            </div>
+            </Reveal>
 
             <ul
               className="border-t border-border"
@@ -137,7 +137,7 @@ export function Services() {
                       </span>
                       <span
                         aria-hidden="true"
-                        className={`self-center transition-all duration-300 ${
+                        className={`self-center transition-[color,transform,opacity] duration-300 ${
                           isActive
                             ? "translate-x-0 text-accent opacity-100"
                             : "-translate-x-1 text-muted opacity-50"
@@ -160,6 +160,7 @@ export function Services() {
                 aria-labelledby={`${baseId}-tab-${active}`}
                 className="relative aspect-[4/5] w-full overflow-hidden bg-stone"
               >
+                <Reveal variant="clip" className="absolute inset-0">
                 {serviceMedia.map((src, i) => (
                   <div
                     key={src}
@@ -171,12 +172,13 @@ export function Services() {
                       alt=""
                       aria-hidden="true"
                       fill
-                      quality={90}
+                      quality={75}
                       sizes="(max-width: 1280px) 40vw, 560px"
                       className="object-cover"
                     />
                   </div>
                 ))}
+                </Reveal>
                 <div
                   className="pointer-events-none absolute inset-x-0 bottom-0 h-28"
                   style={{

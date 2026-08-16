@@ -90,14 +90,10 @@ export type Dictionary = {
     labelRight: string;
     heading: string;
     body: string;
-    stages: {
-      finishing: string;
-      install: string;
-      detail: string;
-      handover: string;
-    };
-    captionPlaceholder: string;
+    mediaAlt: string;
     instagramCta: string;
+    showMore: string;
+    showLess: string;
   };
   faq: {
     label: string;
@@ -247,7 +243,7 @@ const uk: Dictionary = {
     copy: "Квартири, будинки й комерційні приміщення у Львові — від першого кошторису до готового простору",
     ctaPrimary: "Отримати попередній розрахунок",
     ctaSecondary: "Дивитися роботи",
-    imageAlt: "Інтер’єр після комплексного ремонту DTM у Львові",
+    imageAlt: "Атмосферне відео сучасного житлового інтер’єру — не об’єкт DTM",
   },
   intro: {
     label: "Відповідальність",
@@ -369,15 +365,11 @@ const uk: Dictionary = {
     label: "У роботі",
     labelRight: "Поточні об’єкти",
     heading: "Об’єкти зараз у роботі",
-    body: "Реальні кадри з поточних ремонтів DTM — хід робіт і звітність",
-    stages: {
-      finishing: "Фінішні роботи",
-      install: "Монтаж",
-      detail: "Деталі",
-      handover: "Підготовка до передачі",
-    },
-    captionPlaceholder: "[Об’єкт]",
+    body: "Живі кадри з майданчиків, де роботи ще тривають. Це не відретушована реклама — більше процесу в Instagram",
+    mediaAlt: "Кадр з об’єкта DTM, де роботи ще тривають",
     instagramCta: "Більше з процесу в Instagram",
+    showMore: "Показати більше",
+    showLess: "Згорнути",
   },
   faq: {
     label: "Запитання",
@@ -576,7 +568,7 @@ const en: Dictionary = {
     copy: "Apartments, houses and commercial spaces in Lviv — from the first estimate to a finished interior",
     ctaPrimary: "Get a preliminary estimate",
     ctaSecondary: "View projects",
-    imageAlt: "Interior after a DTM full-cycle renovation in Lviv",
+    imageAlt: "Atmospheric footage of a contemporary residential interior — not a DTM project",
   },
   intro: {
     label: "Responsibility",
@@ -698,15 +690,11 @@ const en: Dictionary = {
     label: "In progress",
     labelRight: "Live sites",
     heading: "Projects currently in progress",
-    body: "Real frames from active DTM renovations — process and reporting",
-    stages: {
-      finishing: "Finishing works",
-      install: "Installation",
-      detail: "Details",
-      handover: "Preparing for handover",
-    },
-    captionPlaceholder: "[Project]",
+    body: "Live frames from sites where work is still underway. This is not retouched advertising — more of the process is on Instagram",
+    mediaAlt: "Frame from a DTM site where work is still underway",
     instagramCta: "More process on Instagram",
+    showMore: "Show more",
+    showLess: "Show less",
   },
   faq: {
     label: "Questions",

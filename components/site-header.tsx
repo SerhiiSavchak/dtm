@@ -161,7 +161,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
         className={`site-header fixed inset-x-0 top-0 z-[70] transition-[background-color,opacity,box-shadow,visibility] duration-500 ${
           !boot
             ? "pointer-events-none invisible opacity-0"
-            : "opacity-100"
+            : "is-booted opacity-100"
         } ${
           solid ? "site-header-solid bg-background" : "bg-transparent"
         }`}

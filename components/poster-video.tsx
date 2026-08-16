@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { MediaImage } from "./media-image";
 import type { SiteImageSrc } from "@/lib/site-images";
 
@@ -33,6 +33,7 @@ type PosterVideoProps = {
    * `metadata` / `none`.
    */
   preload?: "none" | "metadata" | "auto";
+  objectPosition?: string;
 };
 
 /**
@@ -52,6 +53,7 @@ export function PosterVideo({
   quality = 90,
   onPosterReady,
   preload = "metadata",
+  objectPosition,
 }: PosterVideoProps) {
   const reduced = useSyncExternalStore(subscribeReduced, getReduced, () => false);
   const [posterReady, setPosterReady] = useState(false);
@@ -84,6 +86,10 @@ export function PosterVideo({
     tryReveal(el);
   }, [mountVideo, tryReveal]);
 
+  const positionStyle = objectPosition
+    ? ({ objectPosition } as CSSProperties)
+    : undefined;
+
   return (
     <div className={`relative h-full w-full overflow-hidden ${className}`}>
       <MediaImage
@@ -94,6 +100,7 @@ export function PosterVideo({
         quality={quality}
         sizes={sizes}
         className={imageClassName}
+        style={positionStyle}
         onReady={signalPoster}
       />
       {mountVideo ? (
@@ -102,6 +109,7 @@ export function PosterVideo({
           className={`media-video ${videoClassName} ${
             videoReady ? "is-shown" : ""
           }`}
+          style={positionStyle}
           muted
           loop
           playsInline

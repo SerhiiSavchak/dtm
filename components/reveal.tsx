@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, type ElementType, type ReactNode } from "r
 
 type RevealProps = {
   children?: ReactNode;
-  /** Motion variant: rise, clip (image mask), or rule (line draw) */
-  variant?: "rise" | "clip" | "rule";
+  /** rise: fade+up · clip: image mask · rule: line draw · mask: overflow reveal · fade: opacity only */
+  variant?: "rise" | "clip" | "rule" | "mask" | "fade";
   /** Delay in seconds for staggered sequences */
   delay?: number;
   /** Render element */
@@ -51,8 +51,6 @@ export function Reveal({
     ? ({ "--fx-delay": `${delay}s` } as React.CSSProperties)
     : undefined;
 
-  // Clip variant: observe an unclipped outer wrapper — a clipped root can
-  // deadlock IntersectionObserver at ratio 0.
   if (variant === "clip") {
     return (
       <Tag ref={ref} className={className}>
@@ -71,6 +69,30 @@ export function Reveal({
       <Tag
         ref={ref}
         className={`fx-rule ${inView ? "is-in" : ""} ${className}`}
+        style={styleVar}
+      >
+        {children}
+      </Tag>
+    );
+  }
+
+  if (variant === "mask") {
+    return (
+      <Tag
+        ref={ref}
+        className={`fx-mask ${inView ? "is-in" : ""} ${className}`}
+        style={styleVar}
+      >
+        <span className="fx-mask-inner">{children}</span>
+      </Tag>
+    );
+  }
+
+  if (variant === "fade") {
+    return (
+      <Tag
+        ref={ref}
+        className={`fx-fade ${inView ? "is-in" : ""} ${className}`}
         style={styleVar}
       >
         {children}

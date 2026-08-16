@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { inProgressMedia, socialLinks } from "@/data/media";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { MediaImage } from "../media-image";
@@ -9,6 +10,8 @@ import { SectionHead } from "../section-head";
 
 export function InProgress() {
   const t = useDictionary().inProgress;
+  const [expanded, setExpanded] = useState(false);
+  const hiddenCount = inProgressMedia.filter((item) => !item.mobilePriority).length;
 
   return (
     <section
@@ -19,25 +22,22 @@ export function InProgress() {
       <div className="container-dtm section-pad">
         <SectionHead label={t.label} right={t.labelRight} />
 
-        <div className="grid grid-cols-1 gap-x-8 gap-y-8 lg:grid-cols-12 lg:items-center">
-          <div className="lg:col-span-4">
-            <Reveal>
-              <h2 id="in-progress-heading" className="type-h2 text-foreground">
-                {t.heading}
-              </h2>
+        <div className="in-progress-intro">
+          <Reveal variant="mask">
+            <h2 id="in-progress-heading" className="type-h2 text-foreground">
+              {t.heading}
+            </h2>
+          </Reveal>
+          <div className="in-progress-intro-copy">
+            <Reveal variant="fade" delay={0.08}>
+              <p className="type-body-lg text-foreground/70">{t.body}</p>
             </Reveal>
-            <Reveal delay={0.06}>
-              <p className="type-body-lg mt-4 max-w-md text-foreground/70">
-                {t.body}
-              </p>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <p className="label mt-8 text-muted">{t.captionPlaceholder}</p>
+            <Reveal variant="fade" delay={0.14}>
               <a
                 href={socialLinks.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-text group mt-4 text-foreground"
+                className="btn btn-text group mt-5 text-foreground"
               >
                 {t.instagramCta}
                 <span className="btn-arrow" aria-hidden>
@@ -46,59 +46,69 @@ export function InProgress() {
               </a>
             </Reveal>
           </div>
-
-          <div className="lg:col-span-8">
-            <Reveal
-              variant="clip"
-              className="relative aspect-[4/5] overflow-hidden bg-stone sm:aspect-[16/10]"
-            >
-              <PosterVideo
-                poster={inProgressMedia.lead}
-                alt=""
-                mp4={inProgressMedia.leadVideo}
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                preload="metadata"
-                className="absolute inset-0"
-                imageClassName="object-cover object-center"
-                videoClassName="object-cover object-center"
-              />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] flex items-center justify-between bg-gradient-to-t from-ink-deep/80 to-transparent p-4">
-                <span className="label text-paper/90">{t.stages.finishing}</span>
-              </div>
-            </Reveal>
-          </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-4 md:mt-5 lg:grid-cols-12">
-          {inProgressMedia.tiles.slice(0, 3).map((tile, i) => {
-            const spans = [
-              "col-span-1 aspect-[4/5] lg:col-span-3",
-              "col-span-1 aspect-[4/5] lg:col-span-6",
-              "col-span-2 aspect-[16/10] lg:col-span-3",
-            ][i];
+        <div className="in-progress-grid">
+          {inProgressMedia.map((item, i) => {
+            const sizes =
+              item.layout === "feature"
+                ? "(max-width: 1024px) 100vw, min(1120px, 88vw)"
+                : "(max-width: 1023px) 100vw, min(548px, 44vw)";
+
             return (
-              <Reveal
-                key={tile.src}
-                variant="clip"
-                delay={0.04 + i * 0.05}
-                className={`group relative overflow-hidden bg-stone lg:aspect-auto lg:h-[clamp(15rem,23vw,23rem)] ${spans}`}
+              <div
+                key={item.id}
+                className={`in-progress-item is-${item.layout}${
+                  item.mobilePriority ? "" : " is-deferred"
+                }${expanded ? " is-shown" : ""}`}
               >
-                <MediaImage
-                  src={tile.src}
-                  alt=""
-                  fill
-                  sizes="(max-width: 1024px) 50vw, 30vw"
-                  className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.03]"
-                />
-                <div className="absolute inset-x-0 bottom-0 z-[3] p-3">
-                  <span className="label text-paper/90">
-                    {t.stages[tile.stageKey]}
-                  </span>
-                </div>
-              </Reveal>
+                <Reveal
+                  variant={item.layout === "feature" ? "clip" : i % 2 === 0 ? "fade" : "clip"}
+                  delay={item.layout === "feature" ? 0.04 : 0.06 + (i - 1) * 0.06}
+                  className="in-progress-frame"
+                >
+                  {item.video ? (
+                    <PosterVideo
+                      poster={item.src}
+                      alt={t.mediaAlt}
+                      mp4={item.video}
+                      sizes={sizes}
+                      preload="metadata"
+                      quality={75}
+                      objectPosition={item.objectPosition}
+                      className="absolute inset-0"
+                      imageClassName="object-cover"
+                      videoClassName="object-cover"
+                    />
+                  ) : (
+                    <MediaImage
+                      src={item.src}
+                      alt={t.mediaAlt}
+                      fill
+                      quality={75}
+                      sizes={sizes}
+                      className="in-progress-image object-cover"
+                      style={{ objectPosition: item.objectPosition }}
+                    />
+                  )}
+                </Reveal>
+              </div>
             );
           })}
         </div>
+
+        {hiddenCount > 0 ? (
+          <div className="mt-6 lg:hidden">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              aria-expanded={expanded}
+              onClick={() => setExpanded((value) => !value)}
+            >
+              {expanded ? t.showLess : t.showMore}
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );

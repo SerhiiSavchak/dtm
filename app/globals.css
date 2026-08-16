@@ -359,6 +359,21 @@ input:disabled {
   box-shadow: inset 0 -1px 0 var(--color-line);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .site-header.is-booted {
+    animation: dtm-header-settle 0.8s var(--ease-out-soft) both;
+  }
+}
+
+@keyframes dtm-header-settle {
+  from {
+    transform: translateY(-8px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 .dtm-wordmark {
   color: var(--orange);
   font-size: 1.4rem;
@@ -927,7 +942,7 @@ html[data-theme] {
 
 /* Light cinematic veil — keeps the interior readable, not crushed */
 .hero-contrast-tint {
-  background: rgba(13, 13, 15, 0.14);
+  background: rgba(13, 13, 15, 0.1);
 }
 
 /* Header clearance on bright frames */
@@ -944,9 +959,9 @@ html[data-theme] {
 .hero-contrast-copy {
   background: linear-gradient(
     90deg,
-    rgba(13, 13, 15, 0.72) 0%,
-    rgba(13, 13, 15, 0.48) 28%,
-    rgba(13, 13, 15, 0.18) 52%,
+    rgba(13, 13, 15, 0.62) 0%,
+    rgba(13, 13, 15, 0.4) 28%,
+    rgba(13, 13, 15, 0.14) 52%,
     rgba(13, 13, 15, 0) 72%
   );
 }
@@ -976,17 +991,80 @@ html[data-theme] {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  [data-hero="ready"] .hero-cluster {
-    animation: dtm-hero-settle 0.7s var(--ease-out-expo);
+  [data-hero="pending"] .mask-line > span {
+    transform: translateY(105%);
+  }
+
+  [data-hero="pending"] .hero-meta,
+  [data-hero="pending"] .hero-copy {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  [data-hero="pending"] .hero-cta {
+    transform: translateY(14px);
+  }
+
+  [data-hero="ready"] .hero-meta {
+    animation: dtm-hero-enter 0.7s var(--ease-out-expo) both;
+  }
+
+  [data-hero="ready"] .hero-line-1 > span {
+    animation: dtm-mask-line 0.85s var(--ease-out-expo) both;
+    animation-delay: 80ms;
+  }
+
+  [data-hero="ready"] .hero-line-2 > span {
+    animation: dtm-mask-line 0.85s var(--ease-out-expo) both;
+    animation-delay: 160ms;
+  }
+
+  [data-hero="ready"] .hero-line-3 > span {
+    animation: dtm-mask-line 0.9s var(--ease-out-expo) both;
+    animation-delay: 250ms;
+  }
+
+  [data-hero="ready"] .hero-copy {
+    animation: dtm-hero-enter 0.75s var(--ease-out-expo) both;
+    animation-delay: 340ms;
+  }
+
+  [data-hero="ready"] .hero-cta {
+    animation: dtm-hero-cta 0.7s var(--ease-out-expo) both;
+    animation-delay: 440ms;
+  }
+
+  [data-hero="ready"] .hero-media-inner {
+    animation: dtm-hero-media 1.55s var(--ease-out-soft) both;
   }
 }
 
-@keyframes dtm-hero-settle {
+@keyframes dtm-hero-enter {
   from {
+    opacity: 0;
     transform: translateY(12px);
   }
   to {
+    opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes dtm-hero-cta {
+  from {
+    transform: translateY(14px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes dtm-hero-media {
+  from {
+    transform: scale(1.035);
+  }
+  to {
+    transform: scale(1);
   }
 }
 
@@ -1172,6 +1250,118 @@ html[data-theme] {
 .group:hover .fx-media-scale-hover {
   transform: scale(1.035);
   transition: transform 0.9s var(--ease-out-soft);
+}
+
+.fx-mask {
+  overflow: hidden;
+}
+
+.fx-mask-inner {
+  display: block;
+  transform: translateY(108%);
+  transition: transform 0.85s var(--ease-out-expo);
+  transition-delay: var(--fx-delay, 0s);
+}
+
+.fx-mask.is-in .fx-mask-inner {
+  transform: none;
+}
+
+.fx-fade {
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out-soft);
+  transition-delay: var(--fx-delay, 0s);
+}
+
+.fx-fade.is-in {
+  opacity: 1;
+}
+
+/* ---------- In progress editorial grid ---------- */
+
+.in-progress-intro {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 0.25rem;
+  margin-bottom: 1.75rem;
+}
+
+@media (min-width: 1024px) {
+  .in-progress-intro {
+    grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
+    gap: 2.5rem;
+    align-items: end;
+    margin-bottom: 2.25rem;
+  }
+}
+
+.in-progress-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+}
+
+@media (min-width: 1024px) {
+  .in-progress-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.15rem;
+  }
+
+  .in-progress-item.is-feature {
+    grid-column: 1 / -1;
+  }
+}
+
+.in-progress-item {
+  min-width: 0;
+}
+
+.in-progress-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-stone, #d8d2c8);
+  width: 100%;
+}
+
+.in-progress-item.is-feature .in-progress-frame {
+  aspect-ratio: 16 / 10;
+}
+
+.in-progress-item.is-landscape .in-progress-frame {
+  aspect-ratio: 5 / 4;
+}
+
+.in-progress-item.is-portrait .in-progress-frame {
+  aspect-ratio: 4 / 5;
+}
+
+@media (min-width: 1024px) {
+  .in-progress-item.is-feature .in-progress-frame {
+    aspect-ratio: auto;
+    height: clamp(32rem, 46vw, 44rem);
+  }
+
+  .in-progress-item.is-landscape .in-progress-frame,
+  .in-progress-item.is-portrait .in-progress-frame {
+    aspect-ratio: auto;
+    height: clamp(34rem, 50vw, 46rem);
+  }
+}
+
+.in-progress-image {
+  transition: transform 0.9s var(--ease-out-soft);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .in-progress-item:hover .in-progress-image {
+    transform: scale(1.03);
+  }
+}
+
+@media (max-width: 1023px) {
+  .in-progress-item.is-deferred:not(.is-shown) {
+    display: none;
+  }
 }
 
 /* Calculator step motion */
@@ -1926,7 +2116,8 @@ html[data-theme="light"] .calc-panel {
   .calc-step-enter-back,
   .calc-step-exit,
   [data-hero="ready"] .hero-cluster,
-  .hero-cluster {
+  .hero-cluster,
+  .site-header.is-booted {
     animation: none !important;
   }
 
@@ -1939,10 +2130,12 @@ html[data-theme="light"] .calc-panel {
   .mask-line > span,
   .hero-line-1 > span,
   .hero-line-2 > span,
-  .hero-line-3 > span {
+  .hero-line-3 > span,
+  .site-header.is-booted {
     opacity: 1 !important;
     transform: none !important;
     clip-path: none !important;
+    animation: none !important;
   }
 
   .media-frame .media-lqip {
@@ -1956,7 +2149,10 @@ html[data-theme="light"] .calc-panel {
 
   .fx,
   .fx-clip,
-  .fx-rule {
+  .fx-rule,
+  .fx-mask,
+  .fx-fade,
+  .fx-mask-inner {
     opacity: 1 !important;
     transform: none !important;
     clip-path: none !important;
@@ -1964,7 +2160,8 @@ html[data-theme="light"] .calc-panel {
   }
 
   .fx-media-scale,
-  .service-media {
+  .service-media,
+  .in-progress-image {
     transform: none !important;
     transition: none !important;
     clip-path: none !important;
