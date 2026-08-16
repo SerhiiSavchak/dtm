@@ -18,6 +18,7 @@ export type Dictionary = {
     about: string;
     contact: string;
     estimate: string;
+    estimateCta: string;
     mainAria: string;
     mobileAria: string;
     openMenu: string;
@@ -191,6 +192,7 @@ export type Dictionary = {
     tagline: string;
     locationLabel: string;
     location: string;
+    socialLabel: string;
     copyright: string;
     localeMark: string;
   };
@@ -220,6 +222,7 @@ const uk: Dictionary = {
     about: "Про нас",
     contact: "Контакти",
     estimate: "Розрахувати",
+    estimateCta: "Розрахувати вартість",
     mainAria: "Головна навігація",
     mobileAria: "Мобільна навігація",
     openMenu: "Відкрити меню",
@@ -509,6 +512,7 @@ const uk: Dictionary = {
       "Комплексний ремонт квартир, будинків і комерційних просторів у Львові",
     locationLabel: "Локація",
     location: "Львів, Україна",
+    socialLabel: "Соцмережі",
     copyright: "DTM — Дім Твоєї Мрії",
     localeMark: "Львів · Україна",
   },
@@ -538,6 +542,7 @@ const en: Dictionary = {
     about: "About us",
     contact: "Contact",
     estimate: "Get an estimate",
+    estimateCta: "Estimate cost",
     mainAria: "Primary navigation",
     mobileAria: "Mobile navigation",
     openMenu: "Open menu",
@@ -827,6 +832,7 @@ const en: Dictionary = {
       "Full-cycle renovation of apartments, houses and commercial spaces in Lviv",
     locationLabel: "Location",
     location: "Lviv, Ukraine",
+    socialLabel: "Social",
     copyright: "DTM — Dim Tvoyeyi Mriyi",
     localeMark: "Lviv · Ukraine",
   },

@@ -165,6 +165,38 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Interactive cursor
+   Native <button> uses cursor: default in UA styles; Tailwind v4 preflight
+   does not override it. Pointer is set once for real controls. More specific
+   rules later in this file keep grab on the project track and not-allowed
+   on disabled buttons. Text inputs / textareas are intentionally omitted. */
+a[href],
+button,
+[role="button"],
+[role="tab"],
+summary,
+label[for],
+select,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"],
+input[type="color"],
+input[type="range"],
+::file-selector-button {
+  cursor: pointer;
+}
+
+button:disabled,
+button[aria-disabled="true"],
+[role="button"][aria-disabled="true"],
+select:disabled,
+input:disabled {
+  cursor: not-allowed;
+}
+
 ::selection {
   background: var(--orange);
   color: #ffffff;
@@ -350,6 +382,7 @@ body {
   font-weight: 500;
   line-height: 1.25;
   border-radius: 0;
+  cursor: pointer;
   /* Clip the fill wipe horizontally; extra padding-end holds arrow travel */
   overflow-x: clip;
   overflow-y: visible;
@@ -361,15 +394,45 @@ body {
     background-color var(--motion-fast) var(--ease-out-soft);
 }
 
+.btn:disabled {
+  cursor: not-allowed;
+}
+
 .btn-sm {
   min-height: 2.5rem;
   padding: 0.65rem 1.15rem;
 }
 
+/* Hamburger → close: same 48×48 hit area, same stroke geometry */
+.header-menu-toggle {
+  cursor: pointer;
+}
+
+.header-menu-toggle .header-menu-line {
+  transform-origin: center;
+  transition: transform 220ms var(--ease-out-expo), background-color 200ms ease;
+}
+
+.header-menu-toggle .header-menu-line-1 {
+  transform: translateY(-5px);
+}
+
+.header-menu-toggle .header-menu-line-2 {
+  transform: translateY(5px);
+}
+
+.header-menu-toggle[data-open="true"] .header-menu-line-1 {
+  transform: rotate(45deg);
+}
+
+.header-menu-toggle[data-open="true"] .header-menu-line-2 {
+  transform: rotate(-45deg);
+}
+
 /* Desktop header CTA — slightly more presence than compact btn-sm */
 .btn.header-cta {
   min-height: 2.75rem;
-  padding: 0.7rem 1.4rem;
+  padding: 0.7rem 1.5rem;
   font-size: 0.875rem;
   letter-spacing: 0.01em;
 }
@@ -377,7 +440,7 @@ body {
 @media (min-width: 1280px) {
   .btn.header-cta {
     min-height: 2.875rem;
-    padding-inline: 1.55rem;
+    padding-inline: 1.65rem;
     font-size: 0.9rem;
   }
 }
@@ -385,6 +448,7 @@ body {
 /* Theme toggle — rim/background owned here so Tailwind `border` cannot
    force --color-border over the intended light Hero outline. */
 .theme-toggle {
+  cursor: pointer;
   border-color: var(--color-line);
   background-color: color-mix(in oklab, var(--color-foreground) 4%, transparent);
   color: var(--color-muted);
@@ -483,11 +547,13 @@ body {
 .btn:disabled {
   opacity: 0.4;
   pointer-events: none;
+  cursor: not-allowed;
 }
 
 .btn-primary {
   background: var(--accent);
   color: #ffffff;
+  border: 1px solid var(--accent);
 }
 
 .btn-primary::before {
@@ -521,7 +587,7 @@ body {
 }
 
 .btn-secondary {
-  border: 1px solid var(--color-line);
+  border: 1px solid color-mix(in oklab, var(--color-foreground) 28%, transparent);
   color: var(--color-text);
   background: transparent;
 }
@@ -529,6 +595,7 @@ body {
 .btn-secondary:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 6%, transparent);
 }
 
 .btn-ink {
@@ -1207,6 +1274,7 @@ html[data-theme="light"] .calc-panel {
   border: 1px solid var(--calc-line);
   background: transparent;
   color: var(--calc-fg);
+  cursor: pointer;
 }
 
 .calc-option:hover {
@@ -1287,55 +1355,44 @@ html[data-theme="light"] .calc-panel {
 
 .mobile-menu {
   position: fixed;
-  inset: 0;
+  top: var(--header-h);
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 80;
   width: 100%;
-  height: 100svh;
   background-color: var(--background);
   color: var(--foreground);
   opacity: 0;
-  transform: translateY(-8px);
   pointer-events: none;
   overflow-x: hidden;
   overflow-y: auto;
   /* No visibility:hidden — it commonly skips opacity enter transitions */
-  transition:
-    opacity 320ms var(--ease-out-soft),
-    transform 320ms var(--ease-out-expo);
+  transition: opacity 280ms var(--ease-out-soft);
 }
 
 .mobile-menu[data-state="open"] {
   opacity: 1;
-  transform: translateY(0);
   pointer-events: auto;
 }
 
 .mobile-menu[data-state="closing"] {
   opacity: 0;
-  transform: translateY(-8px);
   pointer-events: none;
-  transition-duration: 220ms, 220ms;
+  transition-duration: 200ms;
 }
 
 .mobile-menu[data-state="closed"] {
   opacity: 0;
-  transform: translateY(-8px);
   pointer-events: none;
 }
 
 .mobile-menu-shell {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  min-height: 100svh;
-  padding-block: 0.75rem calc(1.35rem + env(safe-area-inset-bottom, 0px));
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 100%;
+  padding-block: 0.5rem calc(1.35rem + env(safe-area-inset-bottom, 0px));
   gap: 0.25rem;
-}
-
-.mobile-menu-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 2.75rem;
 }
 
 /* Nav sits in upper-middle band (~42–50% visual mass), not stretched full height */
@@ -1424,15 +1481,8 @@ html[data-theme="light"] .calc-panel {
   transition-delay: 0s;
 }
 
-.mobile-menu[data-state="open"] .mobile-menu-top .mobile-menu-item:nth-child(1) {
-  transition-delay: 0.05s;
-}
-.mobile-menu[data-state="open"] .mobile-menu-top .mobile-menu-item:nth-child(2) {
-  transition-delay: 0.08s;
-}
-
 .mobile-menu[data-state="open"] .mobile-menu-nav .mobile-menu-item:nth-child(1) {
-  transition-delay: 0.1s;
+  transition-delay: 0.06s;
 }
 .mobile-menu[data-state="open"] .mobile-menu-nav .mobile-menu-item:nth-child(2) {
   transition-delay: 0.15s;
@@ -1459,7 +1509,6 @@ html[data-theme="light"] .calc-panel {
 
 .mobile-menu[data-motion="reduce"][data-state="open"] {
   opacity: 1;
-  transform: none;
 }
 
 .mobile-menu[data-motion="reduce"][data-state="open"] .mobile-menu-item {
@@ -1480,6 +1529,40 @@ html[data-theme="light"] .calc-panel {
 }
 
 /* FAQ accordion — grid rows + inner fade/translate */
+.faq-question {
+  cursor: pointer;
+  min-height: 3.75rem;
+}
+
+.faq-question:hover .faq-toggle-icon {
+  color: var(--orange);
+}
+
+.faq-toggle {
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.faq-toggle-icon {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 1.375rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.faq-toggle.is-open {
+  transform: rotate(45deg);
+}
+
 .faq-panel {
   display: grid;
   grid-template-rows: 0fr;
@@ -1567,6 +1650,7 @@ html[data-theme="light"] .calc-panel {
   .mobile-menu-item,
   .faq-panel,
   .faq-answer,
+  .faq-toggle,
   .locale-fade,
   .btn-primary::before,
   .process-rail-fill {

@@ -21,7 +21,6 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
     "closed"
   );
   const [reduceMotion, setReduceMotion] = useState(false);
-  const menuCloseRef = useRef<HTMLButtonElement>(null);
   const burgerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -49,10 +48,6 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
       document.body.style.overflow = "";
     };
   }, [menuVisible]);
-
-  useEffect(() => {
-    if (menuPhase === "open") menuCloseRef.current?.focus();
-  }, [menuPhase]);
 
   function openMenu() {
     if (menuPhase !== "closed") return;
@@ -146,10 +141,9 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
     };
   }, [menuPhase, reduceMotion]);
 
-  const solid = scrolled && !menuVisible;
+  const solid = scrolled || menuVisible;
   const onDarkChrome = !solid || theme === "dark";
   const tone = onDarkChrome ? "paper" : "ink";
-  const menuLogoTone = theme === "dark" ? "paper" : "ink";
 
   const links = [
     { label: t.nav.services, href: navHrefs.services },
@@ -163,20 +157,23 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
     <>
       <header
         className={`site-header fixed inset-x-0 top-0 z-[70] transition-[background-color,opacity,box-shadow,visibility] duration-500 ${
-          !boot || menuVisible
+          !boot
             ? "pointer-events-none invisible opacity-0"
             : "opacity-100"
         } ${
           solid ? "site-header-solid bg-background" : "bg-transparent"
         }`}
         style={{ height: "var(--header-h)" }}
-        aria-hidden={menuVisible}
+        aria-hidden={!boot}
       >
-        <div className="container-dtm flex h-full items-center justify-between gap-3 nav:gap-4">
+        <div className="container-dtm grid h-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 nav:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
           <a
             href="#top"
-            className="flex items-center"
+            className="justify-self-start flex items-center"
             aria-label={t.nav.homeAria}
+            onClick={(e) => {
+              if (menuPhase === "open") onMobileNavClick(e, "#top");
+            }}
           >
             <Logo tone={tone} withDescriptor className="hidden sm:block" />
             <Logo tone={tone} withDescriptor={false} className="sm:hidden" />
@@ -184,7 +181,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
 
           <nav
             aria-label={t.nav.mainAria}
-            className="hidden items-center gap-5 min-[1280px]:gap-6 min-[1440px]:gap-8 nav:flex"
+            className="hidden items-center gap-4 justify-self-center min-[1280px]:gap-6 min-[1440px]:gap-8 nav:flex"
           >
             {links.map((item) => (
               <a
@@ -207,7 +204,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
             ))}
           </nav>
 
-          <div className="flex items-center">
+          <div className="col-start-2 flex items-center justify-self-end nav:col-start-3">
             <div className="hidden items-center gap-3 nav:flex min-[1440px]:gap-3.5">
               <ThemeToggle
                 tone={
@@ -246,31 +243,41 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
                     : "btn-primary"
                 }`}
               >
-                {t.nav.estimate}
+                {t.nav.estimateCta}
               </a>
             </div>
 
             <button
               type="button"
               ref={burgerRef}
-              onClick={openMenu}
+              onClick={() => {
+                if (menuPhase === "open") {
+                  pendingAnchorRef.current = null;
+                  closeMenu();
+                } else {
+                  openMenu();
+                }
+              }}
               aria-expanded={menuVisible}
               aria-controls={menuId}
-              aria-label={t.nav.openMenu}
-              className="relative flex h-12 w-12 items-center justify-center nav:hidden"
+              aria-label={menuVisible ? t.nav.closeMenu : t.nav.openMenu}
+              data-open={menuVisible ? "true" : "false"}
+              className="header-menu-toggle relative flex h-12 w-12 items-center justify-center nav:hidden"
             >
-              <span className="sr-only">{t.nav.openMenu}</span>
+              <span className="sr-only">
+                {menuVisible ? t.nav.closeMenu : t.nav.openMenu}
+              </span>
               <span
                 aria-hidden
-                className={`absolute block h-0.5 w-7 transition-colors ${
+                className={`header-menu-line header-menu-line-1 absolute block h-0.5 w-7 ${
                   !solid ? "bg-paper" : "bg-foreground"
-                } -translate-y-[5px]`}
+                }`}
               />
               <span
                 aria-hidden
-                className={`absolute block h-0.5 w-7 transition-colors ${
+                className={`header-menu-line header-menu-line-2 absolute block h-0.5 w-7 ${
                   !solid ? "bg-paper" : "bg-foreground"
-                } translate-y-[5px]`}
+                }`}
               />
             </button>
           </div>
@@ -287,37 +294,6 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
         inert={!menuVisible}
       >
         <div className="mobile-menu-shell container-dtm">
-          <div className="mobile-menu-top">
-            <a
-              href="#top"
-              className="mobile-menu-item flex items-center"
-              aria-label={t.nav.homeAria}
-              onClick={(e) => onMobileNavClick(e, "#top")}
-            >
-              <Logo tone={menuLogoTone} withDescriptor={false} />
-            </a>
-            <button
-              type="button"
-              ref={menuCloseRef}
-              onClick={() => {
-                pendingAnchorRef.current = null;
-                closeMenu();
-              }}
-              aria-label={t.nav.closeMenu}
-              className="mobile-menu-item relative flex h-12 w-12 items-center justify-center"
-            >
-              <span className="sr-only">{t.nav.closeMenu}</span>
-              <span
-                aria-hidden
-                className="absolute block h-px w-7 rotate-45 bg-foreground"
-              />
-              <span
-                aria-hidden
-                className="absolute block h-px w-7 -rotate-45 bg-foreground"
-              />
-            </button>
-          </div>
-
           <nav aria-label={t.nav.mobileAria} className="mobile-menu-nav">
             {links.map((item) => (
               <a
@@ -334,7 +310,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
             ))}
           </nav>
 
-            <div className="mobile-menu-item mobile-menu-utility">
+          <div className="mobile-menu-item mobile-menu-utility">
             <div className="mobile-menu-utility-row">
               <ThemeToggle
                 size="lg"

@@ -23,16 +23,16 @@ export function SiteFooter() {
     <footer id="contacts" className="mt-auto bg-bg text-foreground">
       <div className="container-dtm section-pad-sm">
         <Reveal>
-          <div className="flex flex-col items-center border-t border-border pt-8 text-center md:pt-10">
+          <div className="flex flex-col items-center border-t border-border pt-10 text-center md:pt-12">
             <p className="type-h1 max-w-[18ch] text-balance text-foreground">
               {t.finalCta.headingBefore}{" "}
               <span className="text-accent">{t.finalCta.headingAfter}</span>
             </p>
-            <p className="type-body-lg mt-4 max-w-lg text-muted">
+            <p className="type-body-lg mt-5 max-w-lg text-muted lg:mt-6">
               {t.finalCta.body}
             </p>
-            <div className="mt-6 flex w-full flex-col items-center gap-4 sm:w-auto lg:mt-8 lg:flex-row lg:items-center lg:justify-center lg:gap-8">
-              <a href="#estimate" className="btn btn-primary max-lg:w-full">
+            <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:w-auto lg:mt-10 lg:flex-row lg:items-center lg:justify-center lg:gap-4">
+              <a href="#estimate" className="btn btn-primary group max-lg:w-full">
                 {t.finalCta.primary}
                 <span className="btn-arrow" aria-hidden>
                   →
@@ -40,7 +40,7 @@ export function SiteFooter() {
               </a>
               <a
                 href={socialLinks.telegram}
-                className="btn btn-text group text-foreground/80 hover:text-foreground"
+                className="btn btn-secondary group max-lg:w-full"
                 target={
                   socialLinks.telegram.startsWith("http") ? "_blank" : undefined
                 }
@@ -59,7 +59,7 @@ export function SiteFooter() {
           </div>
         </Reveal>
 
-        <div className="mt-10 border-t border-border pt-8 md:mt-12 md:pt-10 lg:mt-8 lg:pt-6">
+        <div className="mt-12 border-t border-border pt-8 md:mt-14 md:pt-10 lg:mt-14 lg:pt-8">
           {/* Mobile / tablet — stacked, centered. Unchanged composition. */}
           <div className="mx-auto flex max-w-5xl flex-col items-center gap-8 text-center md:gap-10 lg:hidden">
             <div className="flex flex-col items-center">
@@ -97,61 +97,56 @@ export function SiteFooter() {
               >
                 Instagram
               </a>
-              <a
-                href="#estimate"
-                className="flex min-h-11 items-center text-base text-accent transition-colors hover:text-foreground"
-              >
-                {t.nav.estimate}
-              </a>
             </div>
           </div>
 
-          {/* Desktop — wide horizontal: brand | nav row | location */}
-          <div className="hidden lg:grid lg:grid-cols-[minmax(13rem,1.15fr)_auto_minmax(11rem,0.95fr)] lg:items-center lg:gap-x-8 xl:gap-x-12 2xl:gap-x-16">
-            <div className="flex min-w-0 flex-col items-start text-left">
+          {/* Desktop — equal side columns keep nav in the true center */}
+          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-start lg:gap-x-8 xl:gap-x-10 2xl:gap-x-12">
+            <div className="flex min-w-0 flex-col items-start justify-self-start text-left">
               <Logo tone={theme === "dark" ? "paper" : "ink"} withDescriptor />
-              <p className="type-body-sm mt-2.5 max-w-[22rem] text-muted">
+              <p className="type-body-sm mt-2.5 max-w-[20rem] text-muted">
                 {t.footer.tagline}
               </p>
             </div>
 
             <nav
               aria-label={t.nav.mainAria}
-              className="flex flex-nowrap items-center justify-center gap-x-5 xl:gap-x-7 2xl:gap-x-9"
+              className="flex flex-nowrap items-center justify-center gap-x-5 pt-1.5 xl:gap-x-6 2xl:gap-x-7"
             >
               {links.map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className="whitespace-nowrap py-1 type-body text-foreground/80 transition-colors hover:text-accent"
+                  className="type-body whitespace-nowrap py-1 text-foreground/80 transition-colors hover:text-accent"
                 >
                   {item.label}
                 </a>
               ))}
             </nav>
 
-            <div className="flex flex-col items-end gap-0.5 text-right">
-              <span className="label text-muted">{t.footer.locationLabel}</span>
-              <p className="type-body-sm text-foreground/80">{t.footer.location}</p>
-              <a
-                href={socialLinks.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="type-body-sm text-foreground/80 transition-colors hover:text-accent"
-              >
-                Instagram
-              </a>
-              <a
-                href="#estimate"
-                className="type-body-sm text-accent transition-colors hover:text-foreground"
-              >
-                {t.nav.estimate}
-              </a>
+            <div className="flex items-start justify-end justify-self-end gap-x-8 pt-1.5 xl:gap-x-10">
+              <div className="flex flex-col items-start text-left">
+                <span className="label text-muted">{t.footer.locationLabel}</span>
+                <p className="mt-2 type-body-sm text-foreground/80">
+                  {t.footer.location}
+                </p>
+              </div>
+              <div className="flex flex-col items-start text-left">
+                <span className="label text-muted">{t.footer.socialLabel}</span>
+                <a
+                  href={socialLinks.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 type-body-sm text-foreground/80 transition-colors hover:text-accent"
+                >
+                  Instagram
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-2 border-t border-border pt-5 text-center sm:flex-row sm:gap-8 lg:mt-6 lg:pt-4">
+        <div className="mt-8 flex flex-col items-center justify-center gap-2 border-t border-border pt-5 text-center sm:flex-row sm:gap-8 lg:mt-6 lg:items-center lg:justify-between lg:pt-4 lg:text-left">
           <span className="label text-muted">
             © {new Date().getFullYear()} {t.footer.copyright}
           </span>

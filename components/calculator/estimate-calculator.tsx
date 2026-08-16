@@ -56,7 +56,7 @@ export function EstimateCalculator() {
   );
   const currentIndex = Math.min(stepIndex, steps.length - 1);
   const stepId = steps[currentIndex] ?? "objectType";
-  const progress = ((currentIndex + 1) / steps.length) * 100;
+  const progress = (currentIndex / Math.max(steps.length, 1)) * 100;
 
   function patch(partial: Partial<EstimateFormState>) {
     setState((prev) => ({ ...prev, ...partial }));

@@ -43,18 +43,16 @@ export function Faq() {
                         aria-expanded={isOpen}
                         aria-controls={panelId}
                         onClick={() => setOpen(isOpen ? null : i)}
-                        className="flex w-full items-start justify-between gap-6 border-b border-border py-4 text-left md:py-5"
+                        className="faq-question flex w-full items-center justify-between gap-5 border-b border-border py-4 text-left md:gap-6 md:py-5"
                       >
-                        <span className="type-title text-foreground">
+                        <span className="type-title min-w-0 flex-1 pr-1 text-foreground">
                           {item.q}
                         </span>
                         <span
                           aria-hidden
-                          className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center font-mono text-lg text-accent transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                            isOpen ? "rotate-45" : ""
-                          }`}
+                          className={`faq-toggle ${isOpen ? "is-open" : ""}`}
                         >
-                          +
+                          <span className="faq-toggle-icon">+</span>
                         </span>
                       </button>
                     </h3>

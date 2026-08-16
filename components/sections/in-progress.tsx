@@ -21,8 +21,8 @@ export function InProgress() {
         <SectionHead label={t.label} right={t.labelRight} />
 
         {/* Editorial spread: text column + dominant documentary frame */}
-        <div className="grid grid-cols-1 gap-x-8 gap-y-8 lg:grid-cols-12 lg:items-end">
-          <div className="lg:col-span-4 lg:pb-1">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-8 lg:grid-cols-12 lg:items-center">
+          <div className="lg:col-span-4">
             <Reveal>
               <h2 id="in-progress-heading" className="type-h2 text-foreground">
                 {t.heading}
