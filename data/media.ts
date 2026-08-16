@@ -28,24 +28,32 @@ export const heroMedia = {
 /**
  * Service panel stills: real DTM rooms used as atmosphere, not as four
  * separate named projects. Same two physical objects as Portfolio.
+ * objectPosition is for the desktop 4/5 portrait panel (Telegram JPEGs are 9:16).
  */
 export const serviceMedia = [
-  "/images/photo_2026-08-09_15-10-55.jpg",
-  "/images/photo_2026-08-09_15-10-13.jpg",
-  "/images/photo_2026-08-09_15-10-41.jpg",
-  "/images/photo_2026-08-09_15-11-17.jpg",
+  {
+    src: "/images/photo_2026-08-09_15-10-55.jpg",
+    objectPosition: "center 46%",
+  },
+  {
+    src: "/images/photo_2026-08-09_15-10-13.jpg",
+    objectPosition: "center 52%",
+  },
+  {
+    src: "/images/photo_2026-08-09_15-10-41.jpg",
+    objectPosition: "center 40%",
+  },
+  {
+    src: "/images/photo_2026-08-09_15-11-17.jpg",
+    objectPosition: "center 48%",
+  },
 ] as const;
-
-export type InProgressLayout = "feature" | "portrait" | "landscape";
 
 export type InProgressItem = {
   id: string;
   src: string;
   video?: string | null;
-  layout: InProgressLayout;
   objectPosition: string;
-  /** How many items to show before the mobile disclosure. */
-  mobilePriority: boolean;
 };
 
 /**
@@ -67,38 +75,28 @@ export const inProgressMedia: InProgressItem[] = [
   {
     id: "house-living",
     src: "/images/photo_2026-08-09_15-12-18.jpg",
-    layout: "feature",
-    objectPosition: "center 48%",
-    mobilePriority: true,
-  },
-  {
-    id: "house-bedroom",
-    src: "/images/photo_2026-08-09_15-12-16.jpg",
-    layout: "landscape",
-    objectPosition: "center 46%",
-    mobilePriority: true,
+    objectPosition: "62% 46%",
   },
   {
     id: "house-media",
     src: "/images/photo_2026-08-09_15-11-27.jpg",
-    layout: "portrait",
-    objectPosition: "center 42%",
-    mobilePriority: true,
+    objectPosition: "58% 42%",
+  },
+  {
+    id: "house-bedroom",
+    src: "/images/photo_2026-08-09_15-12-16.jpg",
+    objectPosition: "54% 38%",
   },
   {
     id: "kitchen-video",
     src: "/images/in-progress-kitchen.jpg",
     video: "/videos/in-progress-kitchen.mp4",
-    layout: "portrait",
-    objectPosition: "center 40%",
-    mobilePriority: false,
+    objectPosition: "78% 42%",
   },
   {
     id: "house-niche",
     src: "/images/photo_2026-08-09_15-12-25.jpg",
-    layout: "portrait",
-    objectPosition: "center 45%",
-    mobilePriority: false,
+    objectPosition: "70% 52%",
   },
 ];
 

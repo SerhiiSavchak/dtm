@@ -27,7 +27,7 @@ export function SiteFooter() {
   return (
     <footer id="contacts" className="mt-auto bg-bg text-foreground">
       <div className="container-dtm section-pad-sm">
-        <Reveal>
+        <Reveal policy="reveal-reversible">
           <div className="final-cta-block flex flex-col items-center border-t-0 pt-10 text-center md:pt-12">
             <ArchitecturalRule />
             <p className="type-h1 max-w-[18ch] text-balance text-foreground">
@@ -77,7 +77,7 @@ export function SiteFooter() {
                   href={item.href}
                   className="flex min-h-11 items-center text-base text-foreground/80 arch-link hover:text-accent"
                 >
-                  {item.label}
+                  <span className="arch-link-label">{item.label}</span>
                 </a>
               ))}
             </nav>
@@ -110,7 +110,7 @@ export function SiteFooter() {
                   href={item.href}
                   className="arch-link type-body whitespace-nowrap py-1 text-foreground/80 hover:text-accent"
                 >
-                  {item.label}
+                  <span className="arch-link-label">{item.label}</span>
                 </a>
               ))}
             </nav>

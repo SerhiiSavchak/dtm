@@ -34,6 +34,11 @@ type PosterVideoProps = {
    */
   preload?: "none" | "metadata" | "auto";
   objectPosition?: string;
+  /**
+   * When set, the video mounts and plays only while true.
+   * Omit for the default poster → autoplay path (hero).
+   */
+  active?: boolean;
 };
 
 /**
@@ -54,6 +59,7 @@ export function PosterVideo({
   onPosterReady,
   preload = "metadata",
   objectPosition,
+  active,
 }: PosterVideoProps) {
   const reduced = useSyncExternalStore(subscribeReduced, getReduced, () => false);
   const [posterReady, setPosterReady] = useState(false);
@@ -63,7 +69,9 @@ export function PosterVideo({
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const hasVideo = Boolean(webm || mp4);
-  const mountVideo = hasVideo && !reduced && !videoFailed && posterReady;
+  const wantVideo = active !== false;
+  const mountVideo =
+    hasVideo && !reduced && !videoFailed && posterReady && wantVideo;
 
   const signalPoster = useCallback(() => {
     if (signaled.current) return;
@@ -84,6 +92,15 @@ export function PosterVideo({
     const el = videoRef.current;
     if (!el || !mountVideo) return;
     tryReveal(el);
+    const onVis = () => {
+      if (document.hidden) el.pause();
+      else tryReveal(el);
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      el.pause();
+    };
   }, [mountVideo, tryReveal]);
 
   const positionStyle = objectPosition

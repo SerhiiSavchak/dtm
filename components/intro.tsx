@@ -2,7 +2,7 @@
 
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { CopyText } from "./copy-text";
-import { Reveal } from "./reveal";
+import { Reveal, RevealGroup } from "./reveal";
 import { SectionHead } from "./section-head";
 
 export function Intro() {
@@ -15,37 +15,39 @@ export function Intro() {
       className="bg-bg text-foreground"
     >
       <div className="container-dtm section-pad">
-        {/* Eyebrow only — “Модель роботи” lives with the right-hand column */}
-        <SectionHead label={t.label} />
+        <RevealGroup>
+          {/* Eyebrow only — “Модель роботи” lives with the right-hand column */}
+          <SectionHead label={t.label} />
 
-        {/*
-          Desktop (lg+): editorial two-anchor grid
-          heading ~1–5 · intentional void ~6–8 · copy ~9–12
-          Mobile: stacked left-aligned
-        */}
-        <div className="intro-lead grid grid-cols-1 gap-y-5 md:gap-y-6 lg:grid-cols-12 lg:items-end lg:gap-x-6 xl:gap-x-8">
-          <div className="lg:col-span-5">
-            <Reveal variant="mask">
-              <h2
-                id="intro-heading"
-                className="type-h1 max-w-[21ch] text-balance text-foreground lg:max-w-[16ch]"
-              >
-                {t.headingBefore}{" "}
-                <span className="text-accent">{t.headingAccent}</span>
-                {t.headingAfter ? ` ${t.headingAfter}` : null}
-              </h2>
-            </Reveal>
-          </div>
+          {/*
+            Desktop (lg+): editorial two-anchor grid
+            heading ~1–5 · intentional void ~6–8 · copy ~9–12
+            Mobile: stacked left-aligned
+          */}
+          <div className="intro-lead grid grid-cols-1 gap-y-5 md:gap-y-6 lg:grid-cols-12 lg:items-end lg:gap-x-6 xl:gap-x-8">
+            <div className="lg:col-span-5">
+              <Reveal variant="mask">
+                <h2
+                  id="intro-heading"
+                  className="type-h1 max-w-[21ch] text-balance text-foreground lg:max-w-[16ch]"
+                >
+                  {t.headingBefore}{" "}
+                  <span className="text-accent">{t.headingAccent}</span>
+                  {t.headingAfter ? ` ${t.headingAfter}` : null}
+                </h2>
+              </Reveal>
+            </div>
 
-          <div className="intro-lead-aside lg:col-span-4 lg:col-start-9">
-            <Reveal variant="fade" delay={0.08}>
-              <p className="label mb-3 text-muted lg:mb-4">{t.labelRight}</p>
-              <p className="intro-lead-copy text-left text-foreground/70">
-                <CopyText>{t.body}</CopyText>
-              </p>
-            </Reveal>
+            <div className="intro-lead-aside lg:col-span-4 lg:col-start-9">
+              <Reveal variant="fade" delay={0.08}>
+                <p className="label mb-3 text-muted lg:mb-4">{t.labelRight}</p>
+                <p className="intro-lead-copy text-left text-foreground/70">
+                  <CopyText>{t.body}</CopyText>
+                </p>
+              </Reveal>
+            </div>
           </div>
-        </div>
+        </RevealGroup>
 
         <Reveal variant="fade" delay={0.1} className="mt-9 md:mt-11 lg:mt-12">
           <p className="label text-muted">{t.proposition}</p>

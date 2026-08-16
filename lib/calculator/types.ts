@@ -58,13 +58,31 @@ export type CalcStepId =
   | "start"
   | "lead";
 
+export const CALC_FLOW_STEPS: CalcStepId[] = [
+  "objectType",
+  "area",
+  "rooms",
+  "renovationType",
+  "design",
+  "condition",
+  "start",
+  "lead",
+];
+
+export function isRoomsApplicable(objectType: ObjectType | null): boolean {
+  return objectType === "apartment" || objectType === "house";
+}
+
+export function isStepApplicable(
+  stepId: CalcStepId,
+  objectType: ObjectType | null
+): boolean {
+  if (stepId === "rooms") return isRoomsApplicable(objectType);
+  return true;
+}
+
 export function getStepSequence(
   objectType: ObjectType | null
 ): CalcStepId[] {
-  const base: CalcStepId[] = ["objectType", "area"];
-  if (objectType === "apartment" || objectType === "house") {
-    base.push("rooms");
-  }
-  base.push("renovationType", "design", "condition", "start", "lead");
-  return base;
+  return CALC_FLOW_STEPS.filter((stepId) => isStepApplicable(stepId, objectType));
 }

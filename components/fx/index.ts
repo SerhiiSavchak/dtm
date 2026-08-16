@@ -8,4 +8,9 @@ export { MediaReveal } from "./media-reveal";
 export { ScrollProgress } from "./scroll-progress";
 export { SubtleGrain } from "./subtle-grain";
 export { useMagnetic } from "./magnetic";
-export { useInView } from "./use-in-view";
+export { useInView, useRevealMotion, revealStateClass } from "./use-in-view";
+export type { RevealPolicy, RevealCycle, ScrollDir } from "./use-in-view";
+export {
+  shouldEnterReveal,
+  shouldResetReveal,
+} from "./reveal-geometry";

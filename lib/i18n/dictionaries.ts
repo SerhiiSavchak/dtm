@@ -52,6 +52,7 @@ export type Dictionary = {
     all: string;
     areaPlaceholder: string;
     titlePlaceholder: string;
+    descriptionPlaceholder: string;
     counter: string;
     close: string;
     next: string;
@@ -59,6 +60,9 @@ export type Dictionary = {
     open: string;
     look: string;
     swipeHint: string;
+    discussCta: string;
+    frame: string;
+    videoKind: string;
     location: {
       lviv: string;
     };
@@ -66,6 +70,13 @@ export type Dictionary = {
       apartment: string;
       house: string;
       commercial: string;
+    };
+    facts: {
+      type: string;
+      area: string;
+      workType: string;
+      duration: string;
+      year: string;
     };
   };
   services: {
@@ -95,6 +106,16 @@ export type Dictionary = {
     instagramCta: string;
     showMore: string;
     showLess: string;
+    look: string;
+    open: string;
+    close: string;
+    prev: string;
+    next: string;
+    gallery: string;
+    photoKind: string;
+    videoKind: string;
+    play: string;
+    pause: string;
   };
   faq: {
     label: string;
@@ -166,7 +187,6 @@ export type Dictionary = {
         telegramPlaceholder: string;
         telegramOptional: string;
         disclaimer: string;
-        handoffDisclosure: string;
       };
     };
     success: {
@@ -174,13 +194,9 @@ export type Dictionary = {
       body: string;
       leadId: string;
       telegram: string;
-      telegramHint: string;
-      copy: string;
-      copied: string;
       call: string;
       again: string;
       returnSite: string;
-      popupBlocked: string;
     };
     sending: string;
     retry: string;
@@ -195,8 +211,13 @@ export type Dictionary = {
       submit: string;
     };
     context: {
-      object: string;
+      objectType: string;
       area: string;
+      rooms: string;
+      renovationType: string;
+      design: string;
+      condition: string;
+      start: string;
     };
   };
   footer: {
@@ -291,6 +312,7 @@ const uk: Dictionary = {
     all: "Переглянути проєкти",
     areaPlaceholder: "[площа]",
     titlePlaceholder: "[Назва проєкту]",
+    descriptionPlaceholder: "[Опис проєкту]",
     counter: "з",
     close: "Закрити",
     next: "Наступний",
@@ -298,11 +320,21 @@ const uk: Dictionary = {
     open: "Відкрити проєкт",
     look: "Дивитися",
     swipeHint: "Гортайте →",
+    discussCta: "Обговорити схожий проєкт",
+    frame: "Кадр",
+    videoKind: "Відео",
     location: { lviv: "Львів" },
     categories: {
       apartment: "Квартира",
       house: "Будинок",
       commercial: "Комерційне приміщення",
+    },
+    facts: {
+      type: "Тип",
+      area: "Площа",
+      workType: "Тип робіт",
+      duration: "Тривалість",
+      year: "Рік",
     },
   },
   services: {
@@ -384,6 +416,16 @@ const uk: Dictionary = {
     instagramCta: "Більше з процесу в Instagram",
     showMore: "Показати більше",
     showLess: "Згорнути",
+    look: "Дивитися",
+    open: "Відкрити",
+    close: "Закрити",
+    prev: "Попередній",
+    next: "Наступний",
+    gallery: "Кадри з об’єктів у роботі",
+    photoKind: "ФОТО",
+    videoKind: "ВІДЕО",
+    play: "Відтворити",
+    pause: "Пауза",
   },
   faq: {
     label: "Запитання",
@@ -503,24 +545,16 @@ const uk: Dictionary = {
         telegramOptional: "необов’язково",
         disclaimer:
           "Ми не обіцяємо точну автоматичну вартість. Після запиту менеджер DTM зв’яжеться з вами й передасть орієнтовний розрахунок",
-        handoffDisclosure:
-          "Після відправлення відкриється Telegram із заповненим повідомленням. Перевірте його та натисніть «Надіслати».",
       },
     },
     success: {
-      title: "Дякуємо, заявку отримано",
-      body: "Інформацію надіслано команді DTM. Ми зв’яжемося з вами, щоб уточнити деталі та підготувати попередній розрахунок",
+      title: "Дякуємо! Ми отримали вашу заявку.",
+      body: "Незабаром зв’яжемося з вами, щоб уточнити деталі та підготувати попередній розрахунок.",
       leadId: "Номер заявки",
       telegram: "Відкрити Telegram",
-      telegramHint:
-        "У Telegram підготовлене повідомлення. Перевірте його та натисніть «Надіслати»",
-      copy: "Скопіювати повідомлення",
-      copied: "Скопійовано",
       call: "Зателефонувати",
       again: "Надіслати ще один запит",
-      returnSite: "Повернутися на сайт",
-      popupBlocked:
-        "Заявку вже отримано. Браузер заблокував автоматичне відкриття Telegram — натисніть кнопку нижче.",
+      returnSite: "Повернутися на головну",
     },
     sending: "Надсилаємо заявку…",
     retry: "Спробувати ще раз",
@@ -535,8 +569,13 @@ const uk: Dictionary = {
       submit: "Не вдалося надіслати запит. Дані збережено — спробуйте ще раз",
     },
     context: {
-      object: "Об’єкт",
+      objectType: "Об’єкт",
       area: "Площа",
+      rooms: "Кімнати",
+      renovationType: "Тип ремонту",
+      design: "Дизайн-проєкт",
+      condition: "Стан об’єкта",
+      start: "Плановий старт",
     },
   },
   footer: {
@@ -632,6 +671,7 @@ const en: Dictionary = {
     all: "Browse projects",
     areaPlaceholder: "[area]",
     titlePlaceholder: "[Project title]",
+    descriptionPlaceholder: "[Project description]",
     counter: "of",
     close: "Close",
     next: "Next",
@@ -639,11 +679,21 @@ const en: Dictionary = {
     open: "Open project",
     look: "View",
     swipeHint: "Swipe →",
+    discussCta: "Discuss a similar project",
+    frame: "Frame",
+    videoKind: "Video",
     location: { lviv: "Lviv" },
     categories: {
       apartment: "Apartment",
       house: "House",
       commercial: "Commercial space",
+    },
+    facts: {
+      type: "Type",
+      area: "Area",
+      workType: "Scope",
+      duration: "Duration",
+      year: "Year",
     },
   },
   services: {
@@ -725,6 +775,16 @@ const en: Dictionary = {
     instagramCta: "More process on Instagram",
     showMore: "Show more",
     showLess: "Show less",
+    look: "View",
+    open: "Open",
+    close: "Close",
+    prev: "Previous",
+    next: "Next",
+    gallery: "Frames from sites in progress",
+    photoKind: "Photo",
+    videoKind: "Video",
+    play: "Play",
+    pause: "Pause",
   },
   faq: {
     label: "Questions",
@@ -844,24 +904,16 @@ const en: Dictionary = {
         telegramOptional: "optional",
         disclaimer:
           "We do not promise an exact automatic price. After your request, a DTM manager will contact you with an indicative estimate",
-        handoffDisclosure:
-          "After sending, Telegram will open with a prepared message. Review it and tap Send.",
       },
     },
     success: {
-      title: "Thank you, we have received your request",
-      body: "Your details were sent to the DTM team. We will contact you to clarify the brief and prepare a preliminary estimate",
+      title: "Thank you! We have received your request.",
+      body: "We will contact you shortly to clarify the details and prepare a preliminary estimate.",
       leadId: "Request number",
       telegram: "Open Telegram",
-      telegramHint:
-        "Telegram contains a prepared message. Review it and tap Send",
-      copy: "Copy message",
-      copied: "Copied",
       call: "Call us",
       again: "Submit another request",
-      returnSite: "Back to the site",
-      popupBlocked:
-        "Your request was received. The browser blocked Telegram from opening automatically — use the button below.",
+      returnSite: "Back to home",
     },
     sending: "Sending your request…",
     retry: "Try again",
@@ -876,8 +928,13 @@ const en: Dictionary = {
       submit: "Could not send the request. Your answers are saved — try again",
     },
     context: {
-      object: "Property",
+      objectType: "Property",
       area: "Area",
+      rooms: "Rooms",
+      renovationType: "Renovation type",
+      design: "Design project",
+      condition: "Condition",
+      start: "Planned start",
     },
   },
   footer: {

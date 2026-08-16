@@ -6,8 +6,8 @@ const nextConfig: NextConfig = {
     root: process.cwd(),
   },
   images: {
-    // quality={90} is used for hero/portfolio masters
-    qualities: [75, 90],
+    // 75 default; 85 in-progress stills; 90 hero/portfolio masters
+    qualities: [75, 85, 90],
   },
   async headers() {
     return [

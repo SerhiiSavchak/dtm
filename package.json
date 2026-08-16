@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:leads-repeat": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-leads-repeat.mjs",
+    "test:calc-progress": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-calc-progress.mjs",
+    "test:calc-summary": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-calc-summary.mjs",
+    "test:reveal": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-reveal-geometry.mjs"
   },
   "dependencies": {
     "embla-carousel-react": "^8.6.0",

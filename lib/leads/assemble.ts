@@ -1,5 +1,5 @@
+import { answersForPayload } from "@/lib/calculator/answers";
 import type { EstimateFormState } from "@/lib/calculator/types";
-import { parseArea } from "./parse-area";
 import { sanitizePersonName, sanitizeTelegramHandle } from "./schema";
 import type { UtmFields } from "./utm";
 
@@ -12,21 +12,16 @@ export function assembleLeadRequest(args: {
   sourcePage?: string;
   utm?: UtmFields;
 }) {
-  const area = parseArea(args.state.area);
-  const roomsRaw = args.state.rooms.trim();
-  const rooms =
-    args.state.objectType === "commercial" || !roomsRaw
-      ? null
-      : Number(roomsRaw);
+  const answers = answersForPayload(args.state);
 
   const payload: Record<string, unknown> = {
-    objectType: args.state.objectType,
-    area: area.ok ? area.value : args.state.area,
-    rooms: Number.isInteger(rooms) ? rooms : null,
-    renovationType: args.state.renovationType,
-    design: args.state.design,
-    condition: args.state.condition,
-    start: args.state.start,
+    objectType: answers.objectType,
+    area: answers.area,
+    rooms: answers.rooms,
+    renovationType: answers.renovationType,
+    design: answers.design,
+    condition: answers.condition,
+    start: answers.start,
     name: sanitizePersonName(args.state.name),
     phone: args.state.phone.trim(),
     locale: args.locale,

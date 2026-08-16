@@ -1,22 +1,72 @@
 "use client";
 
-import { useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
+import {
+  RevealMotionContext,
+  revealStateClass,
+  useInView,
+  useRevealMotion,
+  type RevealPolicy,
+} from "./fx/use-in-view";
 
 type RevealProps = {
   children?: ReactNode;
   /** rise: fade+up · clip: image mask · rule: line draw · mask: overflow reveal · fade: opacity only */
   variant?: "rise" | "clip" | "rule" | "mask" | "fade";
-  /** Delay in seconds for staggered sequences */
+  /** Delay in seconds for staggered sequences — applied on first enter only */
   delay?: number;
   /** Render element */
   as?: ElementType;
   className?: string;
+  policy?: RevealPolicy;
+  /** Ignore ancestor RevealGroup and observe this node. */
+  isolate?: boolean;
 };
 
+type RevealGroupProps = {
+  children?: ReactNode;
+  as?: ElementType;
+  className?: string;
+  policy?: RevealPolicy;
+};
+
+function delayStyle(delay: number, cycle: "first" | "again"): CSSProperties | undefined {
+  if (cycle === "again") return { "--fx-delay": "0s" } as CSSProperties;
+  if (!delay) return undefined;
+  return { "--fx-delay": `${delay}s` } as CSSProperties;
+}
+
 /**
- * Restrained scroll-triggered reveal. A single IntersectionObserver toggles
- * `.is-in`; the actual transition lives in globals.css so motion stays on the
- * compositor. Honors prefers-reduced-motion via the CSS layer.
+ * Non-visual observer for grouped stagger. Children inherit inView / cycle /
+ * direction and must not observe themselves. The wrapper has no opacity or
+ * transform — those stay on the child variant nodes.
+ */
+export function RevealGroup({
+  children,
+  as,
+  className = "",
+  policy = "reveal-reversible",
+}: RevealGroupProps) {
+  const Tag = (as ?? "div") as ElementType;
+  const { ref, inView, cycle, direction, armed } = useInView<HTMLElement>({
+    policy,
+  });
+
+  return (
+    <Tag ref={ref} className={className}>
+      <RevealMotionContext.Provider
+        value={{ inView, cycle, direction, policy, armed }}
+      >
+        {children}
+      </RevealMotionContext.Provider>
+    </Tag>
+  );
+}
+
+/**
+ * Restrained scroll-triggered reveal. A pooled IntersectionObserver toggles
+ * `.is-in`; motion lives in globals.css. Nested Reveals inside RevealGroup
+ * (or another Reveal) reuse the ancestor trigger.
  */
 export function Reveal({
   children,
@@ -24,76 +74,89 @@ export function Reveal({
   delay = 0,
   as,
   className = "",
+  policy = "reveal-reversible",
+  isolate = false,
 }: RevealProps) {
+  const ctx = useRevealMotion();
+  const inherited = isolate ? null : ctx;
   const Tag = (as ?? "div") as ElementType;
-  const ref = useRef<HTMLElement | null>(null);
-  const [inView, setInView] = useState(false);
+  const local = useInView<HTMLElement>({
+    policy: inherited?.policy ?? policy,
+    enabled: !inherited,
+  });
+  const inView = inherited?.inView ?? local.inView;
+  const cycle = inherited?.cycle ?? local.cycle;
+  const direction = inherited?.direction ?? local.direction;
+  const armed = inherited?.armed ?? local.armed;
+  const observeRef = inherited ? undefined : local.ref;
+  const motion = inherited ?? {
+    inView,
+    cycle,
+    direction,
+    policy,
+    armed,
+  };
+  const styleVar = delayStyle(delay, cycle);
+  const stateClass = revealStateClass(inView, armed);
+  const attrs = {
+    "data-reveal-cycle": cycle,
+    "data-scroll-dir": direction,
+  };
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setInView(true);
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  const styleVar = delay
-    ? ({ "--fx-delay": `${delay}s` } as React.CSSProperties)
-    : undefined;
+  let node: ReactNode;
 
   if (variant === "clip") {
-    return (
-      <Tag ref={ref} className={className}>
+    node = (
+      <Tag ref={observeRef} className={className}>
         <span
-          className={`fx-clip block ${inView ? "is-in" : ""}`}
+          className={`fx-clip block ${stateClass}`}
           style={styleVar}
+          {...attrs}
         >
           {children}
         </span>
       </Tag>
     );
-  }
-
-  if (variant === "rule") {
-    return (
+  } else if (variant === "rule") {
+    node = (
       <Tag
-        ref={ref}
-        className={`fx-rule ${inView ? "is-in" : ""} ${className}`}
+        ref={observeRef}
+        className={`fx-rule ${stateClass} ${className}`}
         style={styleVar}
+        {...attrs}
       >
-        {children}
+        <span className="fx-rule-inner">{children}</span>
       </Tag>
     );
-  }
-
-  if (variant === "mask") {
-    return (
+  } else if (variant === "mask") {
+    node = (
       <Tag
-        ref={ref}
-        className={`fx-mask ${inView ? "is-in" : ""} ${className}`}
+        ref={observeRef}
+        className={`fx-mask ${stateClass} ${className}`}
         style={styleVar}
+        {...attrs}
       >
         <span className="fx-mask-inner">{children}</span>
       </Tag>
     );
-  }
-
-  if (variant === "fade") {
-    return (
+  } else if (variant === "fade") {
+    node = (
       <Tag
-        ref={ref}
-        className={`fx-fade ${inView ? "is-in" : ""} ${className}`}
+        ref={observeRef}
+        className={`fx-fade ${stateClass} ${className}`}
         style={styleVar}
+        {...attrs}
+      >
+        {children}
+      </Tag>
+    );
+  } else {
+    node = (
+      <Tag
+        ref={observeRef}
+        className={`fx ${stateClass} ${className}`}
+        style={styleVar}
+        {...attrs}
       >
         {children}
       </Tag>
@@ -101,12 +164,8 @@ export function Reveal({
   }
 
   return (
-    <Tag
-      ref={ref}
-      className={`fx ${inView ? "is-in" : ""} ${className}`}
-      style={styleVar}
-    >
-      {children}
-    </Tag>
+    <RevealMotionContext.Provider value={motion}>
+      {node}
+    </RevealMotionContext.Provider>
   );
 }

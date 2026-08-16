@@ -1,7 +1,7 @@
 "use client";
 
 import Image, { type ImageProps, type StaticImageData } from "next/image";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getBlurDataUrl,
   resolveSiteImage,
@@ -11,13 +11,15 @@ import {
 type MediaImageProps = Omit<ImageProps, "src" | "placeholder" | "alt"> & {
   src: SiteImageSrc;
   alt: string;
-  /** Called once after the final image has loaded or failed. */
+  /** Called once after the final image has loaded. */
   onReady?: () => void;
 };
 
 /**
  * Progressive still: sized wrapper → image-specific LQIP → fade-in of the
  * optimized file. When `fill`, parent must be positioned (`relative` / `absolute`).
+ * Decoded file is visible without waiting for the is-shown class (CSS animation
+ * completes to opacity 1); the class only cancels the fade once loaded.
  */
 export function MediaImage({
   src,
@@ -35,6 +37,7 @@ export function MediaImage({
   const resolved = resolveSiteImage(src);
   const srcKey = typeof resolved === "string" ? resolved : resolved.src;
   const blurDataURL = getBlurDataUrl(src);
+  const frameRef = useRef<HTMLDivElement | null>(null);
   const [shown, setShown] = useState(false);
   const [failed, setFailed] = useState(false);
   const [seenSrc, setSeenSrc] = useState(srcKey);
@@ -51,14 +54,25 @@ export function MediaImage({
 
   const reveal = useCallback(
     (loaded: boolean) => {
-      if (loaded) setShown(true);
-      readyOnce();
+      if (loaded) {
+        setShown(true);
+        readyOnce();
+      }
     },
     [readyOnce]
   );
 
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const img = frame.querySelector("img.media-full") as HTMLImageElement | null;
+    if (img?.complete && img.naturalWidth > 0) {
+      reveal(true);
+    }
+  }, [srcKey, reveal]);
+
   return (
-    <div className="media-frame relative h-full w-full overflow-hidden">
+    <div ref={frameRef} className="media-frame relative h-full w-full overflow-hidden">
       {blurDataURL ? (
         // eslint-disable-next-line @next/next/no-img-element -- inlined LQIP data URL
         <img

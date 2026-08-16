@@ -3,7 +3,6 @@
 import {
   useEffect,
   useId,
-  useMemo,
   useRef,
   useState,
   type KeyboardEvent,
@@ -11,7 +10,12 @@ import {
 import { Logo } from "@/components/logo";
 import { externalLinkProps, socialLinks } from "@/data/media";
 import {
-  getStepSequence,
+  formatCalculatorSummary,
+  summaryCopyFromDict,
+  applyEstimatePatch,
+} from "@/lib/calculator/answers";
+import { resolveCalculatorProgress } from "@/lib/calculator/progress";
+import {
   initialEstimateState,
   type CalcStepId,
   type EstimateFormState,
@@ -19,10 +23,12 @@ import {
 } from "@/lib/calculator/types";
 import { assembleLeadRequest } from "@/lib/leads/assemble";
 import {
-  visitorTelegramUrl,
-  validateStep,
-  type StepErrorKey,
-} from "@/lib/leads/format";
+  canSubmitLead,
+  ensureLeadSession,
+  restartLeadSession,
+  type LeadClientSession,
+} from "@/lib/leads/client-session";
+import { validateStep, type StepErrorKey } from "@/lib/leads/format";
 import { formatAreaDisplay, parseArea, sanitizeAreaInput } from "@/lib/leads/parse-area";
 import { sanitizePhoneInput, normalizePhone } from "@/lib/leads/phone";
 import { sanitizePersonName } from "@/lib/leads/schema";
@@ -35,13 +41,9 @@ type Phase = "form" | "submitting" | "success" | "error";
 
 type SuccessMeta = {
   leadId: string;
-  visitorDraft: string;
-  telegramUrl: string;
-  popupBlocked: boolean;
 };
 
 const TRANSITION_MS = 220;
-const HANDOFF_NAME = "dtm-telegram-handoff";
 
 function OptionButton({
   selected,
@@ -113,38 +115,43 @@ export function EstimateCalculator() {
   const [direction, setDirection] = useState<1 | -1>(1);
   const [animToken, setAnimToken] = useState(0);
   const [success, setSuccess] = useState<SuccessMeta | null>(null);
-  const [copied, setCopied] = useState(false);
   const [honeypot, setHoneypot] = useState("");
   const [statusLive, setStatusLive] = useState("");
 
-  const submissionIdRef = useRef<string | null>(null);
-  const startedAtRef = useRef<number | null>(null);
+  const sessionRef = useRef<LeadClientSession | null>(null);
   const submitLockRef = useRef(false);
+  const hasSubmittedRef = useRef(false);
   const navLockRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const submitGenerationRef = useRef(0);
   const stageRef = useRef<HTMLDivElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
   const utmRef = useRef<ReturnType<typeof utmFromSearch>>(undefined);
 
+  function currentSession(): LeadClientSession {
+    sessionRef.current = ensureLeadSession(sessionRef.current);
+    return sessionRef.current;
+  }
+
   useEffect(() => {
-    submissionIdRef.current = crypto.randomUUID();
-    startedAtRef.current = Date.now();
+    currentSession();
     utmRef.current = utmFromSearch(window.location.search);
+    return () => {
+      abortRef.current?.abort();
+    };
   }, []);
 
-  const steps = useMemo(
-    () => getStepSequence(state.objectType),
-    [state.objectType]
-  );
-  const currentIndex = Math.min(stepIndex, steps.length - 1);
+  const isComplete = phase === "success";
+  const { steps, currentIndex, currentStep, totalSteps, progressPercent } =
+    resolveCalculatorProgress(stepIndex, state.objectType, isComplete);
   const stepId = steps[currentIndex] ?? "objectType";
-  const progress = ((currentIndex + 1) / Math.max(steps.length, 1)) * 100;
 
   function errorMessage(key: StepErrorKey): string {
     return dict.errors[key];
   }
 
   function patch(partial: Partial<EstimateFormState>) {
-    setState((prev) => ({ ...prev, ...partial }));
+    setState((prev) => applyEstimatePatch(prev, partial));
     setError(null);
     const keys = Object.keys(partial);
     if (keys.length) {
@@ -197,7 +204,7 @@ export function EstimateCalculator() {
       focusFirstInvalid();
       return;
     }
-    if (currentIndex < steps.length - 1) goTo(currentIndex + 1);
+    if (currentIndex < totalSteps - 1) goTo(currentIndex + 1);
   }
 
   function handleBack() {
@@ -208,11 +215,18 @@ export function EstimateCalculator() {
   function handleSkipRooms() {
     if (navLockRef.current) return;
     patch({ rooms: "" });
-    if (currentIndex < steps.length - 1) goTo(currentIndex + 1);
+    if (currentIndex < totalSteps - 1) goTo(currentIndex + 1);
   }
 
   async function handleSubmit() {
-    if (submitLockRef.current || navLockRef.current || phase === "submitting") {
+    if (
+      !canSubmitLead({
+        submitLock: submitLockRef.current,
+        hasSubmitted: hasSubmittedRef.current,
+        navLock: navLockRef.current,
+        phase,
+      })
+    ) {
       return;
     }
     if (!validateCurrent()) {
@@ -220,14 +234,13 @@ export function EstimateCalculator() {
       return;
     }
 
-    if (!submissionIdRef.current) submissionIdRef.current = crypto.randomUUID();
-    if (!startedAtRef.current) startedAtRef.current = Date.now();
+    const session = currentSession();
 
     const payload = assembleLeadRequest({
       state,
       locale,
-      submissionId: submissionIdRef.current,
-      formStartedAt: startedAtRef.current,
+      submissionId: session.submissionId,
+      formStartedAt: session.formStartedAt,
       honeypot,
       sourcePage:
         typeof window === "undefined"
@@ -260,98 +273,78 @@ export function EstimateCalculator() {
     }
 
     submitLockRef.current = true;
+    const generation = submitGenerationRef.current;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const timeoutId = window.setTimeout(() => controller.abort(), 20_000);
     setPhase("submitting");
     setError(null);
     setStatusLive(dict.sending);
-
-    let handoff: Window | null = null;
-    try {
-      handoff = window.open("/lead-handoff", HANDOFF_NAME);
-    } catch {
-      handoff = null;
-    }
 
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(20_000),
+        cache: "no-store",
+        signal: controller.signal,
       });
       const data = (await res.json().catch(() => null)) as {
         ok?: boolean;
         leadId?: string;
-        visitorDraft?: string;
+        duplicate?: boolean;
         delivered?: { telegram?: boolean; email?: boolean };
       } | null;
+
+      if (generation !== submitGenerationRef.current) return;
 
       const delivered =
         Boolean(data?.delivered?.telegram) || Boolean(data?.delivered?.email);
 
       if (!res.ok || !data?.ok || !data.leadId || !delivered) {
-        if (handoff && !handoff.closed) {
-          try {
-            handoff.close();
-          } catch {
-            /* ignore */
-          }
-        }
         setPhase("error");
         setError(dict.errors.submit);
         setStatusLive(dict.errors.submit);
-        submitLockRef.current = false;
         return;
       }
 
-      const draft = data.visitorDraft ?? "";
-      const telegramUrl = visitorTelegramUrl(draft);
-      let popupBlocked = !handoff || handoff.closed;
-
-      if (handoff && !handoff.closed) {
-        try {
-          handoff.location.href = telegramUrl;
-          popupBlocked = false;
-        } catch {
-          popupBlocked = true;
-        }
-      }
-
-      setSuccess({
-        leadId: data.leadId,
-        visitorDraft: draft,
-        telegramUrl,
-        popupBlocked,
-      });
+      hasSubmittedRef.current = true;
+      setSuccess({ leadId: data.leadId });
       setPhase("success");
       setStatusLive(dict.success.title);
     } catch {
-      if (handoff && !handoff.closed) {
-        try {
-          handoff.close();
-        } catch {
-          /* ignore */
-        }
-      }
+      if (generation !== submitGenerationRef.current) return;
       setPhase("error");
       setError(dict.errors.submit);
       setStatusLive(dict.errors.submit);
-      submitLockRef.current = false;
+    } finally {
+      window.clearTimeout(timeoutId);
+      if (abortRef.current === controller) abortRef.current = null;
+      if (generation === submitGenerationRef.current) {
+        submitLockRef.current = false;
+      }
     }
   }
 
   function reset() {
-    submissionIdRef.current = crypto.randomUUID();
-    startedAtRef.current = Date.now();
-    submitLockRef.current = false;
+    submitGenerationRef.current += 1;
+    abortRef.current?.abort();
+    abortRef.current = null;
+    const next = restartLeadSession();
+    sessionRef.current = next.session;
+    submitLockRef.current = next.submitLock;
+    hasSubmittedRef.current = next.hasSubmitted;
+    navLockRef.current = next.navLock;
     setState(initialEstimateState);
     setStepIndex(0);
     setPhase("form");
     setError(null);
     setFieldError({});
     setSuccess(null);
-    setCopied(false);
     setHoneypot("");
     setStatusLive("");
+    setDirection(1);
     setAnimToken((token) => token + 1);
   }
 
@@ -394,9 +387,11 @@ export function EstimateCalculator() {
     }
   }, [phase]);
 
-  const objectLabel =
-    dict.steps.objectType.options.find((opt) => opt.value === state.objectType)
-      ?.label ?? "—";
+  const contextItems = formatCalculatorSummary(
+    state,
+    stepId,
+    summaryCopyFromDict(dict)
+  );
 
   const busy = phase === "submitting";
 
@@ -409,45 +404,38 @@ export function EstimateCalculator() {
       <div className="calc-progress">
         <div className="mb-3 flex items-center justify-between gap-4">
           <span className="label calc-muted">
-            {dict.stepOf} {currentIndex + 1} / {steps.length}
+            {dict.stepOf} {currentStep} / {totalSteps}
           </span>
-          <span className="label text-accent">{Math.round(progress)}%</span>
+          <span className="label text-accent">{progressPercent}%</span>
         </div>
         <div
           className="h-0.5 w-full calc-track"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-valuenow={Math.round(progress)}
+          aria-valuenow={progressPercent}
           aria-label={dict.progress}
+          style={{ ["--calc-p" as string]: String(progressPercent / 100) }}
         >
-          <div
-            className="h-0.5 calc-track-fill"
-            style={{ ["--calc-p" as string]: String(progress / 100) }}
-          />
+          <div className="h-0.5 calc-track-fill" />
         </div>
-        <p className="calc-context type-body-sm">
-          {state.objectType ? (
-            <span>
-              {dict.context.object}: {objectLabel}
-              {state.area ? (
-                <span>
-                  {" "}
-                  · {dict.context.area}: {state.area}{"\u00A0"}
-                  {dict.steps.area.unit}
-                </span>
-              ) : null}
-            </span>
+        <div className="calc-context" aria-live="polite">
+          {contextItems.length ? (
+            <ul className="calc-context-list">
+              {contextItems.map((item) => (
+                <li key={item.key} className="calc-context-item">
+                  {item.text}
+                </li>
+              ))}
+            </ul>
           ) : null}
-        </p>
+        </div>
       </div>
 
       {phase === "success" && success ? (
         <SuccessPanel
           dict={dict}
           success={success}
-          copied={copied}
-          onCopied={() => setCopied(true)}
           onReset={reset}
           logoTone={theme === "dark" ? "paper" : "ink"}
         />
@@ -511,13 +499,7 @@ export function EstimateCalculator() {
                   }
                 }}
                 onSelectObject={(value) => {
-                  setState((prev) => ({
-                    ...prev,
-                    objectType: value,
-                    rooms: value === "commercial" ? "" : prev.rooms,
-                  }));
-                  setError(null);
-                  setFieldError({});
+                  patch({ objectType: value });
                 }}
               />
             </div>
@@ -614,63 +596,28 @@ export function EstimateCalculator() {
 function SuccessPanel({
   dict,
   success,
-  copied,
-  onCopied,
   onReset,
   logoTone,
 }: {
   dict: ReturnType<typeof useDictionary>["calculator"];
   success: SuccessMeta;
-  copied: boolean;
-  onCopied: () => void;
   onReset: () => void;
   logoTone: "ink" | "paper";
 }) {
-  async function copyDraft() {
-    try {
-      await navigator.clipboard.writeText(success.visitorDraft);
-      onCopied();
-    } catch {
-      const input = document.createElement("textarea");
-      input.value = success.visitorDraft;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand("copy");
-      input.remove();
-      onCopied();
-    }
-  }
-
   return (
-    <div className="calc-success">
+    <div className="calc-success" role="status">
       <Logo tone={logoTone} withDescriptor />
       <h3 className="mt-6 type-h2">{dict.success.title}</h3>
       <p className="calc-muted mt-3 type-body-lg">{dict.success.body}</p>
       <p className="mt-4 font-mono text-sm text-accent">
         {dict.success.leadId}: {success.leadId}
       </p>
-      {success.popupBlocked ? (
-        <p className="calc-feedback-msg mt-4" role="status">
-          {dict.success.popupBlocked}
-        </p>
-      ) : null}
-      <p className="calc-muted type-body-sm mt-4">{dict.success.telegramHint}</p>
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
         <a
-          {...externalLinkProps(success.telegramUrl)}
-          className="btn btn-primary"
+          href="#top"
+          className="label calc-muted hover:text-[var(--calc-fg)]"
+          onClick={() => onReset()}
         >
-          {dict.success.telegram}
-        </a>
-        <button type="button" onClick={() => void copyDraft()} className="btn btn-ghost">
-          {copied ? dict.success.copied : dict.success.copy}
-        </button>
-        <a {...externalLinkProps(socialLinks.phone)} className="btn btn-ghost">
-          {dict.success.call}
-        </a>
-      </div>
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <a href="#top" className="label calc-muted hover:text-[var(--calc-fg)]">
           {dict.success.returnSite}
         </a>
         <button
@@ -714,7 +661,7 @@ function StepBody({
       return (
         <fieldset>
           <legend className="calc-question">{t.steps.objectType.title}</legend>
-          <div className="mt-7 grid gap-3" role="radiogroup" aria-label={t.steps.objectType.title}>
+          <div className="calc-choices grid gap-3" role="radiogroup" aria-label={t.steps.objectType.title}>
             {t.steps.objectType.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -734,10 +681,10 @@ function StepBody({
           <label htmlFor={`${formId}-area`} className="calc-question">
             {t.steps.area.title}
           </label>
-          <p id={areaHintId} className="calc-muted type-body-sm mt-2">
+          <p id={areaHintId} className="calc-hint calc-muted type-body-sm">
             {t.steps.area.hint}
           </p>
-          <div className="calc-area mt-6">
+          <div className="calc-area">
             <input
               id={`${formId}-area`}
               type="text"
@@ -772,9 +719,9 @@ function StepBody({
           <p className="calc-question" id={`${formId}-rooms-label`}>
             {t.steps.rooms.title}
           </p>
-          <p className="calc-muted type-body-sm mt-2">{t.steps.rooms.hint}</p>
+          <p className="calc-hint calc-muted type-body-sm">{t.steps.rooms.hint}</p>
           <div
-            className="mt-6 flex flex-wrap gap-3"
+            className="calc-choices flex flex-wrap gap-3"
             role="radiogroup"
             aria-labelledby={`${formId}-rooms-label`}
           >
@@ -800,7 +747,7 @@ function StepBody({
       return (
         <fieldset>
           <legend className="calc-question">{t.steps.renovationType.title}</legend>
-          <div className="mt-7 grid gap-3" role="radiogroup">
+          <div className="calc-choices grid gap-3" role="radiogroup">
             {t.steps.renovationType.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -822,7 +769,7 @@ function StepBody({
       return (
         <fieldset>
           <legend className="calc-question">{t.steps.design.title}</legend>
-          <div className="mt-6 grid gap-3" role="radiogroup">
+          <div className="calc-choices grid gap-3" role="radiogroup">
             {t.steps.design.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -842,7 +789,7 @@ function StepBody({
       return (
         <fieldset>
           <legend className="calc-question">{t.steps.condition.title}</legend>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2" role="radiogroup">
+          <div className="calc-choices grid gap-3 sm:grid-cols-2" role="radiogroup">
             {t.steps.condition.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -864,7 +811,7 @@ function StepBody({
       return (
         <fieldset>
           <legend className="calc-question">{t.steps.start.title}</legend>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2" role="radiogroup">
+          <div className="calc-choices grid gap-3 sm:grid-cols-2" role="radiogroup">
             {t.steps.start.options.map((opt) => (
               <OptionButton
                 key={opt.value}
@@ -884,13 +831,10 @@ function StepBody({
       return (
         <div>
           <h3 className="calc-question">{t.steps.lead.title}</h3>
-          <p className="calc-muted type-body-sm mt-2 max-w-lg">
+          <p className="calc-hint calc-muted type-body-sm">
             {t.steps.lead.disclaimer}
           </p>
-          <p className="calc-muted type-body-sm mt-3 max-w-lg">
-            {t.steps.lead.handoffDisclosure}
-          </p>
-          <div className="mt-6 grid gap-2">
+          <div className="calc-choices grid gap-2">
             <div>
               <label htmlFor={`${formId}-name`} className="label calc-muted">
                 {t.steps.lead.name}

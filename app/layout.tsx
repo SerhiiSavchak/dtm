@@ -49,7 +49,7 @@ const themeInitScript = `
   }
   try {
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.documentElement.setAttribute('data-motion', reduce ? 'reduce' : 'ok');
+    if (reduce) document.documentElement.setAttribute('data-motion', 'reduce');
   } catch (e) {}
 })();
 `;

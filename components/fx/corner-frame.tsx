@@ -1,21 +1,29 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useInView } from "./use-in-view";
+import { revealStateClass, useInView, useRevealMotion } from "./use-in-view";
 
 type CornerFrameProps = {
   children?: ReactNode;
   className?: string;
 };
 
-/** L-shaped corner marks. Opacity + transform only. */
+/** L-shaped corner marks. Opacity + transform only, on the marks — not the host. */
 export function CornerFrame({ children, className = "" }: CornerFrameProps) {
-  const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.2 });
+  const inherited = useRevealMotion();
+  const local = useInView<HTMLDivElement>({
+    policy: inherited?.policy ?? "reveal-once",
+    enabled: !inherited,
+  });
+  const inView = inherited?.inView ?? local.inView;
+  const cycle = inherited?.cycle ?? local.cycle;
+  const armed = inherited?.armed ?? local.armed;
 
   return (
     <div
-      ref={ref}
-      className={`arch-corners ${inView ? "is-in" : ""} ${className}`}
+      ref={inherited ? undefined : local.ref}
+      className={`arch-corners ${revealStateClass(inView, armed)} ${className}`}
+      data-reveal-cycle={cycle}
     >
       <span className="arch-corner is-tl" aria-hidden />
       <span className="arch-corner is-tr" aria-hidden />

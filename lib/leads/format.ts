@@ -1,9 +1,13 @@
+import {
+  estimateStateFromOwnerSource,
+  formatCalculatorSummary,
+  ownerSummaryCopy,
+} from "@/lib/calculator/answers";
 import type { EstimateFormState } from "@/lib/calculator/types";
 import {
   conditionLabels,
   designLabels,
   objectTypeLabels,
-  PUBLIC_TELEGRAM_USERNAME,
   renovationTypeLabels,
   startLabels,
 } from "./labels";
@@ -104,7 +108,16 @@ function limitText(value: string, max = 3500): string {
   return `${value.slice(0, max - 1)}…`;
 }
 
+export function parameterItemsFromLead(lead: CanonicalLead) {
+  return formatCalculatorSummary(
+    estimateStateFromOwnerSource(lead),
+    "lead",
+    ownerSummaryCopy()
+  );
+}
+
 export function formatOwnerTelegram(lead: CanonicalLead): string {
+  const parameters = parameterItemsFromLead(lead);
   const lines = [
     "🏠 Нова заявка з сайту DTM",
     "",
@@ -113,15 +126,9 @@ export function formatOwnerTelegram(lead: CanonicalLead): string {
     `Ім’я: ${lead.name}`,
     `Телефон: ${lead.phone}`,
     "",
-    `Об’єкт: ${lead.objectTypeLabel}`,
-    `Площа: ${lead.area} м²`,
+    ...parameters.map((item) => item.text),
   ];
 
-  if (lead.rooms != null) lines.push(`Кімнати: ${lead.rooms}`);
-  lines.push(`Тип ремонту: ${lead.renovationTypeLabel}`);
-  lines.push(`Дизайн-проєкт: ${lead.designLabel}`);
-  lines.push(`Стан об’єкта: ${lead.conditionLabel}`);
-  lines.push(`Плановий старт: ${lead.startLabel}`);
   if (lead.telegram) lines.push(`Telegram відвідувача: ${lead.telegram}`);
   if (lead.sourcePage) lines.push(`Сторінка: ${lead.sourcePage}`);
 
@@ -140,29 +147,20 @@ export function formatOwnerTelegram(lead: CanonicalLead): string {
 }
 
 export function formatVisitorDraft(lead: CanonicalLead): string {
+  const parameters = parameterItemsFromLead(lead);
   const lines = [
     "Вітаю! Я щойно заповнив(ла) форму на сайті DTM.",
     "",
     `Номер заявки: ${lead.leadId}`,
     `Ім’я: ${lead.name}`,
     `Телефон: ${lead.phone}`,
-    `Об’єкт: ${lead.objectTypeLabel}`,
-    `Площа: ${lead.area} м²`,
+    ...parameters.map((item) => item.text),
   ];
 
-  if (lead.rooms != null) lines.push(`Кімнати: ${lead.rooms}`);
-  lines.push(`Тип ремонту: ${lead.renovationTypeLabel}`);
-  lines.push(`Дизайн-проєкт: ${lead.designLabel}`);
-  lines.push(`Стан об’єкта: ${lead.conditionLabel}`);
-  lines.push(`Плановий старт: ${lead.startLabel}`);
   if (lead.telegram) lines.push(`Мій Telegram: ${lead.telegram}`);
   lines.push("", "Хочу уточнити деталі щодо ремонту.");
 
   return limitText(lines.join("\n"), 3500);
-}
-
-export function visitorTelegramUrl(draft: string): string {
-  return `https://t.me/${PUBLIC_TELEGRAM_USERNAME}?text=${encodeURIComponent(draft)}`;
 }
 
 function escapeHtml(value: string): string {
@@ -194,14 +192,10 @@ export function formatOwnerEmail(lead: CanonicalLead): {
     row("Дата (Київ)", escapeHtml(formatKyivDateTime(lead.submittedAt))),
     row("Ім’я", escapeHtml(lead.name)),
     row("Телефон", phoneHtml),
-    row("Об’єкт", escapeHtml(lead.objectTypeLabel)),
-    row("Площа", escapeHtml(`${lead.area} м²`)),
+    ...parameterItemsFromLead(lead).map((item) =>
+      row(item.label, escapeHtml(item.value))
+    ),
   ];
-  if (lead.rooms != null) rows.push(row("Кімнати", escapeHtml(String(lead.rooms))));
-  rows.push(row("Тип ремонту", escapeHtml(lead.renovationTypeLabel)));
-  rows.push(row("Дизайн-проєкт", escapeHtml(lead.designLabel)));
-  rows.push(row("Стан об’єкта", escapeHtml(lead.conditionLabel)));
-  rows.push(row("Плановий старт", escapeHtml(lead.startLabel)));
   if (lead.telegram) rows.push(row("Telegram відвідувача", escapeHtml(lead.telegram)));
 
   const metaRows: string[] = [];

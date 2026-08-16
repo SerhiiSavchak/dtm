@@ -38,6 +38,16 @@ export const startLabels: Record<StartWindow, string> = {
   later: "Пізніше",
 };
 
+export const parameterFieldLabels = {
+  objectType: "Об’єкт",
+  area: "Площа",
+  rooms: "Кімнати",
+  renovationType: "Тип ремонту",
+  design: "Дизайн-проєкт",
+  condition: "Стан об’єкта",
+  start: "Плановий старт",
+} as const;
+
 export const PUBLIC_TELEGRAM_USERNAME = "xrayboy";
 export const PUBLIC_TELEGRAM_URL = `https://t.me/${PUBLIC_TELEGRAM_USERNAME}`;
 export const PUBLIC_INSTAGRAM_URL =

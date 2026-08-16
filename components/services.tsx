@@ -1,14 +1,19 @@
 "use client";
 
-import { useCallback, useId, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useId,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+} from "react";
 import { serviceMedia } from "@/data/media";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { CopyText } from "./copy-text";
 import { MediaImage } from "./media-image";
-import { Reveal } from "./reveal";
+import { Reveal, RevealGroup } from "./reveal";
 import { SectionHead } from "./section-head";
 import { CornerFrame } from "./fx/corner-frame";
-import { MediaReveal } from "./fx/media-reveal";
 
 function subscribeHoverFine(cb: () => void) {
   const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -18,6 +23,43 @@ function subscribeHoverFine(cb: () => void) {
 
 function getHoverFine() {
   return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
+function mediaFor(index: number) {
+  return serviceMedia[index] ?? serviceMedia[0];
+}
+
+function ServiceStills({
+  active,
+  titles,
+  sizes,
+}: {
+  active: number;
+  titles: readonly string[];
+  sizes: string;
+}) {
+  return titles.map((title, i) => {
+    const media = mediaFor(i);
+    const isActive = active === i;
+    return (
+      <div
+        key={`${media.src}-${i}`}
+        className="service-media absolute inset-0"
+        data-active={isActive ? "true" : "false"}
+        style={{ "--service-pos": media.objectPosition } as CSSProperties}
+      >
+        <MediaImage
+          src={media.src}
+          alt={isActive ? title : ""}
+          aria-hidden={isActive ? undefined : true}
+          fill
+          quality={75}
+          sizes={sizes}
+          className="object-cover"
+        />
+      </div>
+    );
+  });
 }
 
 export function Services() {
@@ -30,6 +72,10 @@ export function Services() {
     () => false
   );
 
+  const lastIndex = Math.max(0, t.items.length - 1);
+  const activeIndex = Math.min(Math.max(0, active), lastIndex);
+  const titles = t.items.map((item) => item.title);
+
   const activate = useCallback((index: number) => {
     setActive(index);
   }, []);
@@ -37,17 +83,15 @@ export function Services() {
   const onKeyDown = (e: React.KeyboardEvent, index: number) => {
     if (e.key === "ArrowDown" || e.key === "ArrowRight") {
       e.preventDefault();
-      activate(Math.min(t.items.length - 1, index + 1));
-      document
-        .getElementById(
-          `${baseId}-tab-${Math.min(t.items.length - 1, index + 1)}`
-        )
-        ?.focus();
+      const next = Math.min(lastIndex, index + 1);
+      activate(next);
+      document.getElementById(`${baseId}-tab-${next}`)?.focus();
     }
     if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
       e.preventDefault();
-      activate(Math.max(0, index - 1));
-      document.getElementById(`${baseId}-tab-${Math.max(0, index - 1)}`)?.focus();
+      const prev = Math.max(0, index - 1);
+      activate(prev);
+      document.getElementById(`${baseId}-tab-${prev}`)?.focus();
     }
   };
 
@@ -58,9 +102,10 @@ export function Services() {
       className="bg-bg text-foreground"
     >
       <div className="container-dtm section-pad">
-        <SectionHead label={t.label} right={t.labelRight} />
+        <RevealGroup>
+          <SectionHead label={t.label} right={t.labelRight} />
 
-        <div className="grid grid-cols-1 gap-x-12 lg:grid-cols-12">
+          <div className="grid grid-cols-1 gap-x-12 lg:grid-cols-12">
           <div className="lg:col-span-7">
             <Reveal variant="mask">
               <h2
@@ -71,28 +116,13 @@ export function Services() {
               </h2>
             </Reveal>
 
-            <MediaReveal
-              variant="secondary"
-              className="relative mb-8 aspect-[16/10] w-full overflow-hidden bg-stone lg:hidden"
-            >
-              {serviceMedia.map((src, i) => (
-                <div
-                  key={src}
-                  className="service-media absolute inset-0"
-                  data-active={active === i ? "true" : "false"}
-                >
-                  <MediaImage
-                    src={src}
-                    alt=""
-                    aria-hidden="true"
-                    fill
-                    quality={75}
-                    sizes="(max-width: 1023px) 92vw, 40vw"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </MediaReveal>
+            <div className="services-inline-media">
+              <ServiceStills
+                active={activeIndex}
+                titles={titles}
+                sizes="(max-width: 1023px) 92vw, 40vw"
+              />
+            </div>
 
             <ul
               className="border-t border-border"
@@ -100,7 +130,7 @@ export function Services() {
               aria-label={t.heading}
             >
               {t.items.map((service, i) => {
-                const isActive = active === i;
+                const isActive = activeIndex === i;
                 return (
                   <li key={service.index} role="presentation">
                     <button
@@ -158,54 +188,33 @@ export function Services() {
             </ul>
           </div>
 
-          <div className="hidden lg:col-span-5 lg:block">
+          <div className="services-sticky-col">
             <div className="sticky top-28">
               <div
                 id={`${baseId}-panel`}
                 role="tabpanel"
-                aria-labelledby={`${baseId}-tab-${active}`}
-                className="relative aspect-[4/5] w-full overflow-hidden bg-stone"
+                aria-labelledby={`${baseId}-tab-${activeIndex}`}
+                className="services-sticky-frame"
               >
-                <MediaReveal variant="primary" className="absolute inset-0">
-                  <CornerFrame className="absolute inset-0 h-full">
-                    {serviceMedia.map((src, i) => (
-                      <div
-                        key={src}
-                        className="service-media absolute inset-0"
-                        data-active={active === i ? "true" : "false"}
-                      >
-                        <MediaImage
-                          src={src}
-                          alt=""
-                          aria-hidden="true"
-                          fill
-                          quality={75}
-                          sizes="(max-width: 1280px) 40vw, 560px"
-                          className="object-cover"
-                        />
-                      </div>
-                    ))}
-                  </CornerFrame>
-                </MediaReveal>
-                <div
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-28"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(13,13,15,0) 0%, rgba(13,13,15,0.75) 100%)",
-                  }}
-                />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between p-5">
+                <div className="services-media-stack">
+                  <ServiceStills
+                    active={activeIndex}
+                    titles={titles}
+                    sizes="(max-width: 1280px) 40vw, 560px"
+                  />
+                </div>
+                <div className="services-contrast" aria-hidden />
+                <div className="services-caption">
                   <span className="label text-paper/90">
-                    {t.items[active].title}
-                  </span>
-                  <span className="font-mono text-xs text-accent">
-                    {t.items[active].index}
+                    {t.items[activeIndex]?.title}
                   </span>
                 </div>
+                <CornerFrame className="services-deco" />
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        </RevealGroup>
       </div>
     </section>
   );

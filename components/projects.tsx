@@ -3,18 +3,16 @@
 import {
   useCallback,
   useEffect,
-  useId,
   useRef,
   useState,
 } from "react";
 import { projects, type Project } from "@/data/projects";
-import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 import { useProjectTrack } from "@/lib/project-track";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { MediaImage } from "./media-image";
-import { Reveal } from "./reveal";
+import { ProjectDossier } from "./project-dossier";
+import { Reveal, RevealGroup } from "./reveal";
 import { SectionHead } from "./section-head";
-import { CornerFrame } from "./fx/corner-frame";
 import { HoverMediaLabel } from "./fx/hover-media-label";
 import { MediaParallax } from "./fx/media-parallax";
 import { MediaReveal } from "./fx/media-reveal";
@@ -88,16 +86,17 @@ export function Projects() {
       className="bg-bg"
     >
       <div className="container-dtm section-pad">
-        <SectionHead label={t.label} />
+        <RevealGroup>
+          <SectionHead label={t.label} />
 
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <Reveal variant="mask">
-            <h2 id="projects-heading" className="type-h2 text-foreground">
-              {t.heading}
-            </h2>
-          </Reveal>
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <Reveal variant="mask">
+              <h2 id="projects-heading" className="type-h2 text-foreground">
+                {t.heading}
+              </h2>
+            </Reveal>
 
-          <Reveal delay={0.06} variant="fade">
+            <Reveal delay={0.06} variant="fade">
             <div className="flex flex-col items-start gap-2 md:items-end">
               <div className="flex items-center gap-4">
                 <span
@@ -135,8 +134,9 @@ export function Projects() {
                 {t.swipeHint}
               </span>
             </div>
-          </Reveal>
-        </div>
+            </Reveal>
+          </div>
+        </RevealGroup>
 
         <div
           ref={viewportRef}
@@ -173,8 +173,7 @@ export function Projects() {
       </div>
 
       {openSlug ? (
-        <ProjectModal
-          key={openSlug}
+        <ProjectDossier
           slug={openSlug}
           onClose={() => setOpenSlug(null)}
           onNavigate={(next) => setOpenSlug(next)}
@@ -214,7 +213,7 @@ function ProjectSlide({
         aria-label={`${t.open}: ${labels.title}`}
       >
         <div className="project-media">
-          <div className="overflow-hidden bg-stone">
+          <div className="project-media-crop">
             <div
               className={`project-media-frame relative w-full aspect-[4/5] md:aspect-[16/11] ${
                 lead ? "lg:aspect-[16/10]" : ""
@@ -222,21 +221,19 @@ function ProjectSlide({
             >
               {lead ? (
                 <MediaReveal variant="primary" className="absolute inset-0">
-                  <CornerFrame className="absolute inset-0 h-full">
-                    <div className="project-media-zoom">
-                      <MediaParallax amount={12} className="absolute inset-0">
-                        <MediaImage
-                          src={project.cover}
-                          alt={`DTM: ${labels.category}`}
-                          fill
-                          quality={75}
-                          sizes="(max-width: 1024px) 86vw, 70vw"
-                          className="object-cover"
-                          style={{ objectPosition: project.coverPosition }}
-                        />
-                      </MediaParallax>
-                    </div>
-                  </CornerFrame>
+                  <div className="project-media-zoom">
+                    <MediaParallax amount={12} className="absolute inset-0">
+                      <MediaImage
+                        src={project.cover}
+                        alt={`DTM: ${labels.category}`}
+                        fill
+                        quality={75}
+                        sizes="(max-width: 1024px) 86vw, 70vw"
+                        className="object-cover"
+                        style={{ objectPosition: project.coverPosition }}
+                      />
+                    </MediaParallax>
+                  </div>
                 </MediaReveal>
               ) : (
                 <div className="project-media-zoom">
@@ -254,11 +251,9 @@ function ProjectSlide({
             </div>
           </div>
           <HoverMediaLabel label={t.look} />
-          <div className="project-arrow-slot">
-            <span aria-hidden className="project-arrow project-arrow-hover">
-              →
-            </span>
-          </div>
+          <span aria-hidden className="project-arrow project-arrow-hover">
+            →
+          </span>
         </div>
 
         <div className="mt-4 flex items-baseline justify-between gap-4 border-t border-border pt-3">
@@ -280,168 +275,5 @@ function ProjectSlide({
         </div>
       </button>
     </article>
-  );
-}
-
-function ProjectModal({
-  slug,
-  onClose,
-  onNavigate,
-}: {
-  slug: string;
-  onClose: () => void;
-  onNavigate: (slug: string) => void;
-}) {
-  const t = useDictionary().projects;
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
-  const projectIndex = projects.findIndex((p) => p.slug === slug);
-  const project = projects[projectIndex] ?? projects[0];
-  const labels = useProjectLabels(project);
-  const [galleryIndex, setGalleryIndex] = useState(0);
-  const titleId = useId();
-
-  useEffect(() => {
-    lockScroll();
-    closeRef.current?.focus();
-    return () => {
-      unlockScroll();
-    };
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight") {
-        if (galleryIndex < project.gallery.length - 1) {
-          setGalleryIndex((g) => g + 1);
-        } else if (projectIndex < projects.length - 1) {
-          onNavigate(projects[projectIndex + 1].slug);
-        }
-      }
-      if (e.key === "ArrowLeft") {
-        if (galleryIndex > 0) setGalleryIndex((g) => g - 1);
-        else if (projectIndex > 0) onNavigate(projects[projectIndex - 1].slug);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [galleryIndex, onClose, onNavigate, project.gallery.length, projectIndex]);
-
-  const touchX = useRef<number | null>(null);
-
-  return (
-    <div
-      className="project-modal-backdrop fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-8"
-      role="presentation"
-      onClick={onClose}
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="calc-step-enter relative grid max-h-[92svh] w-full max-w-5xl grid-cols-1 overflow-hidden bg-ink-deep text-paper lg:grid-cols-12"
-        onClick={(e) => e.stopPropagation()}
-        onTouchStart={(e) => {
-          touchX.current = e.changedTouches[0]?.clientX ?? null;
-        }}
-        onTouchEnd={(e) => {
-          if (touchX.current == null) return;
-          const dx = (e.changedTouches[0]?.clientX ?? 0) - touchX.current;
-          if (dx < -48 && galleryIndex < project.gallery.length - 1) {
-            setGalleryIndex((g) => g + 1);
-          }
-          if (dx > 48 && galleryIndex > 0) setGalleryIndex((g) => g - 1);
-          touchX.current = null;
-        }}
-      >
-        <div className="relative aspect-[4/5] bg-ink-soft lg:col-span-7 lg:aspect-auto lg:min-h-[32rem]">
-          <MediaImage
-            key={project.gallery[galleryIndex] ?? project.cover}
-            src={project.gallery[galleryIndex] ?? project.cover}
-            alt=""
-            fill
-            quality={75}
-            sizes="(max-width: 1024px) 100vw, 55vw"
-            className="object-cover"
-            style={{ objectPosition: project.coverPosition }}
-          />
-        </div>
-
-        <div className="flex flex-col justify-between p-6 md:p-8 lg:col-span-5">
-          <div>
-            <div className="flex items-start justify-between gap-4">
-              <span className="label text-accent">
-                {String(projectIndex + 1).padStart(2, "0")}
-              </span>
-              <button
-                ref={closeRef}
-                type="button"
-                onClick={onClose}
-                className="label text-paper/60 hover:text-paper"
-                aria-label={t.close}
-              >
-                {t.close} ✕
-              </button>
-            </div>
-            <h3 id={titleId} className="mt-6 type-h2 text-paper">
-              {labels.title}
-            </h3>
-            <p className="label mt-3 text-paper/55">
-              {labels.category}
-              {labels.location ? ` · ${labels.location}` : ""}
-              {labels.area ? ` · ${labels.area}` : ""}
-            </p>
-
-            {project.gallery.length > 1 ? (
-              <div className="mt-8 flex flex-wrap gap-2">
-                {project.gallery.map((src, i) => (
-                  <button
-                    key={src}
-                    type="button"
-                    onClick={() => setGalleryIndex(i)}
-                    aria-label={`${i + 1}`}
-                    aria-current={galleryIndex === i}
-                    className={`relative h-16 w-14 overflow-hidden border ${
-                      galleryIndex === i
-                        ? "border-accent"
-                        : "border-white/20 opacity-70 hover:opacity-100"
-                    }`}
-                  >
-                    <MediaImage
-                      src={src}
-                      alt=""
-                      fill
-                      sizes="56px"
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="mt-10 flex items-center justify-between gap-3 border-t border-white/15 pt-5">
-            <button
-              type="button"
-              className="btn btn-sm btn-ghost"
-              disabled={projectIndex === 0}
-              onClick={() => onNavigate(projects[projectIndex - 1].slug)}
-            >
-              ← {t.prev}
-            </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-ghost"
-              disabled={projectIndex === projects.length - 1}
-              onClick={() => onNavigate(projects[projectIndex + 1].slug)}
-            >
-              {t.next} →
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }

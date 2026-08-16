@@ -4,7 +4,7 @@ import { useDictionary } from "@/lib/i18n/locale-context";
 import { CopyText } from "./copy-text";
 import { EstimateCalculator } from "./calculator/estimate-calculator";
 import { LightTrace } from "./fx/light-trace";
-import { Reveal } from "./reveal";
+import { Reveal, RevealGroup } from "./reveal";
 import { SectionHead } from "./section-head";
 
 export function EstimateCta() {
@@ -17,9 +17,10 @@ export function EstimateCta() {
       className="bg-bg text-foreground"
     >
       <div className="container-dtm section-pad">
-        <SectionHead label={t.label} right={t.labelRight} />
+        <RevealGroup policy="reveal-once">
+          <SectionHead label={t.label} right={t.labelRight} />
 
-        <Reveal variant="fade">
+          <Reveal variant="fade">
           <div className="calc-panel relative overflow-hidden">
             <LightTrace className="absolute left-0 top-0" />
 
@@ -34,9 +35,9 @@ export function EstimateCta() {
                 </p>
                 <a
                   href="#contacts"
-                  className="label calc-muted arch-link mt-6 inline-block xl:mt-auto xl:pt-10"
+                  className="label calc-muted arch-link mt-6 xl:mt-auto"
                 >
-                  {t.contactLink}
+                  <span className="arch-link-label">{t.contactLink}</span>
                 </a>
               </div>
 
@@ -45,7 +46,8 @@ export function EstimateCta() {
               </div>
             </div>
           </div>
-        </Reveal>
+          </Reveal>
+        </RevealGroup>
       </div>
     </section>
   );

@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { CopyText } from "../copy-text";
-import { Reveal } from "../reveal";
+import { Reveal, RevealGroup } from "../reveal";
 import { SectionHead } from "../section-head";
 
 export function Faq() {
@@ -18,25 +18,31 @@ export function Faq() {
       className="bg-bg text-foreground"
     >
       <div className="container-dtm section-pad">
-        <SectionHead label={t.label} />
+        <RevealGroup>
+          <SectionHead label={t.label} />
 
-        <div className="grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <Reveal variant="mask">
-              <h2 id="faq-heading" className="type-h2 text-foreground">
-                {t.heading}
-              </h2>
-            </Reveal>
-          </div>
+          <div className="grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12">
+            <div className="lg:col-span-4">
+              <Reveal variant="mask">
+                <h2 id="faq-heading" className="type-h2 text-foreground">
+                  {t.heading}
+                </h2>
+              </Reveal>
+            </div>
 
-          <div className="lg:col-span-8">
-            <ul className="border-t border-border">
+            <Reveal
+              as="ul"
+              isolate
+              policy="reveal-once"
+              variant="fade"
+              className="border-t border-border lg:col-span-8"
+            >
               {t.items.map((item, i) => {
                 const isOpen = open === i;
                 const panelId = `${baseId}-panel-${i}`;
                 const btnId = `${baseId}-btn-${i}`;
                 return (
-                  <Reveal as="li" variant="fade" key={item.q} delay={i * 0.03}>
+                  <li key={item.q}>
                     <h3>
                       <button
                         type="button"
@@ -69,12 +75,12 @@ export function Faq() {
                         </p>
                       </div>
                     </div>
-                  </Reveal>
+                  </li>
                 );
               })}
-            </ul>
+            </Reveal>
           </div>
-        </div>
+        </RevealGroup>
       </div>
     </section>
   );

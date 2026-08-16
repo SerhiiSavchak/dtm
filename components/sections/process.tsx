@@ -3,7 +3,7 @@
 import { useCallback, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { CopyText } from "../copy-text";
-import { Reveal } from "../reveal";
+import { Reveal, RevealGroup } from "../reveal";
 import { SectionHead } from "../section-head";
 
 const VIEWPORT_ANCHOR = 0.43;
@@ -216,10 +216,12 @@ export function Process() {
       className="bg-bg text-foreground"
     >
       <div className="container-dtm section-pad">
-        <SectionHead label={t.label} right={t.labelRight} />
+        <RevealGroup>
+          <SectionHead label={t.label} right={t.labelRight} />
+        </RevealGroup>
 
         <div className="grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12">
-          <div className="lg:col-span-4 lg:self-start">
+          <RevealGroup className="lg:col-span-4 lg:self-start">
             <Reveal variant="mask">
               <h2
                 id="process-heading"
@@ -234,7 +236,7 @@ export function Process() {
                 <CopyText>{t.body}</CopyText>
               </p>
             </Reveal>
-          </div>
+          </RevealGroup>
 
           <div ref={railRef} className="process-rail lg:col-span-8">
             <div ref={trackRef} className="process-rail-track" aria-hidden>
