@@ -73,6 +73,7 @@
   /* Motion */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-cinematic: cubic-bezier(0.76, 0, 0.24, 1);
   --motion-fast: 280ms;
   --motion-base: 480ms;
   --motion-slow: 800ms;
@@ -803,15 +804,6 @@ html[data-theme] {
   }
 }
 
-@keyframes dtm-mask-line {
-  from {
-    transform: translateY(105%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
 @keyframes dtm-scale-settle {
   from {
     transform: scale(1.03);
@@ -899,6 +891,8 @@ html[data-theme] {
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  transform-origin: center center;
 }
 
 .hero-media-inner {
@@ -928,7 +922,7 @@ html[data-theme] {
 .hero-contrast {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   pointer-events: none;
 }
 
@@ -978,100 +972,486 @@ html[data-theme] {
 
 .hero-copy-layer {
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
-/* Copy is visible by default. Entrance is transform-only and never required. */
+.hero-copy-inner {
+  display: block;
+}
+
+.hero-meta-rule {
+  transform-origin: left center;
+}
+
+.hero-accent {
+  position: relative;
+  display: block;
+}
+
+.hero-accent-fill {
+  position: relative;
+  display: block;
+  color: var(--accent);
+}
+
+.hero-accent-fill::after {
+  content: none;
+  position: absolute;
+  inset: 0;
+  color: var(--accent);
+  pointer-events: none;
+}
+
+.hero-accent-scanner {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: left center;
+}
+
+.hero-accent-scanner::after {
+  content: "";
+  position: absolute;
+  top: 0.14em;
+  right: 0;
+  bottom: 0.12em;
+  width: 1.5px;
+  background: color-mix(in srgb, var(--orange) 42%, #fff);
+}
+
+.hero-cta-fill {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.hero-aperture {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-aperture-panel {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 18, 20, 0.9);
+  transform-origin: right center;
+}
+
+.hero-aperture-cut {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1.5px;
+  background: var(--orange);
+}
+
+/* Visible by default so JS/CSS failure still shows the approved Hero. */
 .hero-meta,
+.hero-meta-rule,
+.hero-meta-text,
 .hero-copy,
+.hero-copy-inner,
 .hero-cta,
-.mask-line > span {
+.hero-cta-primary,
+.hero-cta-secondary,
+.mask-line > span,
+.hero-accent-fill,
+.hero-media {
   opacity: 1;
   transform: none;
+  filter: none;
 }
 
+.hero-aperture {
+  visibility: hidden;
+}
+
+.hero-accent-scanner {
+  opacity: 0;
+}
+
+.hero-heading {
+  perspective: none;
+}
+
+/*
+  Architectural Aperture — one CSS timeline, gated by data-hero.
+  Delays subtract --hero-elapsed so Strict Mode remounts resume mid-sequence.
+*/
 @media (prefers-reduced-motion: no-preference) {
+  [data-hero] {
+    --hero-line-y: 112%;
+    --hero-line-rx: -12deg;
+    --hero-line-blur: 3px;
+    --h-aperture-dur: 680ms;
+    --h-line-dur: 860ms;
+    --h-fill-dur: 720ms;
+    --h-copy-dur: 640ms;
+    --h-cta-dur: 600ms;
+    --h-media-dur: 2000ms;
+    --h-meta-rule-d: 160ms;
+    --h-meta-text-d: 260ms;
+    --h-line1-d: 360ms;
+    --h-line2-d: 470ms;
+    --h-line3-d: 580ms;
+    --h-fill-d: 700ms;
+    --h-copy-d: 1080ms;
+    --h-cta1-d: 1280ms;
+    --h-cta2-d: 1370ms;
+  }
+
+  @media (max-width: 639px) {
+    [data-hero] {
+      --hero-line-rx: 0deg;
+      --hero-line-blur: 0px;
+      --hero-line-y: 108%;
+      --h-aperture-dur: 540ms;
+      --h-line-dur: 720ms;
+      --h-fill-dur: 640ms;
+      --h-copy-dur: 560ms;
+      --h-cta-dur: 520ms;
+      --h-media-dur: 1700ms;
+      --h-meta-rule-d: 80ms;
+      --h-meta-text-d: 160ms;
+      --h-line1-d: 280ms;
+      --h-line2-d: 370ms;
+      --h-line3-d: 450ms;
+      --h-fill-d: 540ms;
+      --h-copy-d: 900ms;
+      --h-cta1-d: 1180ms;
+      --h-cta2-d: 1260ms;
+    }
+  }
+
+  [data-hero="pending"] .hero-aperture,
+  [data-hero="play"] .hero-aperture {
+    visibility: visible;
+  }
+
+  [data-hero="pending"] .hero-aperture-panel,
+  [data-hero="play"] .hero-aperture-panel {
+    transform: translate3d(10%, 0, 0);
+  }
+
+  [data-hero="pending"] .hero-media,
+  [data-hero="play"] .hero-media {
+    transform: scale(1.055);
+  }
+
+  [data-hero="pending"] .hero-heading,
+  [data-hero="play"] .hero-heading {
+    perspective: 820px;
+    perspective-origin: left 70%;
+  }
+
+  [data-hero="pending"] .mask-line > span,
+  [data-hero="play"] .mask-line > span {
+    transform-origin: 0% 100%;
+    backface-visibility: hidden;
+  }
+
   [data-hero="pending"] .mask-line > span {
-    transform: translateY(105%);
+    transform: translateY(var(--hero-line-y)) rotateX(var(--hero-line-rx));
+    opacity: 0.38;
+    filter: blur(var(--hero-line-blur));
   }
 
-  [data-hero="pending"] .hero-meta,
-  [data-hero="pending"] .hero-copy {
-    opacity: 0;
-    transform: translateY(12px);
+  [data-hero="pending"] .hero-accent-fill,
+  [data-hero="play"] .hero-accent-fill {
+    color: color-mix(in srgb, var(--paper) 30%, transparent);
   }
 
-  [data-hero="pending"] .hero-cta {
-    transform: translateY(14px);
+  [data-hero="pending"] .hero-accent-fill::after,
+  [data-hero="play"] .hero-accent-fill::after {
+    content: attr(data-text);
+    clip-path: inset(0 100% 0 0);
   }
 
-  [data-hero="ready"] .hero-meta {
-    animation: dtm-hero-enter 0.7s var(--ease-out-expo) both;
-  }
-
-  [data-hero="ready"] .hero-line-1 > span {
-    animation: dtm-mask-line 0.85s var(--ease-out-expo) both;
-    animation-delay: 80ms;
-  }
-
-  [data-hero="ready"] .hero-line-2 > span {
-    animation: dtm-mask-line 0.85s var(--ease-out-expo) both;
-    animation-delay: 160ms;
-  }
-
-  [data-hero="ready"] .hero-line-3 > span {
-    animation: dtm-mask-line 0.9s var(--ease-out-expo) both;
-    animation-delay: 250ms;
-  }
-
-  [data-hero="ready"] .hero-copy {
-    animation: dtm-hero-enter 0.75s var(--ease-out-expo) both;
-    animation-delay: 340ms;
-  }
-
-  [data-hero="ready"] .hero-cta {
-    animation: dtm-hero-cta 0.7s var(--ease-out-expo) both;
-    animation-delay: 440ms;
-  }
-
-  [data-hero="ready"] .hero-media-inner {
-    animation: dtm-hero-media 1.55s var(--ease-out-soft) both;
-  }
-}
-
-@keyframes dtm-hero-enter {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
+  [data-hero="pending"] .hero-accent-scanner,
+  [data-hero="play"] .hero-accent-scanner {
     opacity: 1;
-    transform: translateY(0);
+    transform: scaleX(0);
+  }
+
+  [data-hero="pending"] .hero-meta-rule {
+    transform: scaleX(0);
+  }
+
+  [data-hero="pending"] .hero-meta-text,
+  [data-hero="pending"] .hero-copy-inner,
+  [data-hero="pending"] .hero-cta-primary,
+  [data-hero="pending"] .hero-cta-secondary {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  [data-hero="pending"] .hero-cta-primary,
+  [data-hero="play"] .hero-cta-primary {
+    background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+
+  [data-hero="pending"] .hero-cta-fill,
+  [data-hero="play"] .hero-cta-fill {
+    display: block;
+  }
+
+  [data-hero="play"] .hero-cta-fill {
+    animation: dtm-hero-rule var(--h-cta-dur) var(--ease-cinematic) both;
+    animation-delay: calc(var(--h-cta1-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-aperture-panel {
+    will-change: transform;
+  }
+
+  [data-hero="play"] .hero-media,
+  [data-hero="play"] .mask-line > span {
+    will-change: transform, filter;
+  }
+
+  [data-hero="play"] .hero-accent-fill::after,
+  [data-hero="play"] .hero-accent-scanner {
+    will-change: transform, clip-path, opacity;
+  }
+
+  [data-hero="play"] .hero-aperture-panel {
+    animation: dtm-hero-aperture var(--h-aperture-dur) var(--ease-cinematic) both;
+    animation-delay: calc(0ms - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-aperture-cut {
+    animation: dtm-hero-cut var(--h-aperture-dur) var(--ease-cinematic) both;
+    animation-delay: calc(0ms - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-media {
+    animation: dtm-hero-depth var(--h-media-dur) var(--ease-out-soft) both;
+    animation-delay: calc(0ms - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-meta-rule {
+    animation: dtm-hero-rule 0.42s var(--ease-cinematic) both;
+    animation-delay: calc(var(--h-meta-rule-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-meta-text {
+    animation: dtm-hero-rise 0.5s var(--ease-out-soft) both;
+    animation-delay: calc(var(--h-meta-text-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-line-1 > span {
+    animation: dtm-hero-line var(--h-line-dur) var(--ease-cinematic) both;
+    animation-delay: calc(var(--h-line1-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-line-2 > span {
+    animation: dtm-hero-line var(--h-line-dur) var(--ease-cinematic) both;
+    animation-delay: calc(var(--h-line2-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-line-3 > span {
+    animation: dtm-hero-line var(--h-line-dur) var(--ease-cinematic) both;
+    animation-delay: calc(var(--h-line3-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-accent-fill::after {
+    animation: dtm-hero-fill var(--h-fill-dur) var(--ease-cinematic) both;
+    animation-delay: calc(var(--h-fill-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-accent-scanner {
+    animation: dtm-hero-scan var(--h-fill-dur) var(--ease-cinematic) both;
+    animation-delay: calc(var(--h-fill-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-copy-inner {
+    animation: dtm-hero-copy var(--h-copy-dur) var(--ease-out-soft) both;
+    animation-delay: calc(var(--h-copy-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-cta-primary {
+    animation: dtm-hero-cta var(--h-cta-dur) var(--ease-out-soft) both;
+    animation-delay: calc(var(--h-cta1-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="play"] .hero-cta-secondary {
+    animation:
+      dtm-hero-cta var(--h-cta-dur) var(--ease-out-soft) both,
+      dtm-hero-cta-border 0.55s var(--ease-out-soft) both;
+    animation-delay: calc(var(--h-cta2-d) - var(--hero-elapsed, 0ms));
+  }
+
+  [data-hero="done"] .hero-aperture {
+    visibility: hidden;
+  }
+
+  [data-hero="done"] .hero-accent-fill {
+    color: var(--accent);
+  }
+
+  [data-hero="done"] .hero-accent-fill::after {
+    content: none;
+    clip-path: none;
+  }
+
+  [data-hero="done"] .hero-cta-primary {
+    background-color: var(--accent);
+  }
+
+  [data-hero="done"] .hero-cta-fill {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    [data-hero="done"] .hero-media {
+      transform: scale(calc(1 + var(--hero-exit, 0) * 0.032));
+    }
+
+    [data-hero="done"] .hero-cluster {
+      transform: translate3d(0, calc(var(--hero-exit, 0) * -3.2vh), 0);
+    }
+
+    [data-hero="done"] .hero-copy {
+      transform: translate3d(0, calc(var(--hero-exit, 0) * -1.4vh), 0);
+      opacity: calc(1 - var(--hero-exit, 0) * 0.16);
+    }
+
+    [data-hero="done"] .hero-cta {
+      transform: translate3d(0, calc(var(--hero-exit, 0) * -1.8vh), 0);
+    }
   }
 }
 
-@keyframes dtm-hero-cta {
+@keyframes dtm-hero-aperture {
   from {
-    transform: translateY(14px);
+    transform: translate3d(10%, 0, 0);
   }
   to {
-    transform: translateY(0);
+    transform: translate3d(100%, 0, 0);
   }
 }
 
-@keyframes dtm-hero-media {
+@keyframes dtm-hero-cut {
+  0% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes dtm-hero-depth {
   from {
-    transform: scale(1.035);
+    transform: scale(1.055);
   }
   to {
     transform: scale(1);
   }
 }
 
+@keyframes dtm-hero-rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes dtm-hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dtm-hero-line {
+  from {
+    transform: translateY(var(--hero-line-y)) rotateX(var(--hero-line-rx));
+    opacity: 0.38;
+    filter: blur(var(--hero-line-blur));
+  }
+  to {
+    transform: none;
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes dtm-hero-fill {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes dtm-hero-scan {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+@keyframes dtm-hero-copy {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dtm-hero-cta {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dtm-hero-cta-border {
+  from {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  to {
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+}
+
 /*
   Mobile Hero cluster position + CTA rhythm.
   Whole content block (eyebrow → CTAs) shifts down together via .hero-content.
-  Internal description→CTA gap stays via .hero-cta margin (do not re-open).
+  Paragraph→CTA gap is .hero-cta margin-top only.
 */
 .hero-cta {
   margin-top: clamp(3rem, calc(2.25rem + 3.5svh), 4rem);
@@ -1119,7 +1499,7 @@ html[data-theme] {
 
   .hero-cta {
     width: 100%;
-    margin-top: clamp(1.5rem, 4.5svh, 1.85rem);
+    margin-top: clamp(3rem, calc(2.25rem + 4svh), 4.75rem);
     gap: 0.7rem;
   }
 
@@ -1290,7 +1670,7 @@ html[data-theme] {
   .in-progress-intro {
     grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
     gap: 2.5rem;
-    align-items: end;
+    align-items: start;
     margin-bottom: 2.25rem;
   }
 }
@@ -2115,27 +2495,49 @@ html[data-theme="light"] .calc-panel {
   .calc-step-enter,
   .calc-step-enter-back,
   .calc-step-exit,
-  [data-hero="ready"] .hero-cluster,
+  [data-hero] .hero-cluster,
   .hero-cluster,
   .site-header.is-booted {
     animation: none !important;
+  }
+
+  .hero-aperture,
+  .hero-aperture-panel,
+  .hero-aperture-cut,
+  .hero-accent-scanner,
+  .hero-cta-fill,
+  .hero-accent-fill::after {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    animation: none !important;
+    transform: none !important;
+    content: none !important;
   }
 
   .hero-media,
   .hero-media-inner,
   .hero-cluster,
   .hero-meta,
+  .hero-meta-rule,
+  .hero-meta-text,
   .hero-copy,
+  .hero-copy-inner,
   .hero-cta,
+  .hero-cta-primary,
+  .hero-cta-secondary,
   .mask-line > span,
   .hero-line-1 > span,
   .hero-line-2 > span,
   .hero-line-3 > span,
+  .hero-accent,
+  .hero-accent-fill,
   .site-header.is-booted {
     opacity: 1 !important;
     transform: none !important;
+    filter: none !important;
     clip-path: none !important;
     animation: none !important;
+    visibility: visible !important;
   }
 
   .media-frame .media-lqip {
