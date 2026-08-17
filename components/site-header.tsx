@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 import { Logo } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
 import { useMagnetic } from "./fx/magnetic";
@@ -9,8 +16,17 @@ import { useTheme } from "@/lib/theme/theme-context";
 import { navHrefs } from "@/lib/i18n/dictionaries";
 import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 
-function prefersReducedMotion() {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const FOCUSABLE =
+  'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+const DESKTOP_NAV_MQ = "(min-width: 1280px)";
+
+function visibleFocusable(root: ParentNode) {
+  return [...root.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => {
+    if (el.closest("[inert]")) return false;
+    if (el.getAttribute("aria-hidden") === "true") return false;
+    return el.getClientRects().length > 0;
+  });
 }
 
 export function SiteHeader({ boot = true }: { boot?: boolean }) {
@@ -23,16 +39,33 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
     "closed"
   );
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [desktopNav, setDesktopNav] = useState(false);
   const burgerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const ctaRef = useMagnetic<HTMLAnchorElement>(3);
   const menuId = useId();
+  const menuOpen = menuPhase === "open";
   const menuVisible = menuPhase !== "closed";
   const pendingAnchorRef = useRef<string | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const sync = () => setReduceMotion(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia(DESKTOP_NAV_MQ);
+    const sync = () => {
+      const desktop = mq.matches;
+      setDesktopNav(desktop);
+      if (desktop) {
+        pendingAnchorRef.current = null;
+        setMenuPhase("closed");
+      }
+    };
     sync();
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
@@ -53,27 +86,43 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
     };
   }, [menuVisible]);
 
-  function openMenu() {
-    if (menuPhase !== "closed") return;
-    setMenuPhase("open");
-  }
+  const openMenu = useCallback(() => {
+    setMenuPhase((phase) => (phase === "closed" ? "open" : phase));
+  }, []);
 
-  function closeMenu() {
+  const closeMenu = useCallback((restoreFocus = true) => {
     if (menuPhase !== "open") return;
+    if (restoreFocus) burgerRef.current?.focus();
     setMenuPhase("closing");
-  }
+  }, [menuPhase]);
 
-  function scrollToHash(hash: string) {
-    const id = hash.replace(/^#/, "");
-    if (!id) return;
-    const target = document.getElementById(id);
-    if (!target) return;
-    const behavior = prefersReducedMotion() ? "auto" : "smooth";
-    target.scrollIntoView({ behavior, block: "start" });
-    window.history.pushState(null, "", `#${id}`);
-  }
+  const scrollToHash = useCallback(
+    (hash: string) => {
+      const id = hash.replace(/^#/, "");
+      if (!id) return;
+      const behavior: ScrollBehavior = reduceMotion ? "auto" : "smooth";
+      if (id === "top") {
+        window.scrollTo({ top: 0, behavior });
+        window.history.pushState(null, "", "#top");
+        return;
+      }
+      const target = document.getElementById(id);
+      if (!target) return;
+      const headerPx =
+        Number.parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--header-h"
+          )
+        ) || 80;
+      const y =
+        window.scrollY + target.getBoundingClientRect().top - headerPx - 12;
+      window.scrollTo({ top: Math.max(0, y), behavior });
+      window.history.pushState(null, "", `#${id}`);
+    },
+    [reduceMotion]
+  );
 
-  /** Menu link: close first, then smooth-scroll after exit (body overflow restored). */
+  /** Menu link: close first, then offset-scroll after exit (body overflow restored). */
   function onMobileNavClick(
     e: MouseEvent<HTMLAnchorElement>,
     href: string
@@ -90,8 +139,8 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
     }
 
     if (reduceMotion) {
+      burgerRef.current?.focus();
       setMenuPhase("closed");
-      // overflow clears on next paint
       requestAnimationFrame(() => {
         const hash = pendingAnchorRef.current;
         pendingAnchorRef.current = null;
@@ -100,19 +149,46 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
       return;
     }
 
-    setMenuPhase("closing");
+    closeMenu(false);
   }
 
   useEffect(() => {
+    if (menuPhase !== "open") return;
+    const menu = menuRef.current;
+    const header = menu?.ownerDocument.querySelector(".site-header");
+    const firstLink = menu?.querySelector<HTMLElement>(".mobile-menu-link");
+    firstLink?.focus();
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && menuPhase === "open") {
+      if (e.key === "Escape") {
+        e.preventDefault();
         pendingAnchorRef.current = null;
-        setMenuPhase("closing");
+        closeMenu(true);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const nodes = [
+        ...(header ? visibleFocusable(header) : []),
+        ...(menu ? visibleFocusable(menu) : []),
+      ];
+      if (nodes.length === 0) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey) {
+        if (active === first || !nodes.includes(active as HTMLElement)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last) {
+        e.preventDefault();
+        first.focus();
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [menuPhase]);
+
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuPhase, closeMenu]);
 
   // Finish exit, then optional pending anchor scroll
   useEffect(() => {
@@ -125,7 +201,6 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
       setMenuPhase("closed");
       const hash = pendingAnchorRef.current;
       pendingAnchorRef.current = null;
-      // Wait until body overflow is restored, then scroll
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (hash) scrollToHash(hash);
@@ -143,7 +218,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
       el?.removeEventListener("transitionend", onEnd);
       window.clearTimeout(fallback);
     };
-  }, [menuPhase, reduceMotion]);
+  }, [menuPhase, reduceMotion, scrollToHash]);
 
   const solid = scrolled || menuVisible;
   const onDarkChrome = !solid || theme === "dark";
@@ -175,7 +250,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
             className="justify-self-start flex items-center"
             aria-label={t.nav.homeAria}
             onClick={(e) => {
-              if (menuPhase === "open") onMobileNavClick(e, "#top");
+              if (menuOpen) onMobileNavClick(e, "#top");
             }}
           >
             <Logo tone={tone} withDescriptor />
@@ -238,12 +313,8 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               <a
                 ref={ctaRef}
                 href={navHrefs.estimate}
-                className={`header-cta btn arch-magnetic whitespace-nowrap ${
-                  solid
-                    ? theme === "dark"
-                      ? "btn-primary"
-                      : "btn-ink"
-                    : "btn-primary"
+                className={`header-cta btn btn-primary arch-magnetic whitespace-nowrap ${
+                  solid ? "" : "btn-on-dark"
                 }`}
               >
                 {t.nav.estimateCta}
@@ -254,31 +325,32 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
               type="button"
               ref={burgerRef}
               onClick={() => {
-                if (menuPhase === "open") {
+                if (desktopNav) return;
+                if (menuOpen) {
                   pendingAnchorRef.current = null;
-                  closeMenu();
+                  closeMenu(false);
                 } else {
                   openMenu();
                 }
               }}
-              aria-expanded={menuVisible}
-              aria-controls={menuId}
-              aria-label={menuVisible ? t.nav.closeMenu : t.nav.openMenu}
-              data-open={menuVisible ? "true" : "false"}
-              className="header-menu-toggle relative flex shrink-0 items-center justify-center nav:hidden"
+              aria-expanded={desktopNav ? false : menuOpen}
+              aria-controls={desktopNav ? undefined : menuId}
+              aria-label={menuOpen ? t.nav.closeMenu : t.nav.openMenu}
+              aria-hidden={desktopNav || undefined}
+              tabIndex={desktopNav ? -1 : undefined}
+              inert={desktopNav || undefined}
+              data-open={menuOpen ? "true" : "false"}
+              className="header-menu-toggle nav:hidden"
             >
-              <span className="sr-only">
-                {menuVisible ? t.nav.closeMenu : t.nav.openMenu}
-              </span>
               <span
                 aria-hidden
-                className={`header-menu-line header-menu-line-1 absolute block h-0.5 w-8 ${
+                className={`header-menu-line header-menu-line-1 ${
                   !solid ? "bg-paper" : "bg-foreground"
                 }`}
               />
               <span
                 aria-hidden
-                className={`header-menu-line header-menu-line-2 absolute block h-0.5 w-8 ${
+                className={`header-menu-line header-menu-line-2 ${
                   !solid ? "bg-paper" : "bg-foreground"
                 }`}
               />
@@ -293,8 +365,8 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
         className="mobile-menu"
         data-state={menuPhase}
         data-motion={reduceMotion ? "reduce" : "full"}
-        aria-hidden={!menuVisible}
-        inert={!menuVisible}
+        aria-hidden={!menuOpen}
+        inert={!menuOpen}
       >
         <div className="mobile-menu-shell container-dtm">
           <nav aria-label={t.nav.mobileAria} className="mobile-menu-nav">
@@ -314,45 +386,44 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
           </nav>
 
           <div className="mobile-menu-item mobile-menu-utility">
+            <a
+              href={navHrefs.estimate}
+              onClick={(e) => onMobileNavClick(e, navHrefs.estimate)}
+              className="btn btn-primary mobile-menu-cta"
+            >
+              {t.nav.estimateCta}
+            </a>
+
             <div className="mobile-menu-utility-row">
               <ThemeToggle
                 size="lg"
                 tone={theme === "dark" ? "on-dark" : "on-light"}
+                className="mobile-menu-theme"
               />
               <div
-                className="flex items-center gap-1"
+                className="mobile-menu-lang"
                 role="group"
                 aria-label={t.lang.groupAria}
               >
-                {(["uk", "en"] as const).map((code) => (
-                  <button
-                    key={code}
-                    type="button"
-                    onClick={() => {
-                      if (locale !== code) toggleLocale();
-                    }}
-                    aria-pressed={locale === code}
-                    className={`min-h-11 min-w-11 px-3 text-sm font-medium tracking-[0.14em] transition-colors ${
-                      locale === code
-                        ? "text-accent"
-                        : "text-muted hover:text-foreground"
-                    }`}
-                  >
-                    {code === "uk" ? "UA" : "EN"}
-                  </button>
-                ))}
+                {(["uk", "en"] as const).map((code) => {
+                  const selected = locale === code;
+                  return (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => {
+                        if (!selected) toggleLocale();
+                      }}
+                      aria-pressed={selected}
+                      aria-current={selected ? "true" : undefined}
+                      className="mobile-menu-lang-btn"
+                    >
+                      {code === "uk" ? "UA" : "EN"}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-            <a
-              href={navHrefs.estimate}
-              onClick={(e) => onMobileNavClick(e, navHrefs.estimate)}
-              className="btn btn-primary btn-lg mt-5 w-full"
-            >
-              {t.hero.ctaPrimary}
-              <span className="btn-arrow" aria-hidden>
-                →
-              </span>
-            </a>
           </div>
         </div>
       </div>

@@ -124,6 +124,7 @@ export function EstimateCalculator() {
   const navLockRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
   const submitGenerationRef = useRef(0);
+  const steppedRef = useRef(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
   const utmRef = useRef<ReturnType<typeof utmFromSearch>>(undefined);
@@ -166,6 +167,7 @@ export function EstimateCalculator() {
   function goTo(index: number) {
     if (navLockRef.current) return;
     if (index === currentIndex) return;
+    steppedRef.current = true;
     navLockRef.current = true;
     setDirection(index < currentIndex ? -1 : 1);
     setAnimToken((token) => token + 1);
@@ -274,7 +276,6 @@ export function EstimateCalculator() {
 
     submitLockRef.current = true;
     const generation = submitGenerationRef.current;
-    abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
     const timeoutId = window.setTimeout(() => controller.abort(), 20_000);
@@ -346,17 +347,29 @@ export function EstimateCalculator() {
     setStatusLive("");
     setDirection(1);
     setAnimToken((token) => token + 1);
+    steppedRef.current = false;
   }
 
   useEffect(() => {
     if (phase !== "form") return;
+    if (!steppedRef.current) return;
+
     const heading = stageRef.current?.querySelector<HTMLElement>(
       ".calc-question, legend"
     );
     heading?.setAttribute("tabindex", "-1");
     heading?.focus({ preventScroll: true });
 
+    const section = document.getElementById("estimate");
+    const sectionBox = section?.getBoundingClientRect();
+    const sectionInView = Boolean(
+      sectionBox &&
+        sectionBox.bottom > 80 &&
+        sectionBox.top < window.innerHeight
+    );
+    if (!sectionInView) return;
     if (!window.matchMedia("(max-width: 767px)").matches) return;
+
     const active = document.activeElement;
     if (
       active instanceof HTMLInputElement ||
@@ -369,7 +382,7 @@ export function EstimateCalculator() {
       if (!(heading instanceof HTMLElement)) return;
       const rect = heading.getBoundingClientRect();
       const header = 96;
-      if (rect.top >= header && rect.top <= window.innerHeight * 0.4) return;
+      if (rect.top >= header && rect.top <= window.innerHeight * 0.45) return;
       heading.scrollIntoView({
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
           ? "auto"
@@ -383,7 +396,7 @@ export function EstimateCalculator() {
 
   useEffect(() => {
     if (phase === "error") {
-      errorRef.current?.focus();
+      errorRef.current?.focus({ preventScroll: true });
     }
   }, [phase]);
 
@@ -521,7 +534,7 @@ export function EstimateCalculator() {
               type="button"
               onClick={handleBack}
               disabled={currentIndex === 0 || busy}
-              className="type-small calc-muted transition-colors hover:text-[var(--calc-fg)] disabled:opacity-30"
+              className="type-small calc-back"
             >
               ← {dict.back}
             </button>
@@ -612,18 +625,11 @@ function SuccessPanel({
       <p className="mt-4 font-mono text-sm text-accent">
         {dict.success.leadId}: {success.leadId}
       </p>
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <a
-          href="#top"
-          className="label calc-muted hover:text-[var(--calc-fg)]"
-          onClick={() => onReset()}
-        >
-          {dict.success.returnSite}
-        </a>
+      <div className="calc-success-actions">
         <button
           type="button"
           onClick={onReset}
-          className="label calc-muted transition-colors hover:text-[var(--calc-fg)]"
+          className="btn btn-primary"
         >
           {dict.success.again}
         </button>

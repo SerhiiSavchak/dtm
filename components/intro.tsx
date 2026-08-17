@@ -26,7 +26,7 @@ export function Intro() {
           */}
           <div className="intro-lead grid grid-cols-1 gap-y-5 md:gap-y-6 lg:grid-cols-12 lg:items-end lg:gap-x-6 xl:gap-x-8">
             <div className="lg:col-span-5">
-              <Reveal variant="mask">
+              <Reveal variant="rise">
                 <h2
                   id="intro-heading"
                   className="type-h1 max-w-[21ch] text-balance text-foreground lg:max-w-[16ch]"

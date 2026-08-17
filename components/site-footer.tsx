@@ -7,9 +7,9 @@ import { externalLinkProps, socialLinks } from "@/data/media";
 import { useTheme } from "@/lib/theme/theme-context";
 import { CopyText } from "./copy-text";
 import { Reveal } from "./reveal";
-import { ArchitecturalRule } from "./fx/architectural-rule";
 import { InteractiveArrow } from "./fx/interactive-arrow";
 import { useMagnetic } from "./fx/magnetic";
+import { SectionHead } from "./section-head";
 
 export function SiteFooter() {
   const t = useDictionary();
@@ -28,8 +28,8 @@ export function SiteFooter() {
     <footer id="contacts" className="mt-auto bg-bg text-foreground">
       <div className="container-dtm section-pad-sm">
         <Reveal policy="reveal-reversible">
-          <div className="final-cta-block flex flex-col items-center border-t-0 pt-10 text-center md:pt-12">
-            <ArchitecturalRule />
+          <SectionHead label={t.finalCta.label} />
+          <div className="final-cta-block flex flex-col items-center border-t-0 text-center">
             <p className="type-h1 max-w-[18ch] text-balance text-foreground">
               {t.finalCta.headingBefore}{" "}
               <span className="text-accent">{t.finalCta.headingAfter}</span>

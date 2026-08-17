@@ -1,0 +1,110 @@
+[
+  {
+    "vp": "390x844",
+    "armed": false,
+    "scene": "0",
+    "scrollWidth": 390,
+    "clientWidth": 390,
+    "sectionHeight": 3806.171875,
+    "heading": "Об’єкти зараз у роботі",
+    "headingTop": 1676.828125,
+    "nextTop": 5364.21875,
+    "overflowX": "clip",
+    "pinHeight": 3678.171875,
+    "canvasHeight": 3428.40625,
+    "firstFrame": {
+      "w": 342,
+      "h": 428
+    }
+  },
+  {
+    "vp": "430x932",
+    "armed": false,
+    "scene": "0",
+    "scrollWidth": 430,
+    "clientWidth": 430,
+    "sectionHeight": 4156.171875,
+    "heading": "Об’єкти зараз у роботі",
+    "headingTop": 1850.09375,
+    "nextTop": 5887.484375,
+    "overflowX": "clip",
+    "pinHeight": 4028.171875,
+    "canvasHeight": 3778.40625,
+    "firstFrame": {
+      "w": 382,
+      "h": 478
+    }
+  },
+  {
+    "vp": "578x1098",
+    "armed": false,
+    "scene": "0",
+    "scrollWidth": 578,
+    "clientWidth": 578,
+    "sectionHeight": 5508.109375,
+    "heading": "Об’єкти зараз у роботі",
+    "headingTop": 2375.21875,
+    "nextTop": 7764.546875,
+    "overflowX": "clip",
+    "pinHeight": 5380.109375,
+    "canvasHeight": 5126.84375,
+    "firstFrame": {
+      "w": 530,
+      "h": 663
+    }
+  },
+  {
+    "vp": "768x1024",
+    "armed": false,
+    "scene": "0",
+    "scrollWidth": 768,
+    "clientWidth": 768,
+    "sectionHeight": 7024.953125,
+    "heading": "Об’єкти зараз у роботі",
+    "headingTop": 1958.625,
+    "nextTop": 8864.796875,
+    "overflowX": "clip",
+    "pinHeight": 6884.15625,
+    "canvasHeight": 6650.296875,
+    "firstFrame": {
+      "w": 707,
+      "h": 883
+    }
+  },
+  {
+    "vp": "1440x900",
+    "armed": true,
+    "scene": "0",
+    "scrollWidth": 1425,
+    "clientWidth": 1440,
+    "sectionHeight": 4177.59375,
+    "heading": "Об’єкти зараз у роботі",
+    "headingTop": 2360.5,
+    "nextTop": 6168.796875,
+    "overflowX": "clip",
+    "pinHeight": 3980,
+    "canvasHeight": 796,
+    "firstFrame": {
+      "w": 528,
+      "h": 796
+    }
+  },
+  {
+    "vp": "1920x1080",
+    "armed": true,
+    "scene": "0",
+    "scrollWidth": 1905,
+    "clientWidth": 1920,
+    "sectionHeight": 5088,
+    "heading": "Об’єкти зараз у роботі",
+    "headingTop": 2767.234375,
+    "nextTop": 7385.359375,
+    "overflowX": "clip",
+    "pinHeight": 4880,
+    "canvasHeight": 976,
+    "firstFrame": {
+      "w": 634,
+      "h": 976
+    }
+  }
+]

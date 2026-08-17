@@ -128,6 +128,7 @@ function DossierStage({
             item={incoming}
             alt={alt}
             sizes={sizes}
+            priority
             onReady={() => {
               setSlow(false);
               setIncomingOn(true);
@@ -266,13 +267,23 @@ export function ProjectDossier({
     [lastMedia]
   );
 
+  const preloadCover = useCallback(
+    (index: number) => {
+      const cover = projectMedia(projects[index])[0]?.src;
+      if (cover) {
+        void preloadSiteImage(cover, { sizes: stageSizes, quality: 75 });
+      }
+    },
+    [stageSizes]
+  );
+
   useEffect(() => {
     originRef.current = document.activeElement as HTMLElement | null;
     lockScroll();
-    closeRef.current?.focus();
+    closeRef.current?.focus({ preventScroll: true });
     return () => {
       unlockScroll();
-      originRef.current?.focus?.();
+      originRef.current?.focus?.({ preventScroll: true });
     };
   }, []);
 
@@ -281,12 +292,15 @@ export function ProjectDossier({
   }, [slug]);
 
   useEffect(() => {
-    const active = stripRef.current?.querySelector<HTMLElement>(
+    const strip = stripRef.current;
+    const active = strip?.querySelector<HTMLElement>(
       ".project-dossier-thumb.is-active"
     );
-    active?.scrollIntoView({
-      inline: "nearest",
-      block: "nearest",
+    if (!strip || !active) return;
+    const nextLeft =
+      active.offsetLeft - (strip.clientWidth - active.clientWidth) / 2;
+    strip.scrollTo({
+      left: Math.max(0, nextLeft),
       behavior: reduced ? "auto" : "smooth",
     });
   }, [safeIndex, slug, reduced]);
@@ -360,37 +374,9 @@ export function ProjectDossier({
     ].filter((src): src is string => Boolean(src));
 
     srcs.forEach((src) => {
-      void preloadSiteImage(src);
+      void preloadSiteImage(src, { sizes: stageSizes, quality: 75 });
     });
-
-    const rest = list
-      .map((entry) => entry.src)
-      .filter((src) => !srcs.includes(src));
-    let idle = 0;
-    let usedRic = false;
-    if (typeof window.requestIdleCallback === "function") {
-      usedRic = true;
-      idle = window.requestIdleCallback(() => {
-        rest.forEach((src) => {
-          void preloadSiteImage(src);
-        });
-      });
-    } else {
-      idle = window.setTimeout(() => {
-        rest.forEach((src) => {
-          void preloadSiteImage(src);
-        });
-      }, 700);
-    }
-
-    return () => {
-      if (usedRic && typeof window.cancelIdleCallback === "function") {
-        window.cancelIdleCallback(idle);
-      } else {
-        window.clearTimeout(idle);
-      }
-    };
-  }, [project, projectIndex, safeIndex]);
+  }, [project, projectIndex, safeIndex, stageSizes]);
 
   if (typeof document === "undefined" || !project || !current) return null;
 
@@ -535,6 +521,8 @@ export function ProjectDossier({
               type="button"
               className="project-dossier-nav-btn"
               disabled={!canPrevProject}
+              onMouseEnter={() => canPrevProject && preloadCover(projectIndex - 1)}
+              onFocus={() => canPrevProject && preloadCover(projectIndex - 1)}
               onClick={() =>
                 canPrevProject && onNavigate(projects[projectIndex - 1].slug)
               }
@@ -545,6 +533,8 @@ export function ProjectDossier({
               type="button"
               className="project-dossier-nav-btn is-next"
               disabled={!canNextProject}
+              onMouseEnter={() => canNextProject && preloadCover(projectIndex + 1)}
+              onFocus={() => canNextProject && preloadCover(projectIndex + 1)}
               onClick={() =>
                 canNextProject && onNavigate(projects[projectIndex + 1].slug)
               }

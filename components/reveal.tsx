@@ -130,13 +130,14 @@ export function Reveal({
     );
   } else if (variant === "mask") {
     node = (
-      <Tag
-        ref={observeRef}
-        className={`fx-mask ${stateClass} ${className}`}
-        style={styleVar}
-        {...attrs}
-      >
-        <span className="fx-mask-inner">{children}</span>
+      <Tag ref={observeRef} className={className}>
+        <span
+          className={`fx-mask block ${stateClass}`}
+          style={styleVar}
+          {...attrs}
+        >
+          <span className="fx-mask-inner">{children}</span>
+        </span>
       </Tag>
     );
   } else if (variant === "fade") {

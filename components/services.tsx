@@ -107,7 +107,7 @@ export function Services() {
 
           <div className="grid grid-cols-1 gap-x-12 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <Reveal variant="mask">
+            <Reveal variant="rise">
               <h2
                 id="services-heading"
                 className="mb-6 type-h2 text-balance text-foreground md:mb-8"

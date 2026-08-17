@@ -1,74 +1,165 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { inProgressMedia, socialLinks } from "@/data/media";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import {
+  inProgressFrames,
+  inProgressMedia,
+  inProgressMediaIndex,
+  inProgressScenes,
+  socialLinks,
+  type InProgressItem,
+  type InProgressScene,
+} from "@/data/media";
+import { preloadSiteImage } from "@/lib/media-preload";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { CopyText } from "../copy-text";
 import { HoverMediaLabel } from "../fx/hover-media-label";
 import { InteractiveArrow } from "../fx/interactive-arrow";
 import { MediaImage } from "../media-image";
-import { RevealGroup } from "../reveal";
 import { SectionHead } from "../section-head";
 import { InProgressViewer } from "./in-progress-viewer";
 
 const STAGE_QUALITY = 85;
-const CARD_SIZES = "(max-width: 1023px) min(82vw, 320px), 310px";
-/** Scroll-linked travel per rail, within 80–140px. Rest pose is 0. */
-const ROW_SHIFT_PX = 110;
-const ROW_TOP = [0, 1, 2] as const;
-const ROW_BOTTOM = [3, 4] as const;
+const DESKTOP_MQ = "(min-width: 1024px)";
+const HERO_SIZES =
+  "(max-width: 1023px) 92vw, min(42vw, 38rem)";
+const SIDE_SIZES =
+  "(max-width: 1023px) 46vw, min(22vw, 20rem)";
+const VIDEO_SIZES = HERO_SIZES;
+const HYSTERESIS = 0.22;
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
 }
 
-function desktopFilmstripMotion() {
+type Copy = ReturnType<typeof useDictionary>["inProgress"];
+
+function ObjectVideo({
+  item,
+  alt,
+  active,
+  sizes,
+  priority,
+}: {
+  item: InProgressItem;
+  alt: string;
+  active: boolean;
+  sizes: string;
+  priority?: boolean;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !item.video) return;
+    el.muted = true;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!active || reduce || document.hidden) {
+      el.pause();
+      return;
+    }
+    const tryPlay = () => {
+      if (el.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+      el.play().catch(() => {});
+    };
+    tryPlay();
+    el.addEventListener("canplay", tryPlay);
+    const onVis = () => {
+      if (document.hidden) el.pause();
+      else tryPlay();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      el.removeEventListener("canplay", tryPlay);
+      document.removeEventListener("visibilitychange", onVis);
+      el.pause();
+    };
+  }, [active, item.video]);
+
   return (
-    window.matchMedia("(min-width: 1024px)").matches &&
-    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
-    !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
-    !window.matchMedia("(update: slow)").matches
+    <div className="in-progress-video">
+      <MediaImage
+        src={item.src}
+        alt={alt}
+        fill
+        quality={STAGE_QUALITY}
+        sizes={sizes}
+        priority={priority}
+        className="in-progress-image object-cover"
+        style={{ objectPosition: item.objectPosition }}
+      />
+      {item.video ? (
+        <video
+          ref={videoRef}
+          className="in-progress-video-el"
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={item.src}
+          style={{ objectPosition: item.objectPosition }}
+        >
+          <source src={item.video} type="video/mp4" />
+        </video>
+      ) : null}
+    </div>
   );
 }
 
-type Copy = ReturnType<typeof useDictionary>["inProgress"];
-
-function InProgressCard({
-  index,
-  count,
+function FrameButton({
+  item,
   t,
+  sizes,
   onOpen,
+  className,
+  active,
+  priority,
 }: {
-  index: number;
-  count: number;
+  item: InProgressItem;
   t: Copy;
-  onOpen: (index: number) => void;
+  sizes: string;
+  onOpen: () => void;
+  className?: string;
+  active: boolean;
+  priority?: boolean;
 }) {
-  const item = inProgressMedia[index];
-  if (!item) return null;
-
+  const index = inProgressMediaIndex(item.id);
+  const kind = item.video ? t.videoKind : t.photoKind;
   return (
     <button
       type="button"
-      className="in-progress-card"
-      data-index={index}
+      className={`in-progress-frame ${className ?? ""}`}
       aria-haspopup="dialog"
-      aria-label={`${t.open}. ${pad2(index + 1)} / ${pad2(count)}. ${
-        item.video ? t.videoKind : t.photoKind
-      }`}
-      onClick={() => onOpen(index)}
+      aria-label={`${t.open}. ${pad2(index + 1)} / ${pad2(inProgressMedia.length)}. ${kind}`}
+      onClick={onOpen}
     >
       <div className="in-progress-visual">
-        <MediaImage
-          src={item.src}
-          alt={t.mediaAlt}
-          fill
-          quality={STAGE_QUALITY}
-          sizes={CARD_SIZES}
-          priority={index === 0 || index === 1}
-          className="in-progress-image object-cover"
-          style={{ objectPosition: item.objectPosition }}
-        />
+        {item.video ? (
+          <ObjectVideo
+            item={item}
+            alt={t.mediaAlt}
+            active={active}
+            sizes={sizes}
+            priority={priority}
+          />
+        ) : (
+          <MediaImage
+            src={item.src}
+            alt={t.mediaAlt}
+            fill
+            quality={STAGE_QUALITY}
+            sizes={sizes}
+            priority={priority}
+            className="in-progress-image object-cover"
+            style={{ objectPosition: item.objectPosition }}
+          />
+        )}
       </div>
       <span className="in-progress-shade" aria-hidden />
       <HoverMediaLabel label={t.look} />
@@ -76,203 +167,309 @@ function InProgressCard({
   );
 }
 
+function SceneComposition({
+  scene,
+  t,
+  active,
+  eager,
+  onOpen,
+}: {
+  scene: InProgressScene;
+  t: Copy;
+  active: boolean;
+  eager: boolean;
+  onOpen: (mediaIndex: number) => void;
+}) {
+  const frames = inProgressFrames(scene);
+  const hero = frames[0];
+  const sides = frames.slice(1, 3);
+  if (!hero) return null;
+
+  return (
+    <div className={`in-progress-comp is-${scene.layout}`}>
+      <FrameButton
+        item={hero}
+        t={t}
+        sizes={hero.video ? VIDEO_SIZES : HERO_SIZES}
+        className="in-progress-hero"
+        active={active}
+        priority={eager}
+        onOpen={() => onOpen(inProgressMediaIndex(hero.id))}
+      />
+      {sides.length > 0 ? (
+        <div className="in-progress-side">
+          {sides.map((item, index) => (
+            <FrameButton
+              key={item.id}
+              item={item}
+              t={t}
+              sizes={SIDE_SIZES}
+              className={index === 0 ? "in-progress-side-a" : "in-progress-side-b"}
+              active={active}
+              onOpen={() => onOpen(inProgressMediaIndex(item.id))}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function IntroCopy({ t }: { t: Copy }) {
+  return (
+    <>
+      <SectionHead label={t.label} right={t.labelRight} />
+      <div className="in-progress-intro">
+        <h2 id="in-progress-heading" className="type-h2 text-foreground">
+          {t.heading}
+        </h2>
+        <div className="in-progress-intro-copy">
+          <p className="type-body-lg in-progress-body">
+            <CopyText>{t.body}</CopyText>
+          </p>
+          <a
+            href={socialLinks.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-text group mt-5 text-foreground"
+          >
+            <span className="btn-text-label">{t.instagramCta}</span>
+            <InteractiveArrow />
+          </a>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function InProgress() {
   const t = useDictionary().inProgress;
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [activeScene, setActiveScene] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const topRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const indexNowRef = useRef<HTMLSpanElement>(null);
-  const count = inProgressMedia.length;
+  const pinRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLSpanElement>(null);
+  const nowRef = useRef<HTMLSpanElement>(null);
+  const kindRef = useRef<HTMLSpanElement>(null);
+  const activeRef = useRef(0);
+  const count = inProgressScenes.length;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const section = sectionRef.current;
-    const top = topRef.current;
-    const bottom = bottomRef.current;
-    if (!section || !top || !bottom) return;
+    const pin = pinRef.current;
+    const fill = fillRef.current;
+    const now = nowRef.current;
+    const kind = kindRef.current;
+    if (!section || !pin) return;
 
-    let frame = 0;
-    let listening = false;
-    let intersecting = false;
-    let active = desktopFilmstripMotion();
+    const mq = window.matchMedia(DESKTOP_MQ);
+    let raf = 0;
+    let armed = false;
+    let io: IntersectionObserver | null = null;
 
-    const paint = () => {
-      frame = 0;
-      if (!active) {
-        top.style.transform = "translate3d(0, 0, 0)";
-        bottom.style.transform = "translate3d(0, 0, 0)";
+    const sceneKind = (index: number) => {
+      const frames = inProgressFrames(inProgressScenes[index]!);
+      return frames.some((item) => item.video) ? t.videoKind : t.photoKind;
+    };
+
+    const applyScene = (index: number) => {
+      if (now) now.textContent = pad2(index + 1);
+      if (kind) kind.textContent = sceneKind(index);
+      section.dataset.scene = String(index);
+      if (activeRef.current !== index) {
+        activeRef.current = index;
+        setActiveScene(index);
+      }
+    };
+
+    const pickFromProgress = (progress: number, current: number) => {
+      const x = progress * count;
+      const lo = current - HYSTERESIS;
+      const hi = current + 1 + HYSTERESIS;
+      if (x >= hi) return Math.min(count - 1, Math.floor(x - HYSTERESIS));
+      if (x < lo) return Math.max(0, Math.floor(x + HYSTERESIS));
+      return current;
+    };
+
+    const stopIo = () => {
+      io?.disconnect();
+      io = null;
+    };
+
+    const startIo = () => {
+      if (io) return;
+      const nodes = [
+        ...section.querySelectorAll<HTMLElement>(".in-progress-scene[data-index]"),
+      ];
+      if (nodes.length === 0) return;
+      const seen = new Map<number, number>();
+      io = new IntersectionObserver(
+        (entries) => {
+          if (mq.matches) return;
+          for (const entry of entries) {
+            const index = Number((entry.target as HTMLElement).dataset.index);
+            seen.set(index, entry.intersectionRatio);
+          }
+          let next = activeRef.current;
+          let best = 0.35;
+          for (const [index, ratio] of seen) {
+            if (ratio > best) {
+              best = ratio;
+              next = index;
+            }
+          }
+          applyScene(next);
+        },
+        { threshold: [0.35, 0.55, 0.75] }
+      );
+      for (const node of nodes) io.observe(node);
+    };
+
+    const measureDesktop = () => {
+      const headerEl = document.querySelector(".site-header");
+      const header = headerEl?.getBoundingClientRect().height || 80;
+      const stageH = Math.max(240, window.innerHeight - header - 24);
+      const travel = Math.max(1, pin.offsetHeight - stageH);
+      const top = pin.getBoundingClientRect().top;
+      const scrolled = Math.min(travel, Math.max(0, header - top));
+      const progress = scrolled / travel;
+      if (fill) fill.style.transform = `scaleX(${progress})`;
+      applyScene(pickFromProgress(progress, activeRef.current));
+    };
+
+    const syncMode = () => {
+      if (mq.matches) {
+        stopIo();
+        if (!armed) {
+          section.dataset.armed = "";
+          armed = true;
+        }
+        measureDesktop();
         return;
       }
-      const box = section.getBoundingClientRect();
-      const view = window.innerHeight || 1;
-      const restTop = view * 0.22;
-      const travel = Math.max(view * 0.7, box.height * 0.5);
-      const progress = Math.min(1, Math.max(0, (restTop - box.top) / travel));
-      const shift = progress * ROW_SHIFT_PX;
-      top.style.transform = `translate3d(${(-shift).toFixed(2)}px, 0, 0)`;
-      bottom.style.transform = `translate3d(${shift.toFixed(2)}px, 0, 0)`;
+      if (armed) {
+        delete section.dataset.armed;
+        armed = false;
+      }
+      if (fill) fill.style.transform = "scaleX(0)";
+      startIo();
     };
 
     const onScroll = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(paint);
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        if (mq.matches) measureDesktop();
+      });
     };
 
-    const setListening = (on: boolean) => {
-      if (on === listening) return;
-      listening = on;
-      if (on) {
-        window.addEventListener("scroll", onScroll, { passive: true });
-        onScroll();
-      } else {
-        window.removeEventListener("scroll", onScroll);
-      }
-    };
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        intersecting = Boolean(entry?.isIntersecting);
-        setListening(intersecting && active);
-        if (intersecting) onScroll();
-      },
-      { root: null, threshold: 0 }
-    );
-
-    const onChange = () => {
-      active = desktopFilmstripMotion();
-      if (!active) {
-        setListening(false);
-        top.style.transform = "translate3d(0, 0, 0)";
-        bottom.style.transform = "translate3d(0, 0, 0)";
-        return;
-      }
-      setListening(intersecting && active);
-      onScroll();
-    };
-
-    io.observe(section);
-    onChange();
-    window.addEventListener("resize", onChange, { passive: true });
-
+    applyScene(0);
+    syncMode();
+    mq.addEventListener("change", syncMode);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     return () => {
-      io.disconnect();
-      setListening(false);
-      window.removeEventListener("resize", onChange);
-      if (frame) window.cancelAnimationFrame(frame);
-      top.style.removeProperty("transform");
-      bottom.style.removeProperty("transform");
+      mq.removeEventListener("change", syncMode);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      stopIo();
+      if (raf) window.cancelAnimationFrame(raf);
+      delete section.dataset.armed;
     };
-  }, []);
+  }, [count, t.photoKind, t.videoKind]);
 
   useEffect(() => {
-    const viewport = viewportRef.current;
-    const now = indexNowRef.current;
-    if (!viewport || !now) return;
-
-    const cards = [
-      ...viewport.querySelectorAll<HTMLElement>(".in-progress-card[data-index]"),
-    ];
-    if (cards.length === 0) return;
-
-    const seen = new Map<number, number>();
-    const pick = () => {
-      let next = 0;
-      let best = -1;
-      for (const [index, ratio] of seen) {
-        if (ratio > best) {
-          best = ratio;
-          next = index;
-        }
-      }
-      now.textContent = pad2(next + 1);
-      viewport.dataset.active = String(next);
-    };
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const index = Number((entry.target as HTMLElement).dataset.index);
-          seen.set(index, entry.intersectionRatio);
-        }
-        pick();
-      },
-      {
-        root: viewport,
-        threshold: [0.35, 0.5, 0.72],
-      }
-    );
-
-    for (const card of cards) io.observe(card);
-    return () => io.disconnect();
-  }, []);
+    const current = inProgressScenes[activeScene];
+    const next = inProgressScenes[activeScene + 1];
+    const sizes = HERO_SIZES;
+    if (current) {
+      inProgressFrames(current).forEach((item) => {
+        void preloadSiteImage(item.src, { sizes, quality: STAGE_QUALITY });
+      });
+    }
+    if (next) {
+      inProgressFrames(next).forEach((item) => {
+        void preloadSiteImage(item.src, { sizes, quality: STAGE_QUALITY });
+      });
+    }
+  }, [activeScene]);
 
   return (
     <section
       ref={sectionRef}
       id="in-progress"
       aria-labelledby="in-progress-heading"
-      className="bg-bg text-foreground"
+      className="in-progress bg-bg text-foreground"
+      style={{ "--in-progress-count": count } as CSSProperties}
+      data-scene="0"
     >
-      <div className="container-dtm in-progress-head">
-        <RevealGroup>
-          <SectionHead label={t.label} right={t.labelRight} />
+      <div className="container-dtm in-progress-shell">
+        <div ref={pinRef} className="in-progress-pin">
+          <div className="in-progress-stage">
+            <div className="in-progress-rail">
+              <IntroCopy t={t} />
+              <div className="in-progress-status" aria-live="polite">
+                <span className="in-progress-progress" aria-hidden>
+                  <span ref={fillRef} className="in-progress-progress-fill" />
+                </span>
+                <p className="in-progress-status-row">
+                  <span ref={nowRef} className="in-progress-status-now">
+                    01
+                  </span>
+                  <span className="in-progress-status-rule" aria-hidden />
+                  <span className="in-progress-status-total">{pad2(count)}</span>
+                </p>
+                <p className="in-progress-status-kind">
+                  <span className="in-progress-status-label">{t.label}</span>
+                  <span aria-hidden className="in-progress-status-sep">
+                    ·
+                  </span>
+                  <span ref={kindRef}>{t.photoKind}</span>
+                </p>
+              </div>
+            </div>
 
-          <div className="in-progress-intro">
-            <h2 id="in-progress-heading" className="type-h2 text-foreground">
-              {t.heading}
-            </h2>
-            <div className="in-progress-intro-copy">
-              <p className="type-body-lg in-progress-body">
-                <CopyText>{t.body}</CopyText>
-              </p>
-              <a
-                href={socialLinks.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-text group mt-5 text-foreground"
-              >
-                <span className="btn-text-label">{t.instagramCta}</span>
-                <InteractiveArrow />
-              </a>
+            <div className="in-progress-canvas">
+              {inProgressScenes.map((scene, index) => {
+                const frames = inProgressFrames(scene);
+                const kind = frames.some((item) => item.video)
+                  ? t.videoKind
+                  : t.photoKind;
+                const active = index === activeScene;
+                return (
+                  <article
+                    key={scene.id}
+                    className={`in-progress-scene ${active ? "is-active" : ""}`}
+                    data-index={index}
+                    aria-current={active ? "true" : undefined}
+                  >
+                    <div className="in-progress-chapter-meta">
+                      <p className="in-progress-chapter-index">
+                        {pad2(index + 1)}
+                        <span aria-hidden className="in-progress-status-rule" />
+                        {pad2(count)}
+                      </p>
+                      <p className="in-progress-chapter-kind">
+                        <span className="in-progress-status-label">{t.label}</span>
+                        <span aria-hidden className="in-progress-status-sep">
+                          ·
+                        </span>
+                        <span>{kind}</span>
+                      </p>
+                    </div>
+                    <SceneComposition
+                      scene={scene}
+                      t={t}
+                      active={active}
+                      eager={index === 0}
+                      onOpen={setOpenIndex}
+                    />
+                  </article>
+                );
+              })}
             </div>
           </div>
-        </RevealGroup>
-      </div>
-
-      <div ref={viewportRef} className="in-progress-viewport">
-        <div ref={topRef} className="in-progress-rail is-top">
-          {ROW_TOP.map((index) => (
-            <InProgressCard
-              key={inProgressMedia[index]?.id ?? index}
-              index={index}
-              count={count}
-              t={t}
-              onOpen={setOpenIndex}
-            />
-          ))}
         </div>
-        <div ref={bottomRef} className="in-progress-rail is-bottom">
-          {ROW_BOTTOM.map((index) => (
-            <InProgressCard
-              key={inProgressMedia[index]?.id ?? index}
-              index={index}
-              count={count}
-              t={t}
-              onOpen={setOpenIndex}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="container-dtm in-progress-foot">
-        <p className="in-progress-index" aria-live="polite">
-          <span ref={indexNowRef} className="in-progress-index-now">
-            01
-          </span>
-          <span className="in-progress-index-line" aria-hidden />
-          <span className="in-progress-index-total">{pad2(count)}</span>
-        </p>
       </div>
 
       {openIndex != null ? (

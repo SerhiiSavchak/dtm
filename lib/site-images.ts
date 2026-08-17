@@ -12,9 +12,17 @@ import photo151112 from "@/public/images/photo_2026-08-09_15-11-12.jpg";
 import photo151114 from "@/public/images/photo_2026-08-09_15-11-14.jpg";
 import photo151117 from "@/public/images/photo_2026-08-09_15-11-17.jpg";
 import photo151127 from "@/public/images/photo_2026-08-09_15-11-27.jpg";
+import photo151136 from "@/public/images/photo_2026-08-09_15-11-36.jpg";
+import photo151146 from "@/public/images/photo_2026-08-09_15-11-46.jpg";
+import photo151203 from "@/public/images/photo_2026-08-09_15-12-03.jpg";
+import photo151205 from "@/public/images/photo_2026-08-09_15-12-05.jpg";
+import photo151211 from "@/public/images/photo_2026-08-09_15-12-11.jpg";
 import photo151216 from "@/public/images/photo_2026-08-09_15-12-16.jpg";
 import photo151218 from "@/public/images/photo_2026-08-09_15-12-18.jpg";
+import photo151220 from "@/public/images/photo_2026-08-09_15-12-20.jpg";
+import photo151222 from "@/public/images/photo_2026-08-09_15-12-22.jpg";
 import photo151225 from "@/public/images/photo_2026-08-09_15-12-25.jpg";
+import photo151228 from "@/public/images/photo_2026-08-09_15-12-28.jpg";
 import inProgressKitchen from "@/public/images/in-progress-kitchen.jpg";
 import heroPoster from "@/public/images/hero-poster.jpg";
 
@@ -37,9 +45,17 @@ export const siteImages = {
   "/images/photo_2026-08-09_15-11-14.jpg": photo151114,
   "/images/photo_2026-08-09_15-11-17.jpg": photo151117,
   "/images/photo_2026-08-09_15-11-27.jpg": photo151127,
+  "/images/photo_2026-08-09_15-11-36.jpg": photo151136,
+  "/images/photo_2026-08-09_15-11-46.jpg": photo151146,
+  "/images/photo_2026-08-09_15-12-03.jpg": photo151203,
+  "/images/photo_2026-08-09_15-12-05.jpg": photo151205,
+  "/images/photo_2026-08-09_15-12-11.jpg": photo151211,
   "/images/photo_2026-08-09_15-12-16.jpg": photo151216,
   "/images/photo_2026-08-09_15-12-18.jpg": photo151218,
+  "/images/photo_2026-08-09_15-12-20.jpg": photo151220,
+  "/images/photo_2026-08-09_15-12-22.jpg": photo151222,
   "/images/photo_2026-08-09_15-12-25.jpg": photo151225,
+  "/images/photo_2026-08-09_15-12-28.jpg": photo151228,
 } satisfies Record<string, StaticImageData>;
 
 export type SiteImageSrc = keyof typeof siteImages | StaticImageData | string;

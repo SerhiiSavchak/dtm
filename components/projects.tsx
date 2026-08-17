@@ -90,7 +90,7 @@ export function Projects() {
           <SectionHead label={t.label} />
 
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <Reveal variant="mask">
+            <Reveal variant="rise">
               <h2 id="projects-heading" className="type-h2 text-foreground">
                 {t.heading}
               </h2>

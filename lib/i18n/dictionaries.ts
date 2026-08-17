@@ -131,6 +131,7 @@ export type Dictionary = {
     contactLink: string;
   };
   finalCta: {
+    label: string;
     headingBefore: string;
     headingAfter: string;
     body: string;
@@ -196,7 +197,6 @@ export type Dictionary = {
       telegram: string;
       call: string;
       again: string;
-      returnSite: string;
     };
     sending: string;
     retry: string;
@@ -466,6 +466,7 @@ const uk: Dictionary = {
     contactLink: "Зв’язатися напряму",
   },
   finalCta: {
+    label: "Контакти",
     headingBefore: "Плануєте ремонт?",
     headingAfter: "Почнемо з попереднього розрахунку",
     body: "Кілька коротких питань про об’єкт — далі підготуємо попередній розрахунок і наступні кроки",
@@ -553,8 +554,7 @@ const uk: Dictionary = {
       leadId: "Номер заявки",
       telegram: "Відкрити Telegram",
       call: "Зателефонувати",
-      again: "Надіслати ще один запит",
-      returnSite: "Повернутися на головну",
+      again: "Розрахувати ще один об’єкт",
     },
     sending: "Надсилаємо заявку…",
     retry: "Спробувати ще раз",
@@ -825,6 +825,7 @@ const en: Dictionary = {
     contactLink: "Contact us directly",
   },
   finalCta: {
+    label: "Contact",
     headingBefore: "Planning a renovation?",
     headingAfter: "Start with a preliminary estimate",
     body: "A few short questions about the property — then we prepare a preliminary estimate and next steps",
@@ -912,8 +913,7 @@ const en: Dictionary = {
       leadId: "Request number",
       telegram: "Open Telegram",
       call: "Call us",
-      again: "Submit another request",
-      returnSite: "Back to home",
+      again: "Estimate another property",
     },
     sending: "Sending your request…",
     retry: "Try again",

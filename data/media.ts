@@ -49,56 +49,15 @@ export const serviceMedia = [
   },
 ] as const;
 
-export type InProgressItem = {
-  id: string;
-  src: string;
-  video?: string | null;
-  objectPosition: string;
-};
-
-/**
- * «Об’єкти в роботі» — only frames with visible unfinished work.
- * Finished interiors belong in Portfolio.
- *
- * Evidence (visual, not invented stage names):
- * - house-living: plastic-wrapped chairs, empty wall outlet, open-plan house
- * - house-bedroom: mattress still in delivery film
- * - house-media: cardboard, hardware tray, loose trim on the floor
- * - kitchen-video: protective film still on a dining chair
- * - house-niche: loose cable in a built-in sofa niche
- *
- * house-* share wood floors, grey plaster, black lighting, fluted panels.
- * kitchen-video is a kitchen still being furnished; it is not labelled as
- * a separate named project.
- */
-export const inProgressMedia: InProgressItem[] = [
-  {
-    id: "house-living",
-    src: "/images/photo_2026-08-09_15-12-18.jpg",
-    objectPosition: "62% 46%",
-  },
-  {
-    id: "house-media",
-    src: "/images/photo_2026-08-09_15-11-27.jpg",
-    objectPosition: "58% 42%",
-  },
-  {
-    id: "house-bedroom",
-    src: "/images/photo_2026-08-09_15-12-16.jpg",
-    objectPosition: "54% 38%",
-  },
-  {
-    id: "kitchen-video",
-    src: "/images/in-progress-kitchen.jpg",
-    video: "/videos/in-progress-kitchen.mp4",
-    objectPosition: "78% 42%",
-  },
-  {
-    id: "house-niche",
-    src: "/images/photo_2026-08-09_15-12-25.jpg",
-    objectPosition: "70% 52%",
-  },
-];
+export {
+  inProgressFrames,
+  inProgressMedia,
+  inProgressMediaIndex,
+  inProgressScenes,
+  type InProgressItem,
+  type InProgressLayout,
+  type InProgressScene,
+} from "./in-progress-scenes";
 
 /**
  * Public social URLs. Verified DTM destinations are the defaults.

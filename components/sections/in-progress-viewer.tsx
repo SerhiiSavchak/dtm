@@ -156,6 +156,7 @@ function ViewerFrame({
       fill
       quality={85}
       sizes={VIEWER_SIZES}
+      priority
       className="object-contain"
       onReady={onReady}
     />
@@ -276,17 +277,17 @@ export function InProgressViewer({
       Boolean
     ) as SiteImageSrc[];
     srcs.forEach((src) => {
-      void preloadSiteImage(src);
+      void preloadSiteImage(src, { sizes: VIEWER_SIZES, quality: 85 });
     });
   }, [index, item?.src, items]);
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     lockScroll();
-    closeRef.current?.focus();
+    closeRef.current?.focus({ preventScroll: true });
     return () => {
       unlockScroll();
-      previous?.focus?.();
+      previous?.focus?.({ preventScroll: true });
     };
   }, []);
 

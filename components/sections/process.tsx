@@ -222,7 +222,7 @@ export function Process() {
 
         <div className="grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12">
           <RevealGroup className="lg:col-span-4 lg:self-start">
-            <Reveal variant="mask">
+            <Reveal variant="rise">
               <h2
                 id="process-heading"
                 className="type-h2 text-balance text-foreground"

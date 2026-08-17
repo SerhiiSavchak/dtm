@@ -201,9 +201,12 @@ function testSourceGuards() {
   assert("hasSubmittedRef exists", calc.includes("hasSubmittedRef"));
   assert("reset clears hasSubmitted", calc.includes("hasSubmittedRef.current = next.hasSubmitted"));
   assert("reset uses restartLeadSession", calc.includes("restartLeadSession()"));
+  assert("success again copy button", calc.includes("dict.success.again"));
+  assert("single success restart", !calc.includes("dict.success.newCalc"));
+  assert("no return-home reset", !calc.includes('href="#top"'));
+  assert("reset handler on success", calc.includes("onClick={onReset}"));
   assert("submitLock released in finally", calc.includes("submitLockRef.current = false"));
   assert("abort on reset", calc.includes("abortRef.current?.abort()"));
-  assert("return-home resets", calc.includes("onClick={() => onReset()}"));
   assert("client fetch no-store", calc.includes('cache: "no-store"'));
   assert("no window.open handoff", !calc.includes("window.open"));
   assert("no t.me draft url in calculator", !calc.includes("t.me/"));

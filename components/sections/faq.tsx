@@ -9,7 +9,7 @@ import { SectionHead } from "../section-head";
 export function Faq() {
   const t = useDictionary().faq;
   const baseId = useId();
-  const [open, setOpen] = useState<number | null>(0);
+  const [open, setOpen] = useState<number | null>(null);
 
   return (
     <section
@@ -23,7 +23,7 @@ export function Faq() {
 
           <div className="grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-12">
             <div className="lg:col-span-4">
-              <Reveal variant="mask">
+              <Reveal variant="rise">
                 <h2 id="faq-heading" className="type-h2 text-foreground">
                   {t.heading}
                 </h2>
@@ -67,7 +67,8 @@ export function Faq() {
                       id={panelId}
                       role="region"
                       aria-labelledby={btnId}
-                      className={`faq-panel ${isOpen ? "is-open" : ""}`}
+                        inert={!isOpen || undefined}
+                        className={`faq-panel ${isOpen ? "is-open" : ""}`}
                     >
                       <div>
                         <p className="faq-answer type-body-sm max-w-[40rem] pb-7 pt-2 text-muted md:pb-8 md:pt-3">
