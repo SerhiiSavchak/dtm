@@ -235,7 +235,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
   return (
     <>
       <header
-        className={`site-header fixed inset-x-0 top-0 z-[70] transition-[background-color,opacity,box-shadow,visibility] duration-500 ${
+        className={`site-header fixed inset-x-0 top-0 z-[90] transition-[background-color,opacity,box-shadow,visibility] duration-500 ${
           !boot
             ? "pointer-events-none invisible opacity-0"
             : "is-booted opacity-100"
@@ -369,6 +369,7 @@ export function SiteHeader({ boot = true }: { boot?: boolean }) {
         inert={!menuOpen}
       >
         <div className="mobile-menu-shell container-dtm">
+          <div className="mobile-menu-chrome" aria-hidden="true" />
           <nav aria-label={t.nav.mobileAria} className="mobile-menu-nav">
             {links.map((item) => (
               <a

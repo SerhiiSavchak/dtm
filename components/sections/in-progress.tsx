@@ -1,44 +1,39 @@
 "use client";
 
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
-import {
-  inProgressFrames,
+  inProgressComposition,
   inProgressMedia,
   inProgressMediaIndex,
-  inProgressScenes,
   socialLinks,
   type InProgressItem,
-  type InProgressScene,
+  type InProgressPanel,
 } from "@/data/media";
-import { preloadSiteImage } from "@/lib/media-preload";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { CopyText } from "../copy-text";
 import { HoverMediaLabel } from "../fx/hover-media-label";
 import { InteractiveArrow } from "../fx/interactive-arrow";
 import { MediaImage } from "../media-image";
+import { Reveal, RevealGroup } from "../reveal";
 import { SectionHead } from "../section-head";
 import { InProgressViewer } from "./in-progress-viewer";
 
 const STAGE_QUALITY = 85;
-const DESKTOP_MQ = "(min-width: 1024px)";
-const HERO_SIZES =
-  "(max-width: 1023px) 92vw, min(42vw, 38rem)";
-const SIDE_SIZES =
-  "(max-width: 1023px) 46vw, min(22vw, 20rem)";
-const VIDEO_SIZES = HERO_SIZES;
-const HYSTERESIS = 0.22;
+const REDUCE_MQ = "(prefers-reduced-motion: reduce)";
+
+const PANEL_SIZES: Record<InProgressPanel, string> = {
+  wide: "(max-width: 767px) 48vw, (max-width: 1023px) 38vw, min(32vw, 28rem)",
+  portrait:
+    "(max-width: 767px) 48vw, (max-width: 1023px) 32vw, min(24vw, 22rem)",
+  narrow: "(max-width: 767px) 42vw, (max-width: 1023px) 24vw, min(16vw, 14rem)",
+  video: "(max-width: 767px) 48vw, (max-width: 1023px) 28vw, min(18vw, 20rem)",
+};
+
+type Copy = ReturnType<typeof useDictionary>["inProgress"];
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
 }
-
-type Copy = ReturnType<typeof useDictionary>["inProgress"];
 
 function ObjectVideo({
   item,
@@ -59,7 +54,7 @@ function ObjectVideo({
     const el = videoRef.current;
     if (!el || !item.video) return;
     el.muted = true;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(REDUCE_MQ).matches;
     if (!active || reduce || document.hidden) {
       el.pause();
       return;
@@ -112,31 +107,31 @@ function ObjectVideo({
   );
 }
 
-function FrameButton({
+function MediaPanel({
   item,
+  index,
   t,
-  sizes,
-  onOpen,
-  className,
   active,
   priority,
+  onOpen,
 }: {
   item: InProgressItem;
+  index: number;
   t: Copy;
-  sizes: string;
-  onOpen: () => void;
-  className?: string;
   active: boolean;
   priority?: boolean;
+  onOpen: () => void;
 }) {
-  const index = inProgressMediaIndex(item.id);
+  const mediaIndex = inProgressMediaIndex(item.id);
   const kind = item.video ? t.videoKind : t.photoKind;
+  const sizes = PANEL_SIZES[item.panel];
   return (
     <button
       type="button"
-      className={`in-progress-frame ${className ?? ""}`}
+      className={`in-progress-panel is-${item.panel}`}
+      style={{ "--i": index } as CSSProperties}
       aria-haspopup="dialog"
-      aria-label={`${t.open}. ${pad2(index + 1)} / ${pad2(inProgressMedia.length)}. ${kind}`}
+      aria-label={`${t.open}. ${pad2(mediaIndex + 1)} / ${pad2(inProgressMedia.length)}. ${kind}`}
       onClick={onOpen}
     >
       <div className="in-progress-visual">
@@ -161,314 +156,103 @@ function FrameButton({
           />
         )}
       </div>
-      <span className="in-progress-shade" aria-hidden />
       <HoverMediaLabel label={t.look} />
     </button>
   );
 }
 
-function SceneComposition({
-  scene,
-  t,
-  active,
-  eager,
-  onOpen,
-}: {
-  scene: InProgressScene;
-  t: Copy;
-  active: boolean;
-  eager: boolean;
-  onOpen: (mediaIndex: number) => void;
-}) {
-  const frames = inProgressFrames(scene);
-  const hero = frames[0];
-  const sides = frames.slice(1, 3);
-  if (!hero) return null;
-
-  return (
-    <div className={`in-progress-comp is-${scene.layout}`}>
-      <FrameButton
-        item={hero}
-        t={t}
-        sizes={hero.video ? VIDEO_SIZES : HERO_SIZES}
-        className="in-progress-hero"
-        active={active}
-        priority={eager}
-        onOpen={() => onOpen(inProgressMediaIndex(hero.id))}
-      />
-      {sides.length > 0 ? (
-        <div className="in-progress-side">
-          {sides.map((item, index) => (
-            <FrameButton
-              key={item.id}
-              item={item}
-              t={t}
-              sizes={SIDE_SIZES}
-              className={index === 0 ? "in-progress-side-a" : "in-progress-side-b"}
-              active={active}
-              onOpen={() => onOpen(inProgressMediaIndex(item.id))}
-            />
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function IntroCopy({ t }: { t: Copy }) {
-  return (
-    <>
-      <SectionHead label={t.label} right={t.labelRight} />
-      <div className="in-progress-intro">
-        <h2 id="in-progress-heading" className="type-h2 text-foreground">
-          {t.heading}
-        </h2>
-        <div className="in-progress-intro-copy">
-          <p className="type-body-lg in-progress-body">
-            <CopyText>{t.body}</CopyText>
-          </p>
-          <a
-            href={socialLinks.instagram}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-text group mt-5 text-foreground"
-          >
-            <span className="btn-text-label">{t.instagramCta}</span>
-            <InteractiveArrow />
-          </a>
-        </div>
-      </div>
-    </>
-  );
-}
-
 export function InProgress() {
   const t = useDictionary().inProgress;
+  const frames = inProgressComposition();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [activeScene, setActiveScene] = useState(0);
-  const sectionRef = useRef<HTMLElement>(null);
-  const pinRef = useRef<HTMLDivElement>(null);
-  const fillRef = useRef<HTMLSpanElement>(null);
-  const nowRef = useRef<HTMLSpanElement>(null);
-  const kindRef = useRef<HTMLSpanElement>(null);
-  const activeRef = useRef(0);
-  const count = inProgressScenes.length;
+  const [open, setOpen] = useState(false);
+  const boardRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    const section = sectionRef.current;
-    const pin = pinRef.current;
-    const fill = fillRef.current;
-    const now = nowRef.current;
-    const kind = kindRef.current;
-    if (!section || !pin) return;
+    const board = boardRef.current;
+    if (!board) return;
 
-    const mq = window.matchMedia(DESKTOP_MQ);
-    let raf = 0;
-    let armed = false;
-    let io: IntersectionObserver | null = null;
+    const reduce = window.matchMedia(REDUCE_MQ).matches;
+    if (reduce) {
+      board.classList.add("is-open");
+      return;
+    }
 
-    const sceneKind = (index: number) => {
-      const frames = inProgressFrames(inProgressScenes[index]!);
-      return frames.some((item) => item.video) ? t.videoKind : t.photoKind;
-    };
-
-    const applyScene = (index: number) => {
-      if (now) now.textContent = pad2(index + 1);
-      if (kind) kind.textContent = sceneKind(index);
-      section.dataset.scene = String(index);
-      if (activeRef.current !== index) {
-        activeRef.current = index;
-        setActiveScene(index);
-      }
-    };
-
-    const pickFromProgress = (progress: number, current: number) => {
-      const x = progress * count;
-      const lo = current - HYSTERESIS;
-      const hi = current + 1 + HYSTERESIS;
-      if (x >= hi) return Math.min(count - 1, Math.floor(x - HYSTERESIS));
-      if (x < lo) return Math.max(0, Math.floor(x + HYSTERESIS));
-      return current;
-    };
-
-    const stopIo = () => {
-      io?.disconnect();
-      io = null;
-    };
-
-    const startIo = () => {
-      if (io) return;
-      const nodes = [
-        ...section.querySelectorAll<HTMLElement>(".in-progress-scene[data-index]"),
-      ];
-      if (nodes.length === 0) return;
-      const seen = new Map<number, number>();
-      io = new IntersectionObserver(
-        (entries) => {
-          if (mq.matches) return;
-          for (const entry of entries) {
-            const index = Number((entry.target as HTMLElement).dataset.index);
-            seen.set(index, entry.intersectionRatio);
-          }
-          let next = activeRef.current;
-          let best = 0.35;
-          for (const [index, ratio] of seen) {
-            if (ratio > best) {
-              best = ratio;
-              next = index;
-            }
-          }
-          applyScene(next);
-        },
-        { threshold: [0.35, 0.55, 0.75] }
-      );
-      for (const node of nodes) io.observe(node);
-    };
-
-    const measureDesktop = () => {
-      const headerEl = document.querySelector(".site-header");
-      const header = headerEl?.getBoundingClientRect().height || 80;
-      const stageH = Math.max(240, window.innerHeight - header - 24);
-      const travel = Math.max(1, pin.offsetHeight - stageH);
-      const top = pin.getBoundingClientRect().top;
-      const scrolled = Math.min(travel, Math.max(0, header - top));
-      const progress = scrolled / travel;
-      if (fill) fill.style.transform = `scaleX(${progress})`;
-      applyScene(pickFromProgress(progress, activeRef.current));
-    };
-
-    const syncMode = () => {
-      if (mq.matches) {
-        stopIo();
-        if (!armed) {
-          section.dataset.armed = "";
-          armed = true;
-        }
-        measureDesktop();
-        return;
-      }
-      if (armed) {
-        delete section.dataset.armed;
-        armed = false;
-      }
-      if (fill) fill.style.transform = "scaleX(0)";
-      startIo();
-    };
-
-    const onScroll = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(() => {
-        raf = 0;
-        if (mq.matches) measureDesktop();
-      });
-    };
-
-    applyScene(0);
-    syncMode();
-    mq.addEventListener("change", syncMode);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      mq.removeEventListener("change", syncMode);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      stopIo();
-      if (raf) window.cancelAnimationFrame(raf);
-      delete section.dataset.armed;
-    };
-  }, [count, t.photoKind, t.videoKind]);
+    board.classList.add("is-armed");
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry?.isIntersecting) return;
+        if (entry.intersectionRatio < 0.32) return;
+        board.classList.add("is-open");
+        setOpen(true);
+        io.disconnect();
+      },
+      { threshold: [0.32, 0.45] }
+    );
+    io.observe(board);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
-    const current = inProgressScenes[activeScene];
-    const next = inProgressScenes[activeScene + 1];
-    const sizes = HERO_SIZES;
-    if (current) {
-      inProgressFrames(current).forEach((item) => {
-        void preloadSiteImage(item.src, { sizes, quality: STAGE_QUALITY });
-      });
-    }
-    if (next) {
-      inProgressFrames(next).forEach((item) => {
-        void preloadSiteImage(item.src, { sizes, quality: STAGE_QUALITY });
-      });
-    }
-  }, [activeScene]);
+    const board = boardRef.current;
+    if (!board || !open) return;
+    const onEnd = () => board.classList.remove("is-animating");
+    board.classList.add("is-animating");
+    board.addEventListener("transitionend", onEnd);
+    const fallback = window.setTimeout(onEnd, 1400);
+    return () => {
+      board.removeEventListener("transitionend", onEnd);
+      window.clearTimeout(fallback);
+    };
+  }, [open]);
 
   return (
     <section
-      ref={sectionRef}
       id="in-progress"
       aria-labelledby="in-progress-heading"
       className="in-progress bg-bg text-foreground"
-      style={{ "--in-progress-count": count } as CSSProperties}
-      data-scene="0"
     >
-      <div className="container-dtm in-progress-shell">
-        <div ref={pinRef} className="in-progress-pin">
-          <div className="in-progress-stage">
-            <div className="in-progress-rail">
-              <IntroCopy t={t} />
-              <div className="in-progress-status" aria-live="polite">
-                <span className="in-progress-progress" aria-hidden>
-                  <span ref={fillRef} className="in-progress-progress-fill" />
-                </span>
-                <p className="in-progress-status-row">
-                  <span ref={nowRef} className="in-progress-status-now">
-                    01
-                  </span>
-                  <span className="in-progress-status-rule" aria-hidden />
-                  <span className="in-progress-status-total">{pad2(count)}</span>
+      <div className="container-dtm section-pad">
+        <RevealGroup>
+          <SectionHead label={t.label} right={t.labelRight} />
+          <div className="in-progress-intro">
+            <Reveal variant="rise">
+              <h2 id="in-progress-heading" className="type-h2 text-foreground">
+                {t.heading}
+              </h2>
+            </Reveal>
+            <Reveal variant="fade" delay={0.08}>
+              <div className="in-progress-intro-copy">
+                <p className="type-body-lg in-progress-body">
+                  <CopyText>{t.body}</CopyText>
                 </p>
-                <p className="in-progress-status-kind">
-                  <span className="in-progress-status-label">{t.label}</span>
-                  <span aria-hidden className="in-progress-status-sep">
-                    ·
-                  </span>
-                  <span ref={kindRef}>{t.photoKind}</span>
-                </p>
+                <a
+                  href={socialLinks.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-text group mt-5 text-foreground"
+                >
+                  <span className="btn-text-label">{t.instagramCta}</span>
+                  <InteractiveArrow />
+                </a>
               </div>
-            </div>
-
-            <div className="in-progress-canvas">
-              {inProgressScenes.map((scene, index) => {
-                const frames = inProgressFrames(scene);
-                const kind = frames.some((item) => item.video)
-                  ? t.videoKind
-                  : t.photoKind;
-                const active = index === activeScene;
-                return (
-                  <article
-                    key={scene.id}
-                    className={`in-progress-scene ${active ? "is-active" : ""}`}
-                    data-index={index}
-                    aria-current={active ? "true" : undefined}
-                  >
-                    <div className="in-progress-chapter-meta">
-                      <p className="in-progress-chapter-index">
-                        {pad2(index + 1)}
-                        <span aria-hidden className="in-progress-status-rule" />
-                        {pad2(count)}
-                      </p>
-                      <p className="in-progress-chapter-kind">
-                        <span className="in-progress-status-label">{t.label}</span>
-                        <span aria-hidden className="in-progress-status-sep">
-                          ·
-                        </span>
-                        <span>{kind}</span>
-                      </p>
-                    </div>
-                    <SceneComposition
-                      scene={scene}
-                      t={t}
-                      active={active}
-                      eager={index === 0}
-                      onOpen={setOpenIndex}
-                    />
-                  </article>
-                );
-              })}
-            </div>
+            </Reveal>
           </div>
+        </RevealGroup>
+
+        <div ref={boardRef} className="in-progress-board">
+          {frames.map((item, index) => (
+            <MediaPanel
+              key={item.id}
+              item={item}
+              index={index}
+              t={t}
+              active={open && Boolean(item.video)}
+              priority={index === 0}
+              onOpen={() => setOpenIndex(inProgressMediaIndex(item.id))}
+            />
+          ))}
         </div>
       </div>
 

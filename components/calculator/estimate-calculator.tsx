@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type MouseEvent,
 } from "react";
 import { Logo } from "@/components/logo";
 import { externalLinkProps, socialLinks } from "@/data/media";
@@ -45,6 +46,11 @@ type SuccessMeta = {
 
 const TRANSITION_MS = 220;
 
+/** Native click-focus scrolls the control into view; keep page scrollY still. */
+function suppressMouseFocusScroll(event: MouseEvent<HTMLElement>) {
+  event.preventDefault();
+}
+
 function OptionButton({
   selected,
   onClick,
@@ -69,6 +75,7 @@ function OptionButton({
       id={id}
       role="radio"
       aria-checked={selected}
+      onMouseDown={suppressMouseFocusScroll}
       onClick={onClick}
       onKeyDown={onKeyDown}
       className={`w-full px-6 py-5 text-left type-body font-medium calc-option ${
@@ -359,39 +366,6 @@ export function EstimateCalculator() {
     );
     heading?.setAttribute("tabindex", "-1");
     heading?.focus({ preventScroll: true });
-
-    const section = document.getElementById("estimate");
-    const sectionBox = section?.getBoundingClientRect();
-    const sectionInView = Boolean(
-      sectionBox &&
-        sectionBox.bottom > 80 &&
-        sectionBox.top < window.innerHeight
-    );
-    if (!sectionInView) return;
-    if (!window.matchMedia("(max-width: 767px)").matches) return;
-
-    const active = document.activeElement;
-    if (
-      active instanceof HTMLInputElement ||
-      active instanceof HTMLTextAreaElement
-    ) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      if (!(heading instanceof HTMLElement)) return;
-      const rect = heading.getBoundingClientRect();
-      const header = 96;
-      if (rect.top >= header && rect.top <= window.innerHeight * 0.45) return;
-      heading.scrollIntoView({
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
-        block: "start",
-      });
-    }, TRANSITION_MS);
-
-    return () => window.clearTimeout(timer);
   }, [stepId, animToken, phase]);
 
   useEffect(() => {
@@ -458,7 +432,14 @@ export function EstimateCalculator() {
           onSubmit={(event) => {
             event.preventDefault();
             if (stepId === "lead") void handleSubmit();
-            else handleNext();
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter" || stepId === "lead") return;
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement)) return;
+            if (target.name === "website") return;
+            event.preventDefault();
+            handleNext();
           }}
         >
           <div
@@ -532,6 +513,7 @@ export function EstimateCalculator() {
           <div className="calc-nav">
             <button
               type="button"
+              onMouseDown={suppressMouseFocusScroll}
               onClick={handleBack}
               disabled={currentIndex === 0 || busy}
               className="type-small calc-back"
@@ -543,6 +525,7 @@ export function EstimateCalculator() {
               {stepId === "rooms" ? (
                 <button
                   type="button"
+                  onMouseDown={suppressMouseFocusScroll}
                   onClick={handleSkipRooms}
                   disabled={busy}
                   className="btn btn-ghost"
@@ -564,7 +547,13 @@ export function EstimateCalculator() {
                   </span>
                 </button>
               ) : (
-                <button type="submit" disabled={busy} className="btn btn-primary">
+                <button
+                  type="button"
+                  onMouseDown={suppressMouseFocusScroll}
+                  onClick={handleNext}
+                  disabled={busy}
+                  className="btn btn-primary"
+                >
                   {dict.next}
                   <span className="btn-arrow" aria-hidden>
                     →
@@ -737,6 +726,7 @@ function StepBody({
                 type="button"
                 role="radio"
                 aria-checked={state.rooms === String(n)}
+                onMouseDown={suppressMouseFocusScroll}
                 onClick={() => patch({ rooms: String(n) })}
                 className={`min-h-14 min-w-14 px-4 py-3 text-lg font-medium calc-option ${
                   state.rooms === String(n) ? "is-selected" : ""

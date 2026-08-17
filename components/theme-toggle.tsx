@@ -60,7 +60,7 @@ export function ThemeToggle({
   const t = useDictionary().theme;
   const isDark = theme === "dark";
   const large = size === "lg";
-  const iconSize = large ? 17 : 14;
+  const iconSize = large ? 22 : 14;
 
   return (
     <button
@@ -70,7 +70,7 @@ export function ThemeToggle({
       aria-pressed={isDark}
       data-tone={tone}
       className={`theme-toggle relative grid shrink-0 grid-cols-2 items-stretch rounded-[10px] border p-1 leading-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
-        large ? "h-11 w-[5.75rem]" : "h-9 w-[4.5rem]"
+        large ? "h-12 w-[6.5rem]" : "h-9 w-[4.5rem]"
       } ${className}`}
     >
       <span
@@ -82,7 +82,7 @@ export function ThemeToggle({
       <span className="relative z-[1] flex items-center justify-center">
         <span
           className={`flex items-center justify-center leading-none ${
-            large ? "size-[18px]" : "size-[15px]"
+            large ? "size-[22px]" : "size-[15px]"
           }`}
         >
           <SunIcon
@@ -96,7 +96,7 @@ export function ThemeToggle({
       <span className="relative z-[1] flex items-center justify-center">
         <span
           className={`flex items-center justify-center leading-none ${
-            large ? "size-[18px]" : "size-[15px]"
+            large ? "size-[22px]" : "size-[15px]"
           }`}
         >
           <MoonIcon

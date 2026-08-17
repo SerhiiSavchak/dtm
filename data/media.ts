@@ -50,12 +50,13 @@ export const serviceMedia = [
 ] as const;
 
 export {
+  inProgressComposition,
   inProgressFrames,
   inProgressMedia,
   inProgressMediaIndex,
   inProgressScenes,
   type InProgressItem,
-  type InProgressLayout,
+  type InProgressPanel,
   type InProgressScene,
 } from "./in-progress-scenes";
 
