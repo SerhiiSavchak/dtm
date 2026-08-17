@@ -6,7 +6,7 @@
  * 2. A kitchen still being furnished (poster + one loop).
  *
  * Telegram stills are 720–1280px. Never treat them as 1920 masters.
- * The on-page composition is a short mosaic of large portrait/detail panels.
+ * The on-page composition is four strong blinds; the viewer still uses the full set.
  *
  * Excluded from this section:
  * - Portfolio-prominent interiors (stone / living covers and their sets).
@@ -96,7 +96,7 @@ export const inProgressMedia: InProgressItem[] = [
 
 /**
  * One on-page composition. Order: living → bedroom → vanity → kitchen.
- * CSS shows 2 / 3 / 4 panels by breakpoint. Viewer still uses the full set.
+ * All four stay on screen as architectural blinds. Viewer uses the full set.
  */
 export const inProgressCompositionIds = [
   "house-living",

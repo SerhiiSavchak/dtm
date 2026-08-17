@@ -1,9 +1,10 @@
+import { IMAGE_DEVICE_SIZES } from "@/lib/image-slots";
 import { resolveSiteImage, type SiteImageSrc } from "@/lib/site-images";
 
 const cache = new Map<string, Promise<void>>();
 
-/** Next.js default deviceSizes — keep in sync with the optimizer. */
-const DEVICE_SIZES = [640, 750, 828, 1080, 1200, 1920, 2048, 3840];
+/** Keep in sync with next.config.ts images.deviceSizes. */
+const DEVICE_SIZES = IMAGE_DEVICE_SIZES;
 
 function fileUrl(src: SiteImageSrc) {
   const resolved = resolveSiteImage(src);

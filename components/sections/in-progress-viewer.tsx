@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { type InProgressItem } from "@/data/media";
+import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
 import { preloadSiteImage } from "@/lib/media-preload";
 import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 import { MediaImage } from "../media-image";
@@ -10,7 +11,7 @@ import type { SiteImageSrc } from "@/lib/site-images";
 
 const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-const VIEWER_SIZES = "(max-width: 1024px) 100vw, min(90vw, 1280px)";
+const VIEWER_SIZES = IMAGE_SIZES.inProgressViewer;
 const CROSSFADE_MS = 180;
 const SLOW_WAIT_MS = 150;
 
@@ -89,7 +90,7 @@ function ViewerVideo({
         src={poster}
         alt={alt}
         fill
-        quality={85}
+        quality={IMAGE_QUALITY.editorial}
         sizes={VIEWER_SIZES}
         className="object-contain"
         onReady={onReady}
@@ -154,7 +155,7 @@ function ViewerFrame({
       src={item.src}
       alt={alt}
       fill
-      quality={85}
+      quality={IMAGE_QUALITY.editorial}
       sizes={VIEWER_SIZES}
       priority
       className="object-contain"
@@ -277,7 +278,10 @@ export function InProgressViewer({
       Boolean
     ) as SiteImageSrc[];
     srcs.forEach((src) => {
-      void preloadSiteImage(src, { sizes: VIEWER_SIZES, quality: 85 });
+      void preloadSiteImage(src, {
+        sizes: VIEWER_SIZES,
+        quality: IMAGE_QUALITY.editorial,
+      });
     });
   }, [index, item?.src, items]);
 

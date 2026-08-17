@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { heroMedia } from "@/data/media";
+import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
 import { markCriticalReady } from "@/lib/boot-session";
 import {
   beginHeroIntro,
@@ -111,9 +112,9 @@ export function Hero({ boot = true }: { boot?: boolean }) {
             alt={t.imageAlt}
             mp4={heroMedia.mp4}
             webm={heroMedia.webm}
-            sizes="100vw"
+            sizes={IMAGE_SIZES.hero}
             priority
-            quality={90}
+            quality={IMAGE_QUALITY.hero}
             preload="auto"
             className="hero-media-inner"
             imageClassName="object-cover"

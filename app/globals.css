@@ -1999,11 +1999,17 @@ html[data-motion="reduce"] .arch-corner {
   animation: none !important;
 }
 
-/* ---------- In progress — one-viewport editorial shutters ---------- */
+/* ---------- In progress — interactive architectural blinds ---------- */
 
 .in-progress {
-  --in-progress-gap: 0.75rem;
+  --in-progress-gap: 0.45rem;
+  --shut-min: 3rem;
+  --shut-grow: 0.58;
+  --open-grow: 2.95;
+  --panel-duration: 640ms;
+  --panel-ease: cubic-bezier(0.45, 0.05, 0.18, 1);
   isolation: isolate;
+  overflow-x: clip;
 }
 
 .in-progress-intro {
@@ -2029,8 +2035,10 @@ html[data-motion="reduce"] .arch-corner {
   align-items: stretch;
   gap: var(--in-progress-gap);
   width: 100%;
-  height: min(26rem, 54vh);
-  min-height: 17.5rem;
+  max-width: 100%;
+  min-width: 0;
+  height: min(22rem, 58vh);
+  min-height: 16.5rem;
   overflow: hidden;
 }
 
@@ -2040,9 +2048,10 @@ html[data-motion="reduce"] .arch-corner {
   position: relative;
   isolation: isolate;
   display: block;
-  flex: 1 1 0;
+  flex: var(--shut-grow) 1 0;
+  min-width: var(--shut-min);
+  width: auto;
   height: 100%;
-  min-width: 0;
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -2052,31 +2061,15 @@ html[data-motion="reduce"] .arch-corner {
   color: inherit;
   text-align: left;
   cursor: pointer;
+  touch-action: manipulation;
   box-shadow: none;
   clip-path: inset(0 0 0 0);
-  transform: none;
+  transform: translateZ(0);
   opacity: 1;
 }
 
-.in-progress-panel.is-wide {
-  flex: 1.35 1 0;
-}
-
-.in-progress-panel.is-portrait {
-  flex: 1 1 0;
-}
-
-.in-progress-panel.is-narrow {
-  flex: 0.72 1 0;
-}
-
-.in-progress-panel.is-video {
-  flex: 0.9 1 0;
-}
-
-.in-progress-panel:nth-child(2),
-.in-progress-panel:nth-child(3) {
-  display: none;
+.in-progress-panel.is-active {
+  flex-grow: var(--open-grow);
 }
 
 .in-progress-panel:focus-visible {
@@ -2093,6 +2086,16 @@ html[data-motion="reduce"] .arch-corner {
   height: 100%;
 }
 
+.in-progress-visual {
+  overflow: hidden;
+  transform: scale(1.03);
+  transform-origin: 50% 50%;
+}
+
+.in-progress-panel.is-active .in-progress-visual {
+  transform: scale(1);
+}
+
 .in-progress-image {
   object-fit: cover;
 }
@@ -2103,111 +2106,216 @@ html[data-motion="reduce"] .arch-corner {
   pointer-events: none;
 }
 
-.in-progress-board.is-armed:not(.is-open) .in-progress-panel {
-  clip-path: inset(0 48% 0 0);
-  transform: translate3d(-3%, 0, 0) scale(1.04);
-  opacity: 0.72;
+.in-progress-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--ink-deep) 18%, transparent) 0%,
+      transparent 38%,
+      color-mix(in oklab, var(--ink-deep) 46%, transparent) 100%
+    ),
+    color-mix(in oklab, var(--ink-deep) 32%, transparent);
+  opacity: 1;
+}
+
+.in-progress-panel.is-active .in-progress-shade {
+  background:
+    linear-gradient(
+      180deg,
+      transparent 52%,
+      color-mix(in oklab, var(--ink-deep) 42%, transparent) 100%
+    ),
+    color-mix(in oklab, var(--ink-deep) 6%, transparent);
+}
+
+.in-progress-tick,
+.in-progress-caption {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  color: var(--paper);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 1px 10px color-mix(in oklab, var(--ink-deep) 55%, transparent);
+}
+
+.in-progress-tick {
+  top: 0.5rem;
+  left: 0.28rem;
+  opacity: 0.82;
+}
+
+.in-progress-panel.is-active .in-progress-tick {
+  opacity: 0;
+}
+
+.in-progress-caption {
+  left: 0.7rem;
+  bottom: 0.7rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+}
+
+.in-progress-panel.is-active .in-progress-caption {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.in-progress-board.is-armed:not(.is-live) .in-progress-panel {
+  clip-path: inset(0 86% 0 0);
+  transform: translate3d(-2%, 0, 0);
+  opacity: 0.8;
 }
 
 .in-progress-board.is-armed .in-progress-panel {
   transition:
-    transform 920ms var(--ease-cinematic),
-    opacity 720ms var(--ease-out-soft),
-    clip-path 920ms var(--ease-cinematic);
-  transition-delay: calc(var(--i) * 95ms);
+    transform 700ms var(--ease-cinematic),
+    opacity 560ms var(--ease-out-soft),
+    clip-path 700ms var(--ease-cinematic);
+  transition-delay: calc(var(--i) * 90ms);
 }
 
-.in-progress-board.is-open .in-progress-panel {
+.in-progress-board.is-armed .in-progress-visual,
+.in-progress-board.is-armed .in-progress-shade,
+.in-progress-board.is-armed .in-progress-tick,
+.in-progress-board.is-armed .in-progress-caption {
+  transition:
+    transform var(--panel-duration) var(--panel-ease),
+    opacity var(--panel-duration) var(--panel-ease),
+    background var(--panel-duration) var(--panel-ease);
+  transition-delay: calc(var(--i) * 90ms);
+}
+
+.in-progress-board.is-live .in-progress-panel {
   clip-path: inset(0 0 0 0);
-  transform: translate3d(0, 0, 0) scale(1);
+  transform: translateZ(0);
   opacity: 1;
 }
 
-.in-progress-board.is-animating .in-progress-panel {
+.in-progress-board.is-animating .in-progress-panel,
+.in-progress-board.is-animating .in-progress-visual {
   will-change: transform, opacity, clip-path;
+}
+
+.in-progress-board.is-interactive .in-progress-panel {
+  transition: flex-grow var(--panel-duration) var(--panel-ease);
+  transition-delay: 0s;
+}
+
+.in-progress-board.is-interactive .in-progress-visual,
+.in-progress-board.is-interactive .in-progress-shade,
+.in-progress-board.is-interactive .in-progress-tick,
+.in-progress-board.is-interactive .in-progress-caption {
+  transition:
+    transform var(--panel-duration) var(--panel-ease),
+    opacity 420ms var(--ease-out-soft),
+    background var(--panel-duration) var(--panel-ease);
+  transition-delay: 0s;
 }
 
 @media (min-width: 768px) {
   .in-progress {
-    --in-progress-gap: 1rem;
+    --in-progress-gap: 0.75rem;
+    --shut-min: 5.25rem;
+    --shut-grow: 0.72;
+    --open-grow: 3.35;
   }
 
   .in-progress-board {
     height: min(32rem, 58vh);
   }
 
-  .in-progress-panel:nth-child(2) {
-    display: block;
-  }
-
-  .in-progress-panel.is-video {
-    flex: 0.82 1 0;
-    max-width: min(20rem, 32%);
+  .in-progress-caption {
+    left: 0.9rem;
+    bottom: 0.9rem;
   }
 }
 
 @media (min-width: 1024px) {
   .in-progress {
-    --in-progress-gap: 1.25rem;
+    --in-progress-gap: 1rem;
+    --shut-min: 6.75rem;
+    --shut-grow: 0.78;
+    --open-grow: 3.65;
   }
 
   .in-progress-board {
-    height: min(36rem, 60vh);
-  }
-
-  .in-progress-panel.is-wide {
-    flex: 1.45 1 0;
-    max-width: 42%;
-  }
-
-  .in-progress-panel.is-video {
-    flex: 0.78 1 0;
-    max-width: min(18rem, 24%);
+    height: min(36rem, 62vh);
   }
 }
 
 @media (min-width: 1200px) {
-  .in-progress-panel:nth-child(3) {
-    display: block;
-  }
-
-  .in-progress-panel.is-wide {
-    max-width: 38%;
-  }
-
-  .in-progress-panel.is-video {
-    max-width: min(17.5rem, 22%);
+  .in-progress {
+    --in-progress-gap: 1.1rem;
+    --shut-min: 7.75rem;
+    --shut-grow: 0.82;
+    --open-grow: 3.8;
   }
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .in-progress-panel .in-progress-visual {
-    transition: transform 720ms var(--ease-out-soft);
+@media (min-width: 1440px) {
+  .in-progress {
+    --in-progress-gap: 1.25rem;
+    --shut-min: 8.5rem;
+    --shut-grow: 0.86;
+    --open-grow: 4;
   }
 
-  .in-progress-panel:hover .in-progress-visual,
-  .in-progress-panel:focus-visible .in-progress-visual {
-    transform: scale(1.018);
+  .in-progress-board {
+    height: min(38rem, 64vh);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .in-progress-board,
   .in-progress-panel,
-  .in-progress-board.is-armed:not(.is-open) .in-progress-panel,
+  .in-progress-board.is-armed:not(.is-live) .in-progress-panel,
   .in-progress-board.is-armed .in-progress-panel,
-  .in-progress-board.is-open .in-progress-panel,
-  .in-progress-visual {
+  .in-progress-board.is-live .in-progress-panel,
+    .in-progress-board.is-interactive .in-progress-panel,
+  .in-progress-visual,
+  .in-progress-shade,
+  .in-progress-tick,
+  .in-progress-caption {
     clip-path: none !important;
-    transform: none !important;
-    opacity: 1 !important;
     transition: none !important;
     will-change: auto !important;
   }
+
+  .in-progress-panel,
+  .in-progress-visual {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .in-progress-caption {
+    transform: none !important;
+  }
+}
+
+html[data-motion="reduce"] .in-progress-board,
+html[data-motion="reduce"] .in-progress-panel,
+html[data-motion="reduce"] .in-progress-visual,
+html[data-motion="reduce"] .in-progress-shade,
+html[data-motion="reduce"] .in-progress-tick,
+html[data-motion="reduce"] .in-progress-caption {
+  clip-path: none !important;
+  transition: none !important;
 }
 
 html[data-motion="reduce"] .in-progress-panel,
 html[data-motion="reduce"] .in-progress-visual {
-  clip-path: none !important;
   transform: none !important;
   opacity: 1 !important;
 }
@@ -2469,7 +2577,7 @@ html[data-motion="reduce"] .in-progress-visual {
   position: relative;
   margin-bottom: 2rem;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   background-color: var(--stone);
 }
@@ -2785,14 +2893,29 @@ html[data-motion="ok"] .process-rail-fill {
   }
 }
 
-/* Editorial spread: dominant lead, next project clearly peeking */
+/* Editorial spread: dominant lead, next project clearly peeking.
+   Extra cards keep uneven widths — not an equal grid.
+   Telegram stills are 720–1052px wide; 70vw/16:10 covers upscale them. */
 @media (min-width: 1024px) {
   .project-slide {
-    flex-basis: min(54vw, 50rem);
+    flex-basis: min(34vw, 30rem);
   }
 
-  .project-slide.is-lead {
-    flex-basis: min(70vw, 66rem);
+  .project-slide.is-lead,
+  .project-slide[data-span="large"] {
+    flex-basis: min(42vw, 36rem);
+  }
+
+  .project-slide[data-span="wide"]:not(.is-lead) {
+    flex-basis: min(38vw, 34rem);
+  }
+
+  .project-slide[data-span="tall"]:not(.is-lead) {
+    flex-basis: min(32vw, 28rem);
+  }
+
+  .project-slide[data-span="small"]:not(.is-lead) {
+    flex-basis: min(28vw, 24rem);
   }
 }
 

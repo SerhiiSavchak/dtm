@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { projects, type Project } from "@/data/projects";
+import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
 import { useProjectTrack } from "@/lib/project-track";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { MediaImage } from "./media-image";
@@ -19,10 +20,30 @@ import { MediaReveal } from "./fx/media-reveal";
 
 const PROJECT_IDS = projects.map((project) => project.slug);
 
+function slideAspect(project: Project, lead: boolean) {
+  // Covers are 9:16 Telegram stills (720–1052px). 16:10/16:11 slots
+  // crop to ~450px of height then stretch width past the source.
+  if (lead || project.span === "large" || project.span === "tall") {
+    return "aspect-[4/5]";
+  }
+  if (project.span === "small") return "aspect-[4/5] md:aspect-[5/6]";
+  return "aspect-[4/5]";
+}
+
+function slideSizes(lead: boolean, span: Project["span"]) {
+  return lead || span === "large"
+    ? IMAGE_SIZES.portfolioLead
+    : IMAGE_SIZES.portfolioCard;
+}
+
+function slideQuality(lead: boolean) {
+  return lead ? IMAGE_QUALITY.feature : IMAGE_QUALITY.editorial;
+}
+
 function useProjectLabels(project: Project) {
   const t = useDictionary().projects;
   return {
-    title: t.titlePlaceholder,
+    title: project.title,
     category: t.categories[project.category],
     location: project.locationKey ? t.location[project.locationKey] : null,
     area: project.area
@@ -201,8 +222,11 @@ function ProjectSlide({
     <article
       data-slide
       data-project={project.slug}
+      data-span={project.span}
       aria-current={active ? "true" : undefined}
-      className={`project-slide group/card ${lead ? "is-lead" : ""}`}
+      className={`project-slide group/card ${
+        lead || project.span === "large" ? "is-lead" : ""
+      }`}
     >
       <button
         type="button"
@@ -215,9 +239,7 @@ function ProjectSlide({
         <div className="project-media">
           <div className="project-media-crop">
             <div
-              className={`project-media-frame relative w-full aspect-[4/5] md:aspect-[16/11] ${
-                lead ? "lg:aspect-[16/10]" : ""
-              }`}
+              className={`project-media-frame relative w-full ${slideAspect(project, lead)}`}
             >
               {lead ? (
                 <MediaReveal variant="primary" className="absolute inset-0">
@@ -227,8 +249,8 @@ function ProjectSlide({
                         src={project.cover}
                         alt={`DTM: ${labels.category}`}
                         fill
-                        quality={75}
-                        sizes="(max-width: 1024px) 86vw, 70vw"
+                        quality={slideQuality(lead)}
+                        sizes={slideSizes(lead, project.span)}
                         className="object-cover"
                         style={{ objectPosition: project.coverPosition }}
                       />
@@ -241,8 +263,8 @@ function ProjectSlide({
                     src={project.cover}
                     alt={`DTM: ${labels.category}`}
                     fill
-                    quality={75}
-                    sizes="(max-width: 1024px) 86vw, 70vw"
+                    quality={slideQuality(lead)}
+                    sizes={slideSizes(lead, project.span)}
                     className="object-cover"
                     style={{ objectPosition: project.coverPosition }}
                   />

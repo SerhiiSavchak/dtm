@@ -6,8 +6,13 @@ const nextConfig: NextConfig = {
     root: process.cwd(),
   },
   images: {
-    // 75 default; 85 in-progress stills; 90 hero/portfolio masters
+    formats: ["image/avif", "image/webp"],
+    // 75 thumbs; 85 editorial; 90 hero / lead covers / modal stage.
+    // Values not in this list collapse to the nearest (78 → 75).
     qualities: [75, 85, 90],
+    // 960/1280 match Telegram stills and the one landscape kitchen still.
+    // Keep 3840 so 2× hero (100vw) can request it; optimizer will not enlarge.
+    deviceSizes: [640, 750, 828, 960, 1080, 1200, 1280, 1920, 2048, 3840],
   },
   async headers() {
     return [

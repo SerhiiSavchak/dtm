@@ -8,6 +8,7 @@ import {
   type CSSProperties,
 } from "react";
 import { serviceMedia } from "@/data/media";
+import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { CopyText } from "./copy-text";
 import { MediaImage } from "./media-image";
@@ -53,7 +54,7 @@ function ServiceStills({
           alt={isActive ? title : ""}
           aria-hidden={isActive ? undefined : true}
           fill
-          quality={75}
+          quality={IMAGE_QUALITY.editorial}
           sizes={sizes}
           className="object-cover"
         />
@@ -120,7 +121,7 @@ export function Services() {
               <ServiceStills
                 active={activeIndex}
                 titles={titles}
-                sizes="(max-width: 1023px) 92vw, 40vw"
+                sizes={IMAGE_SIZES.serviceInline}
               />
             </div>
 
@@ -200,7 +201,7 @@ export function Services() {
                   <ServiceStills
                     active={activeIndex}
                     titles={titles}
-                    sizes="(max-width: 1280px) 40vw, 560px"
+                    sizes={IMAGE_SIZES.serviceSticky}
                   />
                 </div>
                 <div className="services-contrast" aria-hidden />

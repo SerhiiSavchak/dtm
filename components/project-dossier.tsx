@@ -16,6 +16,7 @@ import {
   type ProjectMedia,
 } from "@/data/projects";
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
 import { preloadSiteImage } from "@/lib/media-preload";
 import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 import { MediaImage } from "./media-image";
@@ -176,7 +177,7 @@ function DossierFrame({
         objectPosition={item.objectPosition}
         active
         preload="metadata"
-        quality={75}
+        quality={IMAGE_QUALITY.feature}
         onPosterReady={onReady}
       />
     );
@@ -187,7 +188,7 @@ function DossierFrame({
       src={item.src}
       alt={alt}
       fill
-      quality={75}
+      quality={IMAGE_QUALITY.feature}
       sizes={sizes}
       priority={priority}
       className={fitClass}
@@ -231,9 +232,9 @@ export function ProjectDossier({
   const lastMedia = media.length - 1;
   const canPrevProject = projectIndex > 0;
   const canNextProject = projectIndex < projects.length - 1;
-  const stageSizes = "(max-width: 1023px) 100vw, min(68vw, 72rem)";
+  const stageSizes = IMAGE_SIZES.dossierStage;
 
-  const title = t.titlePlaceholder;
+  const title = project.title;
   const category = t.categories[project.category];
   const location = project.locationKey
     ? t.location[project.locationKey]
@@ -271,7 +272,10 @@ export function ProjectDossier({
     (index: number) => {
       const cover = projectMedia(projects[index])[0]?.src;
       if (cover) {
-        void preloadSiteImage(cover, { sizes: stageSizes, quality: 75 });
+        void preloadSiteImage(cover, {
+          sizes: stageSizes,
+          quality: IMAGE_QUALITY.feature,
+        });
       }
     },
     [stageSizes]
@@ -374,7 +378,10 @@ export function ProjectDossier({
     ].filter((src): src is string => Boolean(src));
 
     srcs.forEach((src) => {
-      void preloadSiteImage(src, { sizes: stageSizes, quality: 75 });
+      void preloadSiteImage(src, {
+        sizes: stageSizes,
+        quality: IMAGE_QUALITY.feature,
+      });
     });
   }, [project, projectIndex, safeIndex, stageSizes]);
 
@@ -443,8 +450,8 @@ export function ProjectDossier({
                     src={item.src}
                     alt=""
                     fill
-                    quality={75}
-                    sizes="104px"
+                    quality={IMAGE_QUALITY.thumb}
+                    sizes={IMAGE_SIZES.dossierThumb}
                     loading={Math.abs(index - safeIndex) <= 1 ? "eager" : "lazy"}
                     className="object-cover"
                     style={{

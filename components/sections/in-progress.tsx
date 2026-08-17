@@ -1,51 +1,59 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FocusEvent,
+  type PointerEvent,
+} from "react";
 import {
   inProgressComposition,
   inProgressMedia,
   inProgressMediaIndex,
   socialLinks,
   type InProgressItem,
-  type InProgressPanel,
 } from "@/data/media";
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { IMAGE_QUALITY } from "@/lib/image-slots";
 import { CopyText } from "../copy-text";
-import { HoverMediaLabel } from "../fx/hover-media-label";
 import { InteractiveArrow } from "../fx/interactive-arrow";
 import { MediaImage } from "../media-image";
 import { Reveal, RevealGroup } from "../reveal";
 import { SectionHead } from "../section-head";
 import { InProgressViewer } from "./in-progress-viewer";
 
-const STAGE_QUALITY = 85;
+const STAGE_QUALITY = IMAGE_QUALITY.editorial;
+const HOVER_DELAY_MS = 120;
+const INTRO_MS = 980;
 const REDUCE_MQ = "(prefers-reduced-motion: reduce)";
-
-const PANEL_SIZES: Record<InProgressPanel, string> = {
-  wide: "(max-width: 767px) 48vw, (max-width: 1023px) 38vw, min(32vw, 28rem)",
-  portrait:
-    "(max-width: 767px) 48vw, (max-width: 1023px) 32vw, min(24vw, 22rem)",
-  narrow: "(max-width: 767px) 42vw, (max-width: 1023px) 24vw, min(16vw, 14rem)",
-  video: "(max-width: 767px) 48vw, (max-width: 1023px) 28vw, min(18vw, 20rem)",
-};
+const FINE_HOVER_MQ = "(hover: hover) and (pointer: fine)";
+const PANEL_SIZES =
+  "(max-width: 767px) 72vw, (max-width: 1199px) 58vw, min(62vw, 56rem)";
 
 type Copy = ReturnType<typeof useDictionary>["inProgress"];
+type Phase = "boot" | "armed" | "live" | "ready";
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
+}
+
+function fineHover() {
+  return window.matchMedia(FINE_HOVER_MQ).matches;
 }
 
 function ObjectVideo({
   item,
   alt,
   active,
-  sizes,
   priority,
 }: {
   item: InProgressItem;
   alt: string;
   active: boolean;
-  sizes: string;
   priority?: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -84,7 +92,7 @@ function ObjectVideo({
         alt={alt}
         fill
         quality={STAGE_QUALITY}
-        sizes={sizes}
+        sizes={PANEL_SIZES}
         priority={priority}
         className="in-progress-image object-cover"
         style={{ objectPosition: item.objectPosition }}
@@ -112,35 +120,64 @@ function MediaPanel({
   index,
   t,
   active,
+  ready,
   priority,
+  onActivate,
   onOpen,
+  onHoverEnter,
+  onHoverLeave,
 }: {
   item: InProgressItem;
   index: number;
   t: Copy;
   active: boolean;
+  ready: boolean;
   priority?: boolean;
+  onActivate: () => void;
   onOpen: () => void;
+  onHoverEnter: () => void;
+  onHoverLeave: () => void;
 }) {
   const mediaIndex = inProgressMediaIndex(item.id);
   const kind = item.video ? t.videoKind : t.photoKind;
-  const sizes = PANEL_SIZES[item.panel];
+  const n = pad2(index + 1);
+
+  const onFocus = (event: FocusEvent<HTMLButtonElement>) => {
+    if (!ready) return;
+    if (!event.currentTarget.matches(":focus-visible")) return;
+    onActivate();
+  };
+
+  const onPointerEnter = (event: PointerEvent<HTMLButtonElement>) => {
+    if (!ready) return;
+    if (event.pointerType !== "mouse") return;
+    if (!fineHover()) return;
+    onHoverEnter();
+  };
+
   return (
     <button
       type="button"
-      className={`in-progress-panel is-${item.panel}`}
+      className={`in-progress-panel${active ? " is-active" : ""}`}
       style={{ "--i": index } as CSSProperties}
+      aria-expanded={active}
       aria-haspopup="dialog"
       aria-label={`${t.open}. ${pad2(mediaIndex + 1)} / ${pad2(inProgressMedia.length)}. ${kind}`}
-      onClick={onOpen}
+      onFocus={onFocus}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onHoverLeave}
+      onClick={() => {
+        if (!ready) return;
+        if (active) onOpen();
+        else onActivate();
+      }}
     >
       <div className="in-progress-visual">
         {item.video ? (
           <ObjectVideo
             item={item}
             alt={t.mediaAlt}
-            active={active}
-            sizes={sizes}
+            active={active && ready}
             priority={priority}
           />
         ) : (
@@ -149,14 +186,21 @@ function MediaPanel({
             alt={t.mediaAlt}
             fill
             quality={STAGE_QUALITY}
-            sizes={sizes}
+            sizes={PANEL_SIZES}
             priority={priority}
             className="in-progress-image object-cover"
             style={{ objectPosition: item.objectPosition }}
           />
         )}
       </div>
-      <HoverMediaLabel label={t.look} />
+      <span className="in-progress-shade" aria-hidden />
+      <span className="in-progress-tick" aria-hidden>
+        {n}
+      </span>
+      <span className="in-progress-caption" aria-hidden>
+        <span>{n}</span>
+        <span>{t.label}</span>
+      </span>
     </button>
   );
 }
@@ -164,9 +208,47 @@ function MediaPanel({
 export function InProgress() {
   const t = useDictionary().inProgress;
   const frames = inProgressComposition();
+  const [activeIndex, setActiveIndex] = useState(0);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [open, setOpen] = useState(false);
+  const [phase, setPhase] = useState<Phase>("boot");
   const boardRef = useRef<HTMLDivElement>(null);
+  const hoverTarget = useRef<number | null>(null);
+  const hoverFrom = useRef(0);
+  const hoverRaf = useRef(0);
+
+  const stopHover = useCallback(() => {
+    hoverTarget.current = null;
+    if (hoverRaf.current) {
+      window.cancelAnimationFrame(hoverRaf.current);
+      hoverRaf.current = 0;
+    }
+  }, []);
+
+  const tickHover = useCallback(
+    (now: number) => {
+      hoverRaf.current = 0;
+      const next = hoverTarget.current;
+      if (next == null) return;
+      if (now - hoverFrom.current < HOVER_DELAY_MS) {
+        hoverRaf.current = window.requestAnimationFrame(tickHover);
+        return;
+      }
+      hoverTarget.current = null;
+      setActiveIndex(next);
+    },
+    []
+  );
+
+  const armHover = useCallback(
+    (index: number) => {
+      hoverTarget.current = index;
+      hoverFrom.current = performance.now();
+      if (!hoverRaf.current) {
+        hoverRaf.current = window.requestAnimationFrame(tickHover);
+      }
+    },
+    [tickHover]
+  );
 
   useLayoutEffect(() => {
     const board = boardRef.current;
@@ -174,19 +256,23 @@ export function InProgress() {
 
     const reduce = window.matchMedia(REDUCE_MQ).matches;
     if (reduce) {
-      board.classList.add("is-open");
+      board.classList.add("is-live", "is-interactive");
+      setPhase("ready");
       return;
     }
 
-    board.classList.add("is-armed");
+    setPhase("armed");
     const io = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         if (!entry?.isIntersecting) return;
         if (entry.intersectionRatio < 0.32) return;
-        board.classList.add("is-open");
-        setOpen(true);
         io.disconnect();
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            setPhase("live");
+          });
+        });
       },
       { threshold: [0.32, 0.45] }
     );
@@ -195,17 +281,28 @@ export function InProgress() {
   }, []);
 
   useEffect(() => {
-    const board = boardRef.current;
-    if (!board || !open) return;
-    const onEnd = () => board.classList.remove("is-animating");
-    board.classList.add("is-animating");
-    board.addEventListener("transitionend", onEnd);
-    const fallback = window.setTimeout(onEnd, 1400);
-    return () => {
-      board.removeEventListener("transitionend", onEnd);
-      window.clearTimeout(fallback);
-    };
-  }, [open]);
+    if (phase !== "live") return;
+    const reduce = window.matchMedia(REDUCE_MQ).matches;
+    if (reduce) {
+      setPhase("ready");
+      return;
+    }
+    const wait = window.setTimeout(() => setPhase("ready"), INTRO_MS);
+    return () => window.clearTimeout(wait);
+  }, [phase]);
+
+  useEffect(() => () => stopHover(), [stopHover]);
+
+  const ready = phase === "live" || phase === "ready";
+  const boardClass = [
+    "in-progress-board",
+    phase !== "boot" ? "is-armed" : "",
+    ready ? "is-live" : "",
+    phase === "ready" ? "is-interactive" : "",
+    phase === "live" ? "is-animating" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <section
@@ -241,16 +338,26 @@ export function InProgress() {
           </div>
         </RevealGroup>
 
-        <div ref={boardRef} className="in-progress-board">
+        <div
+          ref={boardRef}
+          className={boardClass}
+          data-active={activeIndex}
+        >
           {frames.map((item, index) => (
             <MediaPanel
               key={item.id}
               item={item}
               index={index}
               t={t}
-              active={open && Boolean(item.video)}
+              active={activeIndex === index}
+              ready={ready}
               priority={index === 0}
+              onActivate={() => setActiveIndex(index)}
               onOpen={() => setOpenIndex(inProgressMediaIndex(item.id))}
+              onHoverEnter={() => armHover(index)}
+              onHoverLeave={() => {
+                if (hoverTarget.current === index) stopHover();
+              }}
             />
           ))}
         </div>

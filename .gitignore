@@ -22,6 +22,9 @@
 
 # misc
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 *.pem
 
 # debug
@@ -36,6 +39,7 @@ yarn-error.log*
 
 # local audit / encode scratch
 /tmp/
+/tmp-qa/
 /scripts/_media-audit.js
 
 # vercel
