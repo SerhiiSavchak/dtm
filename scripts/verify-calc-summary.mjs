@@ -386,6 +386,7 @@ function testTelegramEmailIncludeAnswers() {
   const email = formatOwnerEmail(lead);
   const summary = texts(state);
 
+  assert(email.subject.startsWith("DTM — Нова заявка · "), "17 email subject");
   for (const line of summary) {
     assert(telegram.includes(line), `17 telegram includes ${line}`);
     assert(email.text.includes(line), `17 email text includes ${line}`);

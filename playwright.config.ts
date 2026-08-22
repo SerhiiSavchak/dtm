@@ -17,7 +17,7 @@ export default defineConfig({
   webServer: {
     command: "npx next dev --port 3010 --hostname localhost",
     url: "http://localhost:3010",
-    reuseExistingServer: false,
+    reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
   projects: [

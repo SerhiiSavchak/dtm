@@ -181,7 +181,7 @@ export function formatOwnerEmail(lead: CanonicalLead): {
   text: string;
   html: string;
 } {
-  const subject = `Нова заявка DTM — ${lead.leadId}`;
+  const subject = `DTM — Нова заявка · ${lead.leadId}`;
   const text = formatOwnerTelegram(lead).replace("🏠 ", "");
 
   const telHref = `tel:${escapeHtml(lead.phone)}`;

@@ -12,6 +12,7 @@ import { SubmissionIdempotency } from "../lib/leads/idempotency.ts";
 import { maskPhone } from "../lib/leads/log.ts";
 import { deliverParsedLead } from "../lib/leads/process-lead.ts";
 import { leadInputSchema } from "../lib/leads/schema.ts";
+import { sendOwnerEmail } from "../lib/leads/email.ts";
 import { sendOwnerTelegram } from "../lib/leads/telegram.ts";
 import { toCanonicalLead } from "../lib/leads/format.ts";
 
@@ -118,15 +119,93 @@ async function testInflightCoalesce() {
   assert("coalesce B duplicate", b.body.ok && b.body.duplicate === true);
 }
 
-async function testTelegramRequiredEvenIfEmailSent() {
-  const cache = new SubmissionIdempotency(10 * 60 * 1000);
-  const senders = {
-    sendTelegram: async () => ({ ok: false, reason: "timeout" }),
-    sendEmail: async () => ({ ok: true, messageId: "em-1" }),
+async function testEmailChannelMatrix() {
+  async function run(telegramOk, emailResult) {
+    const cache = new SubmissionIdempotency(10 * 60 * 1000);
+    return deliverParsedLead(validInput(), cache, {
+      sendTelegram: async () =>
+        telegramOk ? { ok: true, messageId: 1 } : { ok: false, reason: "timeout" },
+      sendEmail: async () => emailResult,
+    });
+  }
+
+  const both = await run(true, { ok: true, messageId: "em-ok" });
+  assertEqual("A status", both.status, 200);
+  assert("A telegram", both.body.ok && both.body.delivered.telegram === true);
+  assert("A email", both.body.ok && both.body.delivered.email === true);
+
+  const unconfigured = await run(true, { ok: false, reason: "unconfigured", errorType: "unconfigured" });
+  assertEqual("B status", unconfigured.status, 200);
+  assert("B telegram", unconfigured.body.ok && unconfigured.body.delivered.telegram === true);
+  assert("B email failed", unconfigured.body.ok && unconfigured.body.delivered.email === false);
+
+  const rejected = await run(true, { ok: false, reason: "resend_error", errorType: "resend_error" });
+  assertEqual("C status", rejected.status, 200);
+  assert("C telegram", rejected.body.ok && rejected.body.delivered.telegram === true);
+  assert("C email failed", rejected.body.ok && rejected.body.delivered.email === false);
+
+  const telegramDown = await run(false, { ok: true, messageId: "em-ok" });
+  assertEqual("D status", telegramDown.status, 503);
+  assert("D failed", telegramDown.body.ok === false);
+
+  const bothDown = await run(false, { ok: false, reason: "resend_error", errorType: "resend_error" });
+  assertEqual("E status", bothDown.status, 503);
+  assert("E failed", bothDown.body.ok === false);
+}
+
+async function testEmailSendControlledFailures() {
+  const lead = toCanonicalLead(validInput());
+  const prev = {
+    key: process.env.RESEND_API_KEY,
+    to: process.env.LEADS_TO_EMAIL,
+    from: process.env.LEADS_FROM_EMAIL,
   };
-  const result = await deliverParsedLead(validInput(), cache, senders);
-  assertEqual("email-only status", result.status, 503);
-  assert("email-only not ok", result.body.ok === false);
+
+  delete process.env.RESEND_API_KEY;
+  delete process.env.LEADS_TO_EMAIL;
+  delete process.env.LEADS_FROM_EMAIL;
+  const missing = await sendOwnerEmail(lead);
+  assert("F unconfigured", missing.ok === false && missing.reason === "unconfigured");
+
+  process.env.RESEND_API_KEY = "re_test_not_real";
+  process.env.LEADS_TO_EMAIL = "not-an-email";
+  process.env.LEADS_FROM_EMAIL = "also-bad";
+  const invalid = await sendOwnerEmail(lead, { send: async () => ({ data: { id: "x" } }) });
+  assert("F invalid_configuration", invalid.ok === false && invalid.reason === "invalid_configuration");
+
+  process.env.LEADS_TO_EMAIL = "owner@example.com";
+  process.env.LEADS_FROM_EMAIL = "DTM Website <onboarding@resend.dev>";
+
+  const rejected = await sendOwnerEmail(lead, {
+    send: async () => ({ data: null, error: { name: "validation_error", message: "denied" } }),
+  });
+  assert("C resend_error", rejected.ok === false && rejected.reason === "resend_error");
+
+  const threw = await sendOwnerEmail(lead, {
+    send: async () => {
+      throw new Error("boom");
+    },
+  });
+  assert("F throw unexpected", threw.ok === false && threw.reason === "unexpected_error");
+
+  const network = await sendOwnerEmail(lead, {
+    send: async () => {
+      throw new TypeError("fetch failed");
+    },
+  });
+  assert("F network", network.ok === false && network.reason === "network_error");
+
+  const ok = await sendOwnerEmail(lead, {
+    send: async () => ({ data: { id: "msg_1" }, error: null }),
+  });
+  assert("A send ok", ok.ok === true && ok.messageId === "msg_1");
+
+  if (prev.key === undefined) delete process.env.RESEND_API_KEY;
+  else process.env.RESEND_API_KEY = prev.key;
+  if (prev.to === undefined) delete process.env.LEADS_TO_EMAIL;
+  else process.env.LEADS_TO_EMAIL = prev.to;
+  if (prev.from === undefined) delete process.env.LEADS_FROM_EMAIL;
+  else process.env.LEADS_FROM_EMAIL = prev.from;
 }
 
 function testPhoneMask() {
@@ -332,7 +411,8 @@ const tests = [
   ["accidental duplicate", testAccidentalDuplicate],
   ["inflight coalesce", testInflightCoalesce],
   ["retry after failed send", testRetryAfterFailedSend],
-  ["telegram required even if email sent", testTelegramRequiredEvenIfEmailSent],
+  ["email channel matrix A-E", testEmailChannelMatrix],
+  ["email send controlled failures", testEmailSendControlledFailures],
   ["confirmed delivery guard", async () => testConfirmedDeliveryGuard()],
   ["phone mask", async () => testPhoneMask()],
   ["no duplicate after confirmed send", testNoDuplicateAfterConfirmedSend],
