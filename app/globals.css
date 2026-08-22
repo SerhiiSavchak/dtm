@@ -3100,18 +3100,25 @@ html[data-motion="ok"] .process-rail-fill {
   opacity: 0.85;
 }
 
-.project-dossier-stage[data-fit="contain"] .media-full,
-.project-dossier-stage[data-fit="contain"] .media-lqip,
-.project-dossier-stage[data-fit="contain"] .media-video,
+/* LQIP in the modal stage must match the decoded image box.
+   Global .media-lqip uses 110% + scale(1.05) for card covers; that
+   reads as a crop/zoom jump once the sharp contain/cover frame lands. */
+.project-dossier-stage .media-frame .media-lqip,
+.project-dossier-layer .media-frame .media-lqip,
+.project-dossier-thumb .media-frame .media-lqip {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  transform: none;
+}
+
 .project-dossier-layer[data-fit="contain"] .media-full,
 .project-dossier-layer[data-fit="contain"] .media-lqip,
 .project-dossier-layer[data-fit="contain"] .media-video {
   object-fit: contain;
 }
 
-.project-dossier-stage[data-fit="cover"] .media-full,
-.project-dossier-stage[data-fit="cover"] .media-lqip,
-.project-dossier-stage[data-fit="cover"] .media-video,
 .project-dossier-layer[data-fit="cover"] .media-full,
 .project-dossier-layer[data-fit="cover"] .media-lqip,
 .project-dossier-layer[data-fit="cover"] .media-video {
@@ -3188,6 +3195,7 @@ html[data-motion="ok"] .process-rail-fill {
   width: 100%;
   height: 100%;
   max-width: none;
+  transform: none;
 }
 
 .project-dossier-thumb .media-full,

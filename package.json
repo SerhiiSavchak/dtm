@@ -16,7 +16,8 @@
     "test:calc-progress": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-calc-progress.mjs",
     "test:calc-summary": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-calc-summary.mjs",
     "test:reveal": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-reveal-geometry.mjs",
-    "test:portfolio-map": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-portfolio-map.mjs"
+    "test:portfolio-map": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-portfolio-map.mjs",
+    "seed:sanity:test-projects": "node --env-file=.env.local ./node_modules/sanity/bin/sanity exec scripts/seed-sanity-test-projects.mjs --with-user-token"
   },
   "dependencies": {
     "@sanity/orderable-document-list": "2.0.18",

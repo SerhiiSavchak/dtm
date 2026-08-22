@@ -116,7 +116,7 @@ function DossierStage({
   }, [incoming, incomingOn]);
 
   return (
-    <div className="project-dossier-stage" data-fit={item.fit}>
+    <div className="project-dossier-stage">
       <div className="project-dossier-layer is-shown" data-fit={shown.fit}>
         <DossierFrame item={shown} alt={alt} sizes={sizes} priority />
       </div>

@@ -35,6 +35,7 @@ export function MediaImage({
   sizes,
   fill,
   quality,
+  style,
   ...rest
 }: MediaImageProps) {
   const resolved = resolveSiteImage(src);
@@ -83,6 +84,7 @@ export function MediaImage({
           alt=""
           aria-hidden="true"
           className={`media-lqip ${className}`}
+          style={style}
           draggable={false}
         />
       ) : null}
@@ -99,6 +101,7 @@ export function MediaImage({
         className={`media-full ${shown && !failed ? "is-shown" : ""} ${
           failed ? "is-failed" : ""
         } ${className}`}
+        style={style}
         onLoad={(event) => {
           reveal(true);
           onLoad?.(event);
