@@ -43,6 +43,7 @@ yarn-error.log*
 # local audit / encode scratch
 /tmp/
 /tmp-qa/
+/tmp-stills/
 /scripts/_media-audit.js
 
 # vercel

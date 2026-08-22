@@ -4676,17 +4676,6 @@ html[data-motion="ok"] .arch-media.is-secondary.is-in .arch-media-inner {
   transition-delay: var(--fx-delay, 0s);
 }
 
-.arch-trace-host {
-  display: block;
-  width: 6.5rem;
-  height: 1px;
-  pointer-events: none;
-}
-
-.arch-trace-host .arch-trace {
-  width: 100%;
-}
-
 .arch-trace {
   display: block;
   width: 6.5rem;

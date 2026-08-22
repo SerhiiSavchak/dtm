@@ -2,7 +2,6 @@ export { ArchitecturalRule } from "./architectural-rule";
 export { CornerFrame } from "./corner-frame";
 export { HoverMediaLabel } from "./hover-media-label";
 export { InteractiveArrow } from "./interactive-arrow";
-export { LightTrace } from "./light-trace";
 export { MediaParallax } from "./media-parallax";
 export { MediaReveal } from "./media-reveal";
 export { ScrollProgress } from "./scroll-progress";
