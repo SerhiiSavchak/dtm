@@ -4,7 +4,7 @@ import { IN_PROGRESS_BOARD_ID } from "./schemaTypes/inProgressBoard";
 
 export const structure: StructureResolver = (S, context) =>
   S.list()
-    .title("DTM")
+    .title("Сайт DTM")
     .items([
       orderableDocumentListDeskItem({
         type: "project",
@@ -21,18 +21,18 @@ export const structure: StructureResolver = (S, context) =>
             .items([
               orderableDocumentListDeskItem({
                 type: "inProgressFrame",
-                title: "Матеріали",
+                title: "Усі фото та відео",
                 S,
                 context,
               }),
               S.listItem()
                 .id("in-progress-board")
-                .title("Композиція секції")
+                .title("4 матеріали на головній")
                 .child(
                   S.document()
                     .schemaType("inProgressBoard")
                     .documentId(IN_PROGRESS_BOARD_ID)
-                    .title("Композиція секції")
+                    .title("4 матеріали на головній")
                 ),
             ])
         ),

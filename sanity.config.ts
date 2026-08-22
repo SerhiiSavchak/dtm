@@ -6,7 +6,7 @@ import { structure } from "./sanity/structure";
 
 export default defineConfig({
   name: "dtm",
-  title: "DTM",
+  title: "Сайт DTM",
   projectId: sanityProjectId,
   dataset: sanityDataset,
   basePath: "/admin",

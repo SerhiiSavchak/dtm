@@ -2,13 +2,23 @@ import { defineField, defineType } from "sanity";
 
 export const projectMedia = defineType({
   name: "projectMedia",
-  title: "Кадр галереї",
+  title: "Фото в галереї",
   type: "object",
+  groups: [
+    { name: "main", title: "Фото", default: true },
+    { name: "advanced", title: "Додаткові налаштування" },
+  ],
+  initialValue: {
+    fit: "contain",
+    objectPosition: "center center",
+    thumbPosition: "center center",
+  },
   fields: [
     defineField({
       name: "image",
-      title: "Зображення",
+      title: "Фото",
       type: "image",
+      group: "main",
       options: { hotspot: true },
       validation: (Rule) => Rule.required(),
     }),
@@ -16,17 +26,19 @@ export const projectMedia = defineType({
       name: "video",
       title: "Відео",
       type: "file",
+      group: "main",
       description: "Необов’язково. Залиште порожнім для звичайного фото.",
       options: { accept: "video/mp4,video/webm,video/quicktime" },
     }),
     defineField({
       name: "fit",
-      title: "Як показувати в вікні проєкту",
+      title: "Як показати у великому вікні",
       type: "string",
+      group: "advanced",
       options: {
         list: [
-          { title: "Умістити повністю (без обрізання)", value: "contain" },
-          { title: "Заповнити кадр (можливе обрізання)", value: "cover" },
+          { title: "Показати цілком, без обрізання", value: "contain" },
+          { title: "Заповнити вікно (краї можуть обрізатися)", value: "cover" },
         ],
         layout: "radio",
       },
@@ -35,38 +47,32 @@ export const projectMedia = defineType({
     }),
     defineField({
       name: "objectPosition",
-      title: "Позиція в великому вікні",
+      title: "Позиція у великому вікні",
       type: "string",
-      fieldset: "advanced",
+      group: "advanced",
       initialValue: "center center",
-      description: "CSS object-position, наприклад center 40%.",
+      description:
+        "Використовуйте лише якщо важлива частина фотографії обрізається неправильно.",
     }),
     defineField({
       name: "thumbPosition",
       title: "Позиція в мініатюрі",
       type: "string",
-      fieldset: "advanced",
+      group: "advanced",
       initialValue: "center center",
-      description: "Обрізання прев’ю під основним фото.",
+      description: "Як обрізати маленьке прев’ю під основним фото.",
     }),
-  ],
-  fieldsets: [
-    {
-      name: "advanced",
-      title: "Додатково",
-      options: { collapsible: true, collapsed: true },
-    },
   ],
   preview: {
     select: {
       media: "image",
-      fit: "fit",
+      filename: "image.asset.originalFilename",
       video: "video.asset",
     },
-    prepare({ media, fit, video }) {
+    prepare({ media, filename, video }) {
       return {
-        title: video ? "Фото + відео" : "Фото",
-        subtitle: fit === "cover" ? "Заповнити кадр" : "Умістити повністю",
+        title: filename || (video ? "Фото з відео" : "Фото"),
+        subtitle: video ? "Є відео" : undefined,
         media,
       };
     },
