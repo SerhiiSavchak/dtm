@@ -1,3 +1,4 @@
+import type { InProgressItem } from "@/data/in-progress-scenes";
 import type { Project, ProjectCategory, ProjectMedia } from "@/data/projects";
 import type { Locale } from "@/lib/i18n/dictionaries";
 
@@ -53,4 +54,24 @@ export type PortfolioRecord = {
   media: ProjectMedia[];
 };
 
-export type { Locale, Project, ProjectMedia };
+export type SanityInProgressFrameDocument = {
+  _id?: string | null;
+  frameId?: string | null;
+  objectPosition?: string | null;
+  orderRank?: string | null;
+  src?: string | null;
+  lqip?: string | null;
+  video?: string | null;
+};
+
+export type SanityInProgressBoardDocument = {
+  boardIds?: (string | null)[] | null;
+};
+
+/** Full collection + exactly four homepage panel identities. */
+export type InProgressRecord = {
+  frames: InProgressItem[];
+  boardIds: string[];
+};
+
+export type { Locale, Project, ProjectMedia, InProgressItem };

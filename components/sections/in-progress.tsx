@@ -11,13 +11,7 @@ import {
   type FocusEvent,
   type PointerEvent,
 } from "react";
-import {
-  inProgressComposition,
-  inProgressMedia,
-  inProgressMediaIndex,
-  socialLinks,
-  type InProgressItem,
-} from "@/data/media";
+import { socialLinks, type InProgressItem } from "@/data/media";
 import { useDictionary } from "@/lib/i18n/locale-context";
 import { IMAGE_QUALITY } from "@/lib/image-slots";
 import { CopyText } from "../copy-text";
@@ -97,6 +91,7 @@ function ObjectVideo({
         priority={priority}
         className="in-progress-image object-cover"
         style={{ objectPosition: item.objectPosition }}
+        lqip={item.lqip}
       />
       {item.video ? (
         <video
@@ -119,6 +114,8 @@ function ObjectVideo({
 function MediaPanel({
   item,
   index,
+  collectionLength,
+  mediaIndex,
   t,
   active,
   ready,
@@ -130,6 +127,8 @@ function MediaPanel({
 }: {
   item: InProgressItem;
   index: number;
+  collectionLength: number;
+  mediaIndex: number;
   t: Copy;
   active: boolean;
   ready: boolean;
@@ -139,7 +138,6 @@ function MediaPanel({
   onHoverEnter: () => void;
   onHoverLeave: () => void;
 }) {
-  const mediaIndex = inProgressMediaIndex(item.id);
   const kind = item.video ? t.videoKind : t.photoKind;
   const n = pad2(index + 1);
 
@@ -163,7 +161,7 @@ function MediaPanel({
       style={{ "--i": index } as CSSProperties}
       aria-expanded={active}
       aria-haspopup="dialog"
-      aria-label={`${t.open}. ${pad2(mediaIndex + 1)} / ${pad2(inProgressMedia.length)}. ${kind}`}
+      aria-label={`${t.open}. ${pad2(mediaIndex + 1)} / ${pad2(collectionLength)}. ${kind}`}
       onFocus={onFocus}
       onPointerEnter={onPointerEnter}
       onPointerLeave={onHoverLeave}
@@ -191,6 +189,7 @@ function MediaPanel({
             priority={priority}
             className="in-progress-image object-cover"
             style={{ objectPosition: item.objectPosition }}
+            lqip={item.lqip}
           />
         )}
       </div>
@@ -206,9 +205,21 @@ function MediaPanel({
   );
 }
 
-export function InProgress() {
+export function InProgress({
+  frames,
+  boardIds,
+}: {
+  frames: InProgressItem[];
+  boardIds: string[];
+}) {
   const t = useDictionary().inProgress;
-  const frames = inProgressComposition();
+  const composition = boardIds
+    .map((id) => frames.find((item) => item.id === id))
+    .filter((item): item is InProgressItem => Boolean(item));
+  const framesForViewer = frames;
+  const mediaIndexOf = (id: string) =>
+    framesForViewer.findIndex((item) => item.id === id);
+  const panels = composition.length === 4 ? composition : [];
   const [activeIndex, setActiveIndex] = useState(0);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [phase, setPhase] = useState<Phase>("boot");
@@ -350,16 +361,18 @@ export function InProgress() {
           className={boardClass}
           data-active={activeIndex}
         >
-          {frames.map((item, index) => (
+          {panels.map((item, index) => (
             <MediaPanel
               key={item.id}
               item={item}
               index={index}
+              collectionLength={framesForViewer.length}
+              mediaIndex={mediaIndexOf(item.id)}
               t={t}
               active={activeIndex === index}
               ready={ready}
               onActivate={() => setActiveIndex(index)}
-              onOpen={() => setOpenIndex(inProgressMediaIndex(item.id))}
+              onOpen={() => setOpenIndex(mediaIndexOf(item.id))}
               onHoverEnter={() => armHover(index)}
               onHoverLeave={() => {
                 if (hoverTarget.current === index) stopHover();
@@ -371,7 +384,7 @@ export function InProgress() {
 
       {openIndex != null ? (
         <InProgressViewer
-          items={inProgressMedia}
+          items={framesForViewer}
           index={openIndex}
           alt={t.mediaAlt}
           galleryLabel={t.gallery}

@@ -9,7 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "npm run test:unit && npm run test:e2e",
-    "test:unit": "npm run test:leads && npm run test:leads-repeat && npm run test:calc-progress && npm run test:calc-summary && npm run test:reveal && npm run test:portfolio-map",
+    "test:unit": "npm run test:leads && npm run test:leads-repeat && npm run test:calc-progress && npm run test:calc-summary && npm run test:reveal && npm run test:portfolio-map && npm run test:in-progress-map",
     "test:leads": "node scripts/verify-leads.mjs",
     "test:e2e": "playwright test",
     "test:leads-repeat": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-leads-repeat.mjs",
@@ -17,8 +17,10 @@
     "test:calc-summary": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-calc-summary.mjs",
     "test:reveal": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-reveal-geometry.mjs",
     "test:portfolio-map": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-portfolio-map.mjs",
+    "test:in-progress-map": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-in-progress-map.mjs",
     "seed:sanity:test-projects": "node --env-file=.env.local ./node_modules/sanity/bin/sanity exec scripts/seed-sanity-test-projects.mjs --with-user-token",
-    "migrate:sanity:portfolio": "node --env-file=.env.local ./node_modules/sanity/bin/sanity exec scripts/migrate-portfolio-to-sanity-development.mjs --with-user-token"
+    "migrate:sanity:portfolio": "node --env-file=.env.local ./node_modules/sanity/bin/sanity exec scripts/migrate-portfolio-to-sanity-development.mjs --with-user-token",
+    "migrate:sanity:in-progress": "node --env-file=.env.local ./node_modules/sanity/bin/sanity exec scripts/migrate-in-progress-to-sanity-development.mjs --with-user-token"
   },
   "dependencies": {
     "@sanity/orderable-document-list": "2.0.18",

@@ -1,3 +1,25 @@
+export const IN_PROGRESS_FRAMES_QUERY = /* groq */ `
+*[_type == "inProgressFrame"
+  && !(_id in path("drafts.**"))
+  && defined(frameId.current)
+  && defined(still.asset)
+] | order(orderRank asc) {
+  _id,
+  "frameId": frameId.current,
+  objectPosition,
+  orderRank,
+  "src": still.asset->url,
+  "lqip": still.asset->metadata.lqip,
+  "video": video.asset->url
+}
+`;
+
+export const IN_PROGRESS_BOARD_QUERY = /* groq */ `
+*[_id == "inProgressBoard" && !(_id in path("drafts.**"))][0] {
+  "boardIds": blinds[]->frameId.current
+}
+`;
+
 export const PORTFOLIO_PROJECTS_QUERY = /* groq */ `
 *[_type == "project"
   && !(_id in path("drafts.**"))

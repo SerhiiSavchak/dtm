@@ -21,6 +21,8 @@ export type InProgressItem = {
   id: string;
   src: string;
   video?: string | null;
+  /** Optional Sanity LQIP. Local stills use site-images. */
+  lqip?: string;
   objectPosition: string;
   panel: InProgressPanel;
 };

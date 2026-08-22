@@ -28,6 +28,7 @@ function ViewerVideo({
   playLabel,
   pauseLabel,
   onReady,
+  lqip,
 }: {
   poster: SiteImageSrc;
   mp4: string;
@@ -35,6 +36,7 @@ function ViewerVideo({
   playLabel: string;
   pauseLabel: string;
   onReady?: () => void;
+  lqip?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -94,6 +96,7 @@ function ViewerVideo({
         sizes={VIEWER_SIZES}
         className="object-contain"
         onReady={onReady}
+        lqip={lqip}
       />
       <video
         ref={videoRef}
@@ -146,6 +149,7 @@ function ViewerFrame({
         playLabel={playLabel}
         pauseLabel={pauseLabel}
         onReady={onReady}
+        lqip={item.lqip}
       />
     );
   }
@@ -160,6 +164,7 @@ function ViewerFrame({
       priority
       className="object-contain"
       onReady={onReady}
+      lqip={item.lqip}
     />
   );
 }
