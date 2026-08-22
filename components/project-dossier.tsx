@@ -12,7 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import {
   projectMedia,
-  projects,
+  type Project,
   type ProjectMedia,
 } from "@/data/projects";
 import { useDictionary } from "@/lib/i18n/locale-context";
@@ -169,6 +169,7 @@ function DossierFrame({
     return (
       <PosterVideo
         poster={item.src}
+        posterLqip={item.lqip}
         mp4={item.video}
         alt={alt}
         sizes={sizes}
@@ -187,6 +188,7 @@ function DossierFrame({
     <MediaImage
       src={item.src}
       alt={alt}
+      lqip={item.lqip}
       fill
       quality={IMAGE_QUALITY.feature}
       sizes={sizes}
@@ -201,12 +203,14 @@ function DossierFrame({
 
 export function ProjectDossier({
   slug,
+  projects,
   onClose,
   onNavigate,
 }: {
   slug: string;
+  projects: Project[];
   onClose: () => void;
-  onNavigate: (slug: string) => void;
+  onNavigate: (next: string) => void;
 }) {
   const t = useDictionary().projects;
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -278,7 +282,7 @@ export function ProjectDossier({
         });
       }
     },
-    [stageSizes]
+    [projects, stageSizes]
   );
 
   useEffect(() => {
@@ -388,7 +392,7 @@ export function ProjectDossier({
         quality: IMAGE_QUALITY.feature,
       });
     });
-  }, [project, projectIndex, safeIndex, stageSizes]);
+  }, [project, projectIndex, projects, safeIndex, stageSizes]);
 
   if (typeof document === "undefined" || !project || !current) return null;
 
@@ -454,6 +458,7 @@ export function ProjectDossier({
                   <MediaImage
                     src={item.src}
                     alt=""
+                    lqip={item.lqip}
                     fill
                     quality={IMAGE_QUALITY.thumb}
                     sizes={IMAGE_SIZES.dossierThumb}

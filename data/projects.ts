@@ -5,6 +5,8 @@ export type ProjectMediaFit = "cover" | "contain";
 export type ProjectMedia = {
   src: string;
   video?: string | null;
+  /** Optional LQIP (Sanity metadata.lqip). Local stills use site-images. */
+  lqip?: string;
   /** Stage object-fit. Portrait/detail stills use contain; landscape/hero may cover. */
   fit: ProjectMediaFit;
   objectPosition: string;
@@ -25,6 +27,7 @@ export type Project = {
   year?: string;
   type?: string;
   cover: string;
+  coverLqip?: string;
   coverPosition: string;
   media: ProjectMedia[];
   span: "large" | "tall" | "wide" | "small";

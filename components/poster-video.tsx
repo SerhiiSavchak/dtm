@@ -16,6 +16,7 @@ function getReduced() {
 
 type PosterVideoProps = {
   poster: SiteImageSrc;
+  posterLqip?: string;
   alt: string;
   mp4?: string | null;
   webm?: string | null;
@@ -47,6 +48,7 @@ type PosterVideoProps = {
  */
 export function PosterVideo({
   poster,
+  posterLqip,
   alt,
   mp4,
   webm,
@@ -112,6 +114,7 @@ export function PosterVideo({
       <MediaImage
         src={poster}
         alt={alt}
+        lqip={posterLqip}
         fill
         priority={priority}
         quality={quality}

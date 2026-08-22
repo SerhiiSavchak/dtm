@@ -16,13 +16,14 @@ import { PageLoader } from "./page-loader";
 import { ScrollProgress } from "./fx/scroll-progress";
 import { SubtleGrain } from "./fx/subtle-grain";
 import { useLocale } from "@/lib/i18n/locale-context";
+import type { PortfolioRecord } from "@/lib/sanity/types";
 import {
   getLoaderPhase,
   getServerLoaderPhase,
   subscribeLoader,
 } from "@/lib/boot-session";
 
-export function HomeView() {
+export function HomeView({ projects }: { projects: PortfolioRecord[] }) {
   const phase = useSyncExternalStore(
     subscribeLoader,
     getLoaderPhase,
@@ -42,7 +43,7 @@ export function HomeView() {
         <main className="min-w-0">
           <Hero boot={boot} />
           <Intro />
-          <Projects />
+          <Projects records={projects} />
           <Services />
           <Process />
           <InProgress />

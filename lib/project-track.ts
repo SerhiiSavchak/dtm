@@ -47,6 +47,7 @@ export function useProjectTrack(projectIds: readonly string[]) {
   const [snapIndex, setSnapIndex] = useState(0);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(projectIds.length > 1);
+  const idsKey = projectIds.join("\0");
 
   const commit = useCallback((api: EmblaCarouselType) => {
     setSnapIndex(api.selectedScrollSnap());
@@ -158,6 +159,13 @@ export function useProjectTrack(projectIds: readonly string[]) {
       apiRef.current = null;
     };
   }, [emblaApi, commit, setDraggingAttr]);
+
+  useEffect(() => {
+    const api = apiRef.current;
+    if (!api) return;
+    api.reInit();
+    commit(api);
+  }, [idsKey, commit]);
 
   const moveBy = useCallback((delta: number) => {
     const api = apiRef.current;

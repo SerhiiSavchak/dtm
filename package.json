@@ -9,30 +9,35 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "npm run test:unit && npm run test:e2e",
-    "test:unit": "npm run test:leads && npm run test:leads-repeat && npm run test:calc-progress && npm run test:calc-summary && npm run test:reveal",
+    "test:unit": "npm run test:leads && npm run test:leads-repeat && npm run test:calc-progress && npm run test:calc-summary && npm run test:reveal && npm run test:portfolio-map",
     "test:leads": "node scripts/verify-leads.mjs",
     "test:e2e": "playwright test",
     "test:leads-repeat": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-leads-repeat.mjs",
     "test:calc-progress": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-calc-progress.mjs",
     "test:calc-summary": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-calc-summary.mjs",
-    "test:reveal": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-reveal-geometry.mjs"
+    "test:reveal": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-reveal-geometry.mjs",
+    "test:portfolio-map": "node --import ./scripts/register-ts-ext.mjs --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-portfolio-map.mjs"
   },
   "dependencies": {
+    "@sanity/orderable-document-list": "2.0.18",
     "embla-carousel-react": "^8.6.0",
     "libphonenumber-js": "^1.13.11",
     "next": "16.3.0",
+    "next-sanity": "^13.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "resend": "^6.20.0",
+    "sanity": "^6.10.1",
+    "styled-components": "^6.5.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "@playwright/test": "^1.55.0",
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4",
     "typescript": "^5"

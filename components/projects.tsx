@@ -3,13 +3,16 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
-import { projects, type Project } from "@/data/projects";
+import { type Project } from "@/data/projects";
 import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
 import { useProjectTrack } from "@/lib/project-track";
-import { useDictionary } from "@/lib/i18n/locale-context";
+import { useDictionary, useLocale } from "@/lib/i18n/locale-context";
+import { recordToProject } from "@/lib/sanity/map-project";
+import type { PortfolioRecord } from "@/lib/sanity/types";
 import { MediaImage } from "./media-image";
 import { ProjectDossier } from "./project-dossier";
 import { Reveal, RevealGroup } from "./reveal";
@@ -17,8 +20,6 @@ import { SectionHead } from "./section-head";
 import { HoverMediaLabel } from "./fx/hover-media-label";
 import { MediaParallax } from "./fx/media-parallax";
 import { MediaReveal } from "./fx/media-reveal";
-
-const PROJECT_IDS = projects.map((project) => project.slug);
 
 function slideAspect(project: Project, lead: boolean) {
   // Covers are 9:16 Telegram stills (720–1052px). 16:10/16:11 slots
@@ -54,11 +55,20 @@ function useProjectLabels(project: Project) {
   };
 }
 
-export function Projects() {
+export function Projects({ records }: { records: PortfolioRecord[] }) {
   const t = useDictionary().projects;
+  const { locale } = useLocale();
+  const projects = useMemo(
+    () => records.map((record) => recordToProject(record, locale)),
+    [records, locale]
+  );
+  const projectIds = useMemo(
+    () => projects.map((project) => project.slug),
+    [projects]
+  );
   const sectionRef = useRef<HTMLElement>(null);
   const { viewportRef, activeProjectIndex, selectedSnapIndex, moveBy, canPrev, canNext, onSlideClick } =
-    useProjectTrack(PROJECT_IDS);
+    useProjectTrack(projectIds);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [hintVisible, setHintVisible] = useState(false);
   const hintDismissed = useRef(false);
@@ -196,6 +206,7 @@ export function Projects() {
       {openSlug ? (
         <ProjectDossier
           slug={openSlug}
+          projects={projects}
           onClose={() => setOpenSlug(null)}
           onNavigate={(next) => setOpenSlug(next)}
         />
@@ -248,6 +259,7 @@ function ProjectSlide({
                       <MediaImage
                         src={project.cover}
                         alt={`DTM: ${labels.category}`}
+                        lqip={project.coverLqip}
                         fill
                         quality={slideQuality(lead)}
                         sizes={slideSizes(lead, project.span)}
@@ -262,6 +274,7 @@ function ProjectSlide({
                   <MediaImage
                     src={project.cover}
                     alt={`DTM: ${labels.category}`}
+                    lqip={project.coverLqip}
                     fill
                     quality={slideQuality(lead)}
                     sizes={slideSizes(lead, project.span)}

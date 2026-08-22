@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
     // 960/1280 match Telegram stills and the one landscape kitchen still.
     // Keep 3840 so 2× hero (100vw) can request it; optimizer will not enlarge.
     deviceSizes: [640, 750, 828, 960, 1080, 1200, 1280, 1920, 2048, 3840],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+        pathname: "/images/**",
+      },
+    ],
   },
   async headers() {
     return [
