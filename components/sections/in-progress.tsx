@@ -6,6 +6,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
   type FocusEvent,
   type PointerEvent,
@@ -215,6 +216,17 @@ export function InProgress() {
   const hoverTarget = useRef<number | null>(null);
   const hoverFrom = useRef(0);
   const hoverRaf = useRef(0);
+  const tickHoverRef = useRef<(now: number) => void>(() => {});
+
+  const reduced = useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia(REDUCE_MQ);
+      mq.addEventListener("change", cb);
+      return () => mq.removeEventListener("change", cb);
+    },
+    () => window.matchMedia(REDUCE_MQ).matches,
+    () => false
+  );
 
   const stopHover = useCallback(() => {
     hoverTarget.current = null;
@@ -224,44 +236,41 @@ export function InProgress() {
     }
   }, []);
 
-  const tickHover = useCallback(
-    (now: number) => {
+  useLayoutEffect(() => {
+    tickHoverRef.current = (now: number) => {
       hoverRaf.current = 0;
       const next = hoverTarget.current;
       if (next == null) return;
       if (now - hoverFrom.current < HOVER_DELAY_MS) {
-        hoverRaf.current = window.requestAnimationFrame(tickHover);
+        hoverRaf.current = window.requestAnimationFrame((t) =>
+          tickHoverRef.current(t)
+        );
         return;
       }
       hoverTarget.current = null;
       setActiveIndex(next);
-    },
-    []
-  );
+    };
+  });
 
-  const armHover = useCallback(
-    (index: number) => {
-      hoverTarget.current = index;
-      hoverFrom.current = performance.now();
-      if (!hoverRaf.current) {
-        hoverRaf.current = window.requestAnimationFrame(tickHover);
-      }
-    },
-    [tickHover]
-  );
+  const armHover = useCallback((index: number) => {
+    hoverTarget.current = index;
+    hoverFrom.current = performance.now();
+    if (!hoverRaf.current) {
+      hoverRaf.current = window.requestAnimationFrame((t) =>
+        tickHoverRef.current(t)
+      );
+    }
+  }, []);
 
   useLayoutEffect(() => {
     const board = boardRef.current;
     if (!board) return;
+    if (reduced) return;
 
-    const reduce = window.matchMedia(REDUCE_MQ).matches;
-    if (reduce) {
-      board.classList.add("is-live", "is-interactive");
-      setPhase("ready");
-      return;
-    }
+    const arm = window.requestAnimationFrame(() => {
+      setPhase((current) => (current === "boot" ? "armed" : current));
+    });
 
-    setPhase("armed");
     const io = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
@@ -277,29 +286,27 @@ export function InProgress() {
       { threshold: [0.32, 0.45] }
     );
     io.observe(board);
-    return () => io.disconnect();
-  }, []);
+    return () => {
+      window.cancelAnimationFrame(arm);
+      io.disconnect();
+    };
+  }, [reduced]);
 
   useEffect(() => {
-    if (phase !== "live") return;
-    const reduce = window.matchMedia(REDUCE_MQ).matches;
-    if (reduce) {
-      setPhase("ready");
-      return;
-    }
+    if (reduced || phase !== "live") return;
     const wait = window.setTimeout(() => setPhase("ready"), INTRO_MS);
     return () => window.clearTimeout(wait);
-  }, [phase]);
+  }, [phase, reduced]);
 
   useEffect(() => () => stopHover(), [stopHover]);
 
-  const ready = phase === "live" || phase === "ready";
+  const ready = reduced || phase === "live" || phase === "ready";
   const boardClass = [
     "in-progress-board",
-    phase !== "boot" ? "is-armed" : "",
+    reduced || phase !== "boot" ? "is-armed" : "",
     ready ? "is-live" : "",
-    phase === "ready" ? "is-interactive" : "",
-    phase === "live" ? "is-animating" : "",
+    reduced || phase === "ready" ? "is-interactive" : "",
+    !reduced && phase === "live" ? "is-animating" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -351,7 +358,6 @@ export function InProgress() {
               t={t}
               active={activeIndex === index}
               ready={ready}
-              priority={index === 0}
               onActivate={() => setActiveIndex(index)}
               onOpen={() => setOpenIndex(inProgressMediaIndex(item.id))}
               onHoverEnter={() => armHover(index)}

@@ -125,11 +125,15 @@ export function EstimateCalculator() {
   const [success, setSuccess] = useState<SuccessMeta | null>(null);
   const [honeypot, setHoneypot] = useState("");
   const [statusLive, setStatusLive] = useState("");
+  const [navBusy, setNavBusy] = useState(false);
 
   const sessionRef = useRef<LeadClientSession | null>(null);
   const submitLockRef = useRef(false);
   const hasSubmittedRef = useRef(false);
   const navLockRef = useRef(false);
+  const pendingNavRef = useRef<number | null>(null);
+  const stepIndexRef = useRef(0);
+  const navTimerRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const submitGenerationRef = useRef(0);
   const steppedRef = useRef(false);
@@ -147,6 +151,7 @@ export function EstimateCalculator() {
     utmRef.current = utmFromSearch(window.location.search);
     return () => {
       abortRef.current?.abort();
+      if (navTimerRef.current) window.clearTimeout(navTimerRef.current);
     };
   }, []);
 
@@ -154,6 +159,10 @@ export function EstimateCalculator() {
   const { steps, currentIndex, currentStep, totalSteps, progressPercent } =
     resolveCalculatorProgress(stepIndex, state.objectType, isComplete);
   const stepId = steps[currentIndex] ?? "objectType";
+
+  useEffect(() => {
+    stepIndexRef.current = currentIndex;
+  }, [currentIndex]);
 
   function errorMessage(key: StepErrorKey): string {
     return dict.errors[key];
@@ -173,16 +182,29 @@ export function EstimateCalculator() {
   }
 
   function goTo(index: number) {
-    if (navLockRef.current) return;
-    if (index === currentIndex) return;
+    const clamped = Math.min(Math.max(0, index), Math.max(totalSteps - 1, 0));
+    if (navLockRef.current) {
+      pendingNavRef.current = clamped;
+      return;
+    }
+    if (clamped === stepIndexRef.current) return;
     steppedRef.current = true;
     navLockRef.current = true;
-    setDirection(index < currentIndex ? -1 : 1);
+    setNavBusy(true);
+    pendingNavRef.current = null;
+    stepIndexRef.current = clamped;
+    setDirection(clamped < currentIndex ? -1 : 1);
     setAnimToken((token) => token + 1);
-    setStepIndex(index);
+    setStepIndex(clamped);
     setError(null);
-    window.setTimeout(() => {
+    if (navTimerRef.current) window.clearTimeout(navTimerRef.current);
+    navTimerRef.current = window.setTimeout(() => {
       navLockRef.current = false;
+      navTimerRef.current = 0;
+      setNavBusy(false);
+      const pending = pendingNavRef.current;
+      pendingNavRef.current = null;
+      if (pending != null && pending !== stepIndexRef.current) goTo(pending);
     }, TRANSITION_MS);
   }
 
@@ -223,7 +245,6 @@ export function EstimateCalculator() {
   }
 
   function handleSkipRooms() {
-    if (navLockRef.current) return;
     patch({ rooms: "" });
     if (currentIndex < totalSteps - 1) goTo(currentIndex + 1);
   }
@@ -381,6 +402,7 @@ export function EstimateCalculator() {
   );
 
   const busy = phase === "submitting";
+  const controlsLocked = busy || navBusy;
 
   return (
     <div className="calc-shell">
@@ -515,7 +537,7 @@ export function EstimateCalculator() {
               type="button"
               onMouseDown={suppressMouseFocusScroll}
               onClick={handleBack}
-              disabled={currentIndex === 0 || busy}
+              disabled={currentIndex === 0 || busy || navBusy}
               className="type-small calc-back"
             >
               ← {dict.back}
@@ -527,7 +549,7 @@ export function EstimateCalculator() {
                   type="button"
                   onMouseDown={suppressMouseFocusScroll}
                   onClick={handleSkipRooms}
-                  disabled={busy}
+                  disabled={controlsLocked}
                   className="btn btn-ghost"
                 >
                   {dict.steps.rooms.skip}
@@ -537,7 +559,7 @@ export function EstimateCalculator() {
               {stepId === "lead" ? (
                 <button
                   type="submit"
-                  disabled={busy}
+                  disabled={controlsLocked}
                   className="btn btn-primary calc-submit"
                   aria-busy={busy}
                 >
@@ -551,7 +573,7 @@ export function EstimateCalculator() {
                   type="button"
                   onMouseDown={suppressMouseFocusScroll}
                   onClick={handleNext}
-                  disabled={busy}
+                  disabled={controlsLocked}
                   className="btn btn-primary"
                 >
                   {dict.next}

@@ -17,18 +17,30 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://dtm-chi.vercel.app";
+
 export const metadata: Metadata = {
   title: "DTM — Дім Твоєї Мрії · Комплексний ремонт у Львові",
-    description:
-      "DTM — комплексний ремонт квартир, будинків і комерційних приміщень у Львові під ключ. Кошторис, організація робіт, прораб, комплектація та контроль виконання",
-  metadataBase: new URL("https://dtm.example"),
+  description:
+    "DTM — комплексний ремонт квартир, будинків і комерційних приміщень у Львові під ключ. Кошторис, організація робіт, прораб, комплектація та контроль виконання",
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: "/" },
   openGraph: {
     title: "DTM — Дім Твоєї Мрії",
     description:
       "Комплексний ремонт квартир, будинків і комерційних приміщень у Львові",
     locale: "uk_UA",
     type: "website",
+    url: SITE_URL,
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "DTM — Дім Твоєї Мрії",
+    description:
+      "Комплексний ремонт квартир, будинків і комерційних приміщень у Львові",
+  },
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
