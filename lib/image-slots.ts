@@ -39,8 +39,9 @@ export const IMAGE_SIZES = {
    * Portrait stills are contained; this is the stage box, not the decoded width.
    */
   dossierStage: "(max-width: 1023px) 100vw, min(58vw, 68rem)",
-  /** 3.85rem thumbs (4.35rem ≥1440). */
-  dossierThumb: "(min-width: 1440px) 70px, 62px",
+  /** Filmstrip thumbs: ~4.75rem mobile, 3.85rem desktop, 4.35rem ≥1440. */
+  dossierThumb:
+    "(max-width: 359px) 70px, (max-width: 1023px) 76px, (min-width: 1440px) 70px, 62px",
   serviceInline: "(max-width: 1023px) 92vw, 40vw",
   serviceSticky: "(max-width: 1280px) 40vw, 560px",
   inProgressViewer: "(max-width: 1024px) 100vw, min(90vw, 1280px)",

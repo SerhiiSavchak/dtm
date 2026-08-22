@@ -1,16 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="DTM">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="DTM">
   <!--
-    Compact site lockup from components/logo.tsx (no tagline).
-    Dark tile + white house + brand orange letters so the mark reads
-    on both light and dark browser chrome. Inset so paths do not
-    touch the rounded tile edge.
+    Compact lockup from components/logo.tsx (withDescriptor=false, viewBox 0 0 122 94).
+    Exact path d attributes. Uniform scale only. Brand tile #121214 (--bg).
+    Content bbox ~5.4,7.6 110×80.1; scale 0.261818 so width is 90% of the square.
   -->
-  <rect x="2" y="2" width="124" height="124" rx="26" fill="#121214" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>
-  <g transform="translate(20.5 30.5) scale(0.713)" fill="none">
+  <rect width="32" height="32" fill="#121214"/>
+  <g transform="translate(0.186 3.515) scale(0.261818)">
     <path
       d="M19.2 86H7.2V52L46.5 10L85 52"
+      fill="none"
       stroke="#ffffff"
-      stroke-width="3.4"
+      stroke-width="2.55"
       stroke-linecap="butt"
       stroke-linejoin="miter"
       stroke-miterlimit="2.2"

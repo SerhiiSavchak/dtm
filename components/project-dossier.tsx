@@ -301,10 +301,15 @@ export function ProjectDossier({
       ".project-dossier-thumb.is-active"
     );
     if (!strip || !active) return;
-    const nextLeft =
-      active.offsetLeft - (strip.clientWidth - active.clientWidth) / 2;
-    strip.scrollTo({
-      left: Math.max(0, nextLeft),
+    const pad = 8;
+    const left = active.offsetLeft;
+    const right = left + active.offsetWidth;
+    const viewLeft = strip.scrollLeft;
+    const viewRight = viewLeft + strip.clientWidth;
+    if (left >= viewLeft + pad && right <= viewRight - pad) return;
+    active.scrollIntoView({
+      inline: "nearest",
+      block: "nearest",
       behavior: reduced ? "auto" : "smooth",
     });
   }, [safeIndex, slug, reduced]);
@@ -469,8 +474,12 @@ export function ProjectDossier({
 
         <div className="project-dossier-info">
           <header className="project-dossier-utility">
-            <p className="project-dossier-index">
-              {String(projectIndex + 1).padStart(2, "0")} /{" "}
+            <p
+              className="project-dossier-index"
+              aria-label={`${projectIndex + 1} / ${projects.length}`}
+            >
+              {String(projectIndex + 1).padStart(2, "0")}
+              <span aria-hidden> · </span>
               {String(projects.length).padStart(2, "0")}
             </p>
             <button
