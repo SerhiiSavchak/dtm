@@ -26,6 +26,7 @@ import { assembleLeadRequest } from "@/lib/leads/assemble";
 import {
   canSubmitLead,
   ensureLeadSession,
+  isConfirmedLeadDelivery,
   restartLeadSession,
   type LeadClientSession,
 } from "@/lib/leads/client-session";
@@ -243,6 +244,8 @@ export function EstimateCalculator() {
       return;
     }
 
+    submitLockRef.current = true;
+
     const session = currentSession();
 
     const payload = assembleLeadRequest({
@@ -277,11 +280,11 @@ export function EstimateCalculator() {
       } else {
         setError(dict.errors.submit);
       }
+      submitLockRef.current = false;
       focusFirstInvalid();
       return;
     }
 
-    submitLockRef.current = true;
     const generation = submitGenerationRef.current;
     const controller = new AbortController();
     abortRef.current = controller;
@@ -307,10 +310,7 @@ export function EstimateCalculator() {
 
       if (generation !== submitGenerationRef.current) return;
 
-      const delivered =
-        Boolean(data?.delivered?.telegram) || Boolean(data?.delivered?.email);
-
-      if (!res.ok || !data?.ok || !data.leadId || !delivered) {
+      if (!isConfirmedLeadDelivery(res.ok, data)) {
         setPhase("error");
         setError(dict.errors.submit);
         setStatusLive(dict.errors.submit);

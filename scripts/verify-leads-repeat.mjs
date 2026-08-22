@@ -5,12 +5,12 @@ import {
   canSubmitLead,
   createLeadSession,
   ensureLeadSession,
+  isConfirmedLeadDelivery,
   restartLeadSession,
 } from "../lib/leads/client-session.ts";
 import { SubmissionIdempotency } from "../lib/leads/idempotency.ts";
-import {
-  deliverParsedLead,
-} from "../lib/leads/process-lead.ts";
+import { maskPhone } from "../lib/leads/log.ts";
+import { deliverParsedLead } from "../lib/leads/process-lead.ts";
 import { leadInputSchema } from "../lib/leads/schema.ts";
 import { sendOwnerTelegram } from "../lib/leads/telegram.ts";
 import { toCanonicalLead } from "../lib/leads/format.ts";
@@ -118,6 +118,49 @@ async function testInflightCoalesce() {
   assert("coalesce B duplicate", b.body.ok && b.body.duplicate === true);
 }
 
+async function testTelegramRequiredEvenIfEmailSent() {
+  const cache = new SubmissionIdempotency(10 * 60 * 1000);
+  const senders = {
+    sendTelegram: async () => ({ ok: false, reason: "timeout" }),
+    sendEmail: async () => ({ ok: true, messageId: "em-1" }),
+  };
+  const result = await deliverParsedLead(validInput(), cache, senders);
+  assertEqual("email-only status", result.status, 503);
+  assert("email-only not ok", result.body.ok === false);
+}
+
+function testPhoneMask() {
+  assertEqual("mask last4", maskPhone("+380671234567"), "*******4567");
+  assertEqual("mask short", maskPhone("12"), "****");
+}
+
+function testConfirmedDeliveryGuard() {
+  assert(
+    "email-only not success",
+    isConfirmedLeadDelivery(true, {
+      ok: true,
+      leadId: "DTM-1111-2222",
+      delivered: { telegram: false, email: true },
+    }) === false
+  );
+  assert(
+    "telegram success",
+    isConfirmedLeadDelivery(true, {
+      ok: true,
+      leadId: "DTM-1111-2222",
+      delivered: { telegram: true, email: false },
+    }) === true
+  );
+  assert(
+    "http error not success",
+    isConfirmedLeadDelivery(false, {
+      ok: true,
+      leadId: "DTM-1111-2222",
+      delivered: { telegram: true, email: true },
+    }) === false
+  );
+}
+
 async function testRetryAfterFailedSend() {
   const cache = new SubmissionIdempotency(10 * 60 * 1000);
   let calls = 0;
@@ -206,6 +249,7 @@ function testSourceGuards() {
   assert("no return-home reset", !calc.includes('href="#top"'));
   assert("reset handler on success", calc.includes("onClick={onReset}"));
   assert("submitLock released in finally", calc.includes("submitLockRef.current = false"));
+  assert("client requires telegram delivery", calc.includes("isConfirmedLeadDelivery"));
   assert("abort on reset", calc.includes("abortRef.current?.abort()"));
   assert("client fetch no-store", calc.includes('cache: "no-store"'));
   assert("no window.open handoff", !calc.includes("window.open"));
@@ -288,6 +332,9 @@ const tests = [
   ["accidental duplicate", testAccidentalDuplicate],
   ["inflight coalesce", testInflightCoalesce],
   ["retry after failed send", testRetryAfterFailedSend],
+  ["telegram required even if email sent", testTelegramRequiredEvenIfEmailSent],
+  ["confirmed delivery guard", async () => testConfirmedDeliveryGuard()],
+  ["phone mask", async () => testPhoneMask()],
   ["no duplicate after confirmed send", testNoDuplicateAfterConfirmedSend],
   ["session lifecycle", async () => testSessionLifecycle()],
   ["source guards", async () => testSourceGuards()],

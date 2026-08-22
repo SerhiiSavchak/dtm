@@ -1,6 +1,7 @@
 import type { EmailSendResult } from "./email";
 import { formatVisitorDraft, toCanonicalLead } from "./format";
 import type { SubmissionIdempotency } from "./idempotency";
+import { logLead } from "./log";
 import type { LeadInput } from "./schema";
 import type { TelegramSendResult } from "./telegram";
 
@@ -9,6 +10,7 @@ export type ChannelStatus = "sent" | "failed" | "skipped";
 export type LeadSuccessBody = {
   ok: true;
   leadId: string;
+  requestId: string;
   visitorDraft: string;
   delivered: {
     telegram: boolean;
@@ -19,7 +21,7 @@ export type LeadSuccessBody = {
 
 export type LeadProcessResult = {
   status: number;
-  body: LeadSuccessBody | { ok: false; error: string };
+  body: LeadSuccessBody | { ok: false; error: string; requestId: string };
   telegramAttempted: boolean;
   telegramMessageId?: number;
 };
@@ -31,6 +33,7 @@ export type LeadChannelSenders = {
 
 function successBody(args: {
   leadId: string;
+  requestId: string;
   visitorDraft: string;
   telegram: ChannelStatus;
   email: ChannelStatus;
@@ -38,6 +41,7 @@ function successBody(args: {
   return {
     ok: true,
     leadId: args.leadId,
+    requestId: args.requestId,
     visitorDraft: args.visitorDraft,
     delivered: {
       telegram: args.telegram === "sent",
@@ -46,33 +50,40 @@ function successBody(args: {
   };
 }
 
-function safeLog(event: string, extra?: Record<string, unknown>) {
-  console.info(`[leads] ${event}`, extra ?? {});
-}
-
 function duplicateBody(body: LeadSuccessBody): LeadSuccessBody {
   return { ...body, duplicate: true };
+}
+
+function channelFromTelegram(result: PromiseSettledResult<TelegramSendResult>): ChannelStatus {
+  return result.status === "fulfilled" && result.value.ok ? "sent" : "failed";
+}
+
+function channelFromEmail(result: PromiseSettledResult<EmailSendResult>): ChannelStatus {
+  return result.status === "fulfilled" && result.value.ok ? "sent" : "failed";
 }
 
 /**
  * Same submissionId → at most one Telegram on this instance.
  * New submissionId → new lead even if phone/answers/IP are identical.
  * Failed delivery is not cached, so a retry of the same ID may send.
+ * Success requires Telegram delivery. Email is a duplicate channel only.
  */
 export async function deliverParsedLead(
   input: LeadInput,
   cache: SubmissionIdempotency<LeadSuccessBody>,
-  senders: LeadChannelSenders
+  senders: LeadChannelSenders,
+  requestId = crypto.randomUUID()
 ): Promise<LeadProcessResult> {
   const cached = cache.getDone(input.submissionId);
   if (cached) {
-    safeLog("duplicate", {
+    logLead("lead_completed", {
+      requestId,
       leadId: cached.leadId,
-      submissionId: input.submissionId,
+      duplicate: true,
     });
     return {
       status: 200,
-      body: duplicateBody(cached),
+      body: { ...duplicateBody(cached), requestId },
       telegramAttempted: false,
     };
   }
@@ -81,14 +92,15 @@ export async function deliverParsedLead(
   if (inflight) {
     try {
       const body = await inflight;
-      safeLog("duplicate", {
+      logLead("lead_completed", {
+        requestId,
         leadId: body.leadId,
-        submissionId: input.submissionId,
+        duplicate: true,
         coalesced: true,
       });
       return {
         status: 200,
-        body: duplicateBody(body),
+        body: { ...duplicateBody(body), requestId },
         telegramAttempted: false,
       };
     } catch {
@@ -111,79 +123,107 @@ export async function deliverParsedLead(
   } catch {
     cache.fail(input.submissionId);
     failGate(new Error("invalid_payload"));
+    logLead(
+      "lead_failed",
+      { requestId, errorType: "invalid_payload" },
+      "error"
+    );
     return {
       status: 400,
-      body: { ok: false, error: "invalid_payload" },
+      body: { ok: false, error: "invalid_payload", requestId },
       telegramAttempted: false,
     };
   }
 
   try {
+    logLead("telegram_send_started", { requestId, leadId: lead.leadId });
+    logLead("email_send_started", { requestId, leadId: lead.leadId });
+
     const [telegramResult, emailResult] = await Promise.allSettled([
       senders.sendTelegram(lead),
       senders.sendEmail(lead),
     ]);
 
-    const telegram =
-      telegramResult.status === "fulfilled" && telegramResult.value.ok
-        ? "sent"
-        : "failed";
-    const email =
-      emailResult.status === "fulfilled" && emailResult.value.ok
-        ? "sent"
-        : "failed";
+    const telegram = channelFromTelegram(telegramResult);
+    const email = channelFromEmail(emailResult);
 
-    const telegramReason =
-      telegramResult.status === "fulfilled" && !telegramResult.value.ok
-        ? telegramResult.value.reason
-        : telegramResult.status === "rejected"
-          ? "rejected"
-          : undefined;
-    const emailReason =
-      emailResult.status === "fulfilled" && !emailResult.value.ok
-        ? emailResult.value.reason
-        : emailResult.status === "rejected"
-          ? "rejected"
-          : undefined;
+    if (telegramResult.status === "fulfilled" && telegramResult.value.ok) {
+      logLead("telegram_send_success", {
+        requestId,
+        leadId: lead.leadId,
+        durationMs: telegramResult.value.durationMs,
+        statusCode: telegramResult.value.statusCode,
+      });
+    } else {
+      const value =
+        telegramResult.status === "fulfilled" ? telegramResult.value : null;
+      logLead(
+        "telegram_send_failed",
+        {
+          requestId,
+          leadId: lead.leadId,
+          durationMs: value && !value.ok ? value.durationMs : undefined,
+          statusCode: value && !value.ok ? value.statusCode : undefined,
+          errorType:
+            value && !value.ok
+              ? value.errorType ?? value.reason
+              : "rejected",
+        },
+        "error"
+      );
+    }
+
+    if (emailResult.status === "fulfilled" && emailResult.value.ok) {
+      logLead("email_send_success", {
+        requestId,
+        leadId: lead.leadId,
+        durationMs: emailResult.value.durationMs,
+      });
+    } else {
+      const value = emailResult.status === "fulfilled" ? emailResult.value : null;
+      logLead(
+        "email_send_failed",
+        {
+          requestId,
+          leadId: lead.leadId,
+          durationMs: value && !value.ok ? value.durationMs : undefined,
+          errorType:
+            value && !value.ok
+              ? value.errorType ?? value.reason
+              : "rejected",
+        },
+        value && !value.ok && value.reason === "unconfigured" ? "info" : "error"
+      );
+    }
 
     const telegramMessageId =
       telegramResult.status === "fulfilled" && telegramResult.value.ok
         ? telegramResult.value.messageId
         : undefined;
 
-    if (telegram === "failed" && email === "failed") {
+    if (telegram !== "sent") {
       cache.fail(input.submissionId);
       failGate(new Error("delivery_failed"));
-      safeLog("delivery_failed", {
-        leadId: lead.leadId,
-        submissionId: input.submissionId,
-        telegram: telegramReason ?? "rejected",
-        email: emailReason ?? "rejected",
-      });
+      logLead(
+        "lead_failed",
+        {
+          requestId,
+          leadId: lead.leadId,
+          errorType: "telegram_failed",
+          email,
+        },
+        "error"
+      );
       return {
         status: 503,
-        body: { ok: false, error: "delivery_failed" },
+        body: { ok: false, error: "delivery_failed", requestId },
         telegramAttempted: true,
       };
     }
 
-    if (telegram === "failed") {
-      safeLog("telegram_failed", {
-        leadId: lead.leadId,
-        submissionId: input.submissionId,
-        reason: telegramReason ?? "rejected",
-      });
-    }
-    if (email === "failed") {
-      safeLog("email_failed", {
-        leadId: lead.leadId,
-        submissionId: input.submissionId,
-        reason: emailReason ?? "rejected",
-      });
-    }
-
     const body = successBody({
       leadId: lead.leadId,
+      requestId,
       visitorDraft: formatVisitorDraft(lead),
       telegram,
       email,
@@ -192,9 +232,9 @@ export async function deliverParsedLead(
     cache.succeed(input.submissionId, body);
     settle(body);
 
-    safeLog("accepted", {
+    logLead("lead_completed", {
+      requestId,
       leadId: lead.leadId,
-      submissionId: input.submissionId,
       telegram,
       email,
       ...(telegramMessageId != null ? { telegramMessageId } : {}),
@@ -209,6 +249,15 @@ export async function deliverParsedLead(
   } catch (error) {
     cache.fail(input.submissionId);
     failGate(error instanceof Error ? error : new Error("delivery_failed"));
+    logLead(
+      "lead_failed",
+      {
+        requestId,
+        leadId: lead.leadId,
+        errorType: "unhandled",
+      },
+      "error"
+    );
     throw error;
   }
 }

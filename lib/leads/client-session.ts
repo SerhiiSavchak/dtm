@@ -32,6 +32,22 @@ export function canSubmitLead(guards: LeadSubmitGuards): boolean {
   return true;
 }
 
+/** UI success only after the server confirms Telegram delivery. */
+export function isConfirmedLeadDelivery(
+  resOk: boolean,
+  data: {
+    ok?: boolean;
+    leadId?: string;
+    delivered?: { telegram?: boolean; email?: boolean };
+  } | null
+): data is {
+  ok: true;
+  leadId: string;
+  delivered: { telegram: true; email?: boolean };
+} {
+  return Boolean(resOk && data?.ok && data.leadId && data.delivered?.telegram);
+}
+
 /**
  * Intentional restart after a confirmed success (or an explicit UI reset).
  * Replaces submissionId and formStartedAt; clears already-submitted guards.

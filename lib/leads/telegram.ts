@@ -9,9 +9,21 @@ function isNumericChatId(value: string): boolean {
   return /^-?\d+$/.test(value.trim());
 }
 
+export type TelegramFailReason =
+  | "unconfigured"
+  | "invalid_chat"
+  | "rejected"
+  | "timeout";
+
 export type TelegramSendResult =
-  | { ok: true; messageId: number }
-  | { ok: false; reason: "unconfigured" | "invalid_chat" | "rejected" | "timeout" };
+  | { ok: true; messageId: number; statusCode: number; durationMs: number }
+  | {
+      ok: false;
+      reason: TelegramFailReason;
+      statusCode?: number;
+      durationMs: number;
+      errorType: TelegramFailReason;
+    };
 
 type TelegramApiJson = {
   ok?: boolean;
@@ -23,23 +35,37 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function fail(
+  reason: TelegramFailReason,
+  durationMs: number,
+  statusCode?: number
+): TelegramSendResult {
+  return { ok: false, reason, durationMs, errorType: reason, statusCode };
+}
+
 function parseSendResult(
   res: Response,
-  json: TelegramApiJson | null
+  json: TelegramApiJson | null,
+  durationMs: number
 ): TelegramSendResult | { retryAfterMs: number } {
   if (res.status === 429) {
     const retryAfterSec = Number(json?.parameters?.retry_after);
     if (Number.isFinite(retryAfterSec) && retryAfterSec > 0) {
       return { retryAfterMs: Math.min(retryAfterSec * 1000, MAX_RETRY_AFTER_MS) };
     }
-    return { ok: false, reason: "rejected" };
+    return fail("rejected", durationMs, res.status);
   }
 
   if (!res.ok || !json?.ok || typeof json.result?.message_id !== "number") {
-    return { ok: false, reason: "rejected" };
+    return fail("rejected", durationMs, res.status);
   }
 
-  return { ok: true, messageId: json.result.message_id };
+  return {
+    ok: true,
+    messageId: json.result.message_id,
+    statusCode: res.status,
+    durationMs,
+  };
 }
 
 async function postSendMessage(
@@ -62,13 +88,14 @@ export async function sendOwnerTelegram(
   lead: CanonicalLead,
   deps?: { fetch?: typeof fetch }
 ): Promise<TelegramSendResult> {
+  const started = Date.now();
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
   const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
   const threadRaw = process.env.TELEGRAM_MESSAGE_THREAD_ID?.trim();
   const fetchImpl = deps?.fetch ?? fetch;
 
-  if (!token || !chatId) return { ok: false, reason: "unconfigured" };
-  if (!isNumericChatId(chatId)) return { ok: false, reason: "invalid_chat" };
+  if (!token || !chatId) return fail("unconfigured", Date.now() - started);
+  if (!isNumericChatId(chatId)) return fail("invalid_chat", Date.now() - started);
 
   const payload: Record<string, unknown> = {
     chat_id: chatId,
@@ -85,21 +112,26 @@ export async function sendOwnerTelegram(
 
   try {
     const first = await postSendMessage(url, serialized, fetchImpl);
-    const parsed = parseSendResult(first.res, first.json);
+    const parsed = parseSendResult(first.res, first.json, Date.now() - started);
     if ("retryAfterMs" in parsed) {
       await sleep(parsed.retryAfterMs);
       const second = await postSendMessage(url, serialized, fetchImpl);
-      const retried = parseSendResult(second.res, second.json);
+      const retried = parseSendResult(
+        second.res,
+        second.json,
+        Date.now() - started
+      );
       if ("retryAfterMs" in retried) {
-        return { ok: false, reason: "rejected" };
+        return fail("rejected", Date.now() - started, second.res.status);
       }
       return retried;
     }
     return parsed;
   } catch (error) {
+    const durationMs = Date.now() - started;
     if (error instanceof Error && error.name === "TimeoutError") {
-      return { ok: false, reason: "timeout" };
+      return fail("timeout", durationMs);
     }
-    return { ok: false, reason: "rejected" };
+    return fail("rejected", durationMs);
   }
 }

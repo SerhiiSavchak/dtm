@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sendOwnerEmail } from "@/lib/leads/email";
 import { SubmissionIdempotency } from "@/lib/leads/idempotency";
+import { logLead } from "@/lib/leads/log";
 import {
   deliverParsedLead,
   type LeadSuccessBody,
@@ -65,23 +66,46 @@ function originAllowed(request: Request): boolean {
   }
 }
 
-function honeypotBody(): LeadSuccessBody {
+function honeypotBody(requestId: string): LeadSuccessBody {
   return {
     ok: true,
     leadId: "DTM-0000-0000",
+    requestId,
     visitorDraft: "Вітаю! Я щойно заповнив(ла) форму на сайті DTM.",
     delivered: { telegram: true, email: true },
   };
 }
 
 export async function POST(request: Request) {
+  const requestId = crypto.randomUUID();
+  logLead("lead_received", {
+    requestId,
+    contentLength: Number(request.headers.get("content-length")) || undefined,
+  });
+
   if (!originAllowed(request)) {
-    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+    logLead(
+      "lead_failed",
+      { requestId, errorType: "forbidden" },
+      "error"
+    );
+    return NextResponse.json(
+      { ok: false, error: "forbidden", requestId },
+      { status: 403 }
+    );
   }
 
   const raw = await request.text();
   if (raw.length > MAX_BODY_BYTES) {
-    return NextResponse.json({ ok: false, error: "too_large" }, { status: 413 });
+    logLead(
+      "lead_validation_failed",
+      { requestId, errorType: "too_large" },
+      "error"
+    );
+    return NextResponse.json(
+      { ok: false, error: "too_large", requestId },
+      { status: 413 }
+    );
   }
 
   let json: unknown;
@@ -90,48 +114,97 @@ export async function POST(request: Request) {
   } catch {
     const ip = clientIp(request);
     if (!allowRate(ip)) {
-      return NextResponse.json({ ok: false, error: "rate_limited" }, { status: 429 });
+      logLead(
+        "lead_failed",
+        { requestId, errorType: "rate_limited" },
+        "error"
+      );
+      return NextResponse.json(
+        { ok: false, error: "rate_limited", requestId },
+        { status: 429 }
+      );
     }
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+    logLead(
+      "lead_validation_failed",
+      { requestId, errorType: "invalid_json" },
+      "error"
+    );
+    return NextResponse.json(
+      { ok: false, error: "invalid_json", requestId },
+      { status: 400 }
+    );
   }
 
   const parsed = leadInputSchema.safeParse(json);
   if (parsed.success) {
     const replay = recentSubmissions.getDone(parsed.data.submissionId);
     if (replay) {
-      console.info("[leads] duplicate", {
+      logLead("lead_completed", {
+        requestId,
         leadId: replay.leadId,
-        submissionId: parsed.data.submissionId,
+        duplicate: true,
       });
-      return NextResponse.json({ ...replay, duplicate: true });
+      return NextResponse.json({ ...replay, duplicate: true, requestId });
     }
   }
 
   const ip = clientIp(request);
   if (!allowRate(ip)) {
-    return NextResponse.json({ ok: false, error: "rate_limited" }, { status: 429 });
+    logLead(
+      "lead_failed",
+      { requestId, errorType: "rate_limited" },
+      "error"
+    );
+    return NextResponse.json(
+      { ok: false, error: "rate_limited", requestId },
+      { status: 429 }
+    );
   }
 
   if (!parsed.success) {
-    return NextResponse.json({ ok: false, error: "invalid_payload" }, { status: 400 });
+    logLead(
+      "lead_validation_failed",
+      { requestId, errorType: "invalid_payload" },
+      "error"
+    );
+    return NextResponse.json(
+      { ok: false, error: "invalid_payload", requestId },
+      { status: 400 }
+    );
   }
 
   const input = parsed.data;
   const honeypot = input.honeypot?.trim();
   if (honeypot) {
-    console.info("[leads] honeypot");
-    return NextResponse.json(honeypotBody());
+    logLead("lead_validation_success", { requestId, honeypot: true });
+    logLead("lead_completed", { requestId, honeypot: true });
+    return NextResponse.json(honeypotBody(requestId));
   }
 
   const elapsed = Date.now() - input.formStartedAt;
   if (elapsed < MIN_COMPLETION_MS || elapsed > MAX_COMPLETION_MS) {
-    return NextResponse.json({ ok: false, error: "invalid_payload" }, { status: 400 });
+    logLead(
+      "lead_validation_failed",
+      { requestId, errorType: "timing" },
+      "error"
+    );
+    return NextResponse.json(
+      { ok: false, error: "invalid_payload", requestId },
+      { status: 400 }
+    );
   }
 
-  const result = await deliverParsedLead(input, recentSubmissions, {
-    sendTelegram: sendOwnerTelegram,
-    sendEmail: sendOwnerEmail,
-  });
+  logLead("lead_validation_success", { requestId });
+
+  const result = await deliverParsedLead(
+    input,
+    recentSubmissions,
+    {
+      sendTelegram: sendOwnerTelegram,
+      sendEmail: sendOwnerEmail,
+    },
+    requestId
+  );
 
   return NextResponse.json(result.body, { status: result.status });
 }
