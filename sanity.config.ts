@@ -1,3 +1,4 @@
+import { DtmStudioIcon } from "./sanity/dtm-icon";
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { sanityDataset, sanityProjectId } from "./sanity/env";
@@ -6,7 +7,8 @@ import { structure } from "./sanity/structure";
 
 export default defineConfig({
   name: "dtm",
-  title: "Сайт DTM",
+  title: "DTM",
+  icon: DtmStudioIcon,
   projectId: sanityProjectId,
   dataset: sanityDataset,
   basePath: "/admin",
@@ -14,7 +16,17 @@ export default defineConfig({
   schema: {
     types: schemaTypes,
     templates: (templates) =>
-      templates.filter((template) => template.id !== "inProgressBoard"),
+      templates
+        .filter((template) => template.id !== "inProgressBoard")
+        .map((template) => {
+          if (template.schemaType === "project") {
+            return { ...template, title: "Робота" };
+          }
+          if (template.schemaType === "inProgressFrame") {
+            return { ...template, title: "Фото або відео" };
+          }
+          return template;
+        }),
   },
   document: {
     newDocumentOptions: (prev, { creationContext }) => {

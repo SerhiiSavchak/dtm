@@ -15,6 +15,12 @@ import type {
 
 const hardcoded = hardcodedInProgressRecord();
 
+export function publishedInProgressOrFallback(
+  assembled: InProgressRecord | null
+): InProgressRecord {
+  return assembled ?? hardcoded;
+}
+
 /**
  * Sanity is the primary In-progress source when the full collection and the
  * 4-panel board are valid. Hardcoded data is used only if the client is
@@ -44,8 +50,7 @@ export async function getInProgressContent(): Promise<InProgressRecord> {
       ),
     ]);
     const assembled = assembleInProgressRecord(docs, board);
-    if (!assembled) return hardcoded;
-    return assembled;
+    return publishedInProgressOrFallback(assembled);
   } catch (error) {
     console.error("[in-progress] Sanity fetch failed; using hardcoded frames", error);
     return hardcoded;

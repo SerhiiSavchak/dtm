@@ -1,14 +1,17 @@
 import { orderRankField, orderRankOrdering } from "@sanity/orderable-document-list";
 import { defineField, defineType } from "sanity";
+import { projectListPreview } from "../lib/previews";
 import { slugifyUa, uniqueDraftSlug } from "../lib/slugify";
 
 export const project = defineType({
   name: "project",
-  title: "Проєкт",
+  title: "Робота",
   type: "document",
   orderings: [orderRankOrdering],
   groups: [
-    { name: "content", title: "Проєкт", default: true },
+    { name: "main", title: "Основне", default: true },
+    { name: "photos", title: "Фото" },
+    { name: "details", title: "Деталі" },
     { name: "english", title: "Англійська версія" },
     { name: "advanced", title: "Додаткові налаштування" },
   ],
@@ -22,16 +25,16 @@ export const project = defineType({
     orderRankField({ type: "project", hidden: true }),
     defineField({
       name: "titleUa",
-      title: "Назва проєкту",
+      title: "Назва",
       type: "string",
-      group: "content",
+      group: "main",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "category",
       title: "Тип об’єкта",
       type: "string",
-      group: "content",
+      group: "main",
       options: {
         list: [
           { title: "Квартира", value: "apartment" },
@@ -46,60 +49,61 @@ export const project = defineType({
       name: "area",
       title: "Площа",
       type: "string",
-      group: "content",
+      group: "main",
       description: "Як на сайті, наприклад 72 м².",
     }),
     defineField({
       name: "descriptionUa",
       title: "Опис",
       type: "array",
-      group: "content",
+      group: "main",
       of: [{ type: "text", title: "Абзац", rows: 3 }],
     }),
     defineField({
       name: "cover",
       title: "Обкладинка",
       type: "image",
-      group: "content",
+      group: "photos",
       options: { hotspot: true },
-      description: "Фото, яке буде показане у списку робіт на головній.",
+      description: "Фото у списку робіт на головній.",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "gallery",
       title: "Галерея",
       type: "array",
-      group: "content",
+      group: "photos",
       of: [{ type: "projectMedia" }],
       options: { sortable: true },
       description:
-        "Додайте фотографії у потрібному порядку. Перше фото — перше в галереї. Їх можна перетягувати.",
+        "Додайте кілька фото. Порядок у списку — порядок у вікні проєкту. Перетягніть, щоб змінити. Перше фото відкривається першим.",
       validation: (Rule) => Rule.required().min(1),
     }),
     defineField({
       name: "workTypeUa",
       title: "Тип робіт",
       type: "string",
-      group: "content",
+      group: "details",
     }),
     defineField({
       name: "durationUa",
       title: "Термін виконання",
       type: "string",
-      group: "content",
+      group: "details",
     }),
     defineField({
       name: "year",
       title: "Рік",
       type: "string",
-      group: "content",
+      group: "details",
     }),
     defineField({
       name: "titleEn",
       title: "Назва",
       type: "string",
       group: "english",
-      description: "Необов’язково. Якщо порожньо, на англійській версії сайту буде українська назва.",
+      description:
+        "Необов’язково. Якщо порожньо, англійською покажеться українська назва.",
     }),
     defineField({
       name: "descriptionEn",
@@ -136,8 +140,9 @@ export const project = defineType({
       title: "Системна адреса",
       type: "slug",
       group: "advanced",
-      description:
-        "Створюється автоматично. Не змінюйте, якщо не потрібно зберегти стару адресу проєкту.",
+      hidden: true,
+      readOnly: true,
+      description: "Створюється автоматично. Не змінюється при перейменуванні роботи.",
       options: {
         source: "titleUa",
         maxLength: 96,
@@ -152,26 +157,34 @@ export const project = defineType({
       type: "string",
       group: "advanced",
       description:
-        "Впливає на розмір картки у блоці «Наші роботи». Якщо не впевнені — залиште значення без змін.",
+        "Звичайна композиція на сайті задається автоматично за порядком робіт. Це поле залиште без змін, якщо немає окремої вказівки.",
       options: {
         list: [
-          { title: "Велика картка", value: "large" },
+          { title: "Велика", value: "large" },
           { title: "Вертикальна", value: "tall" },
           { title: "Широка", value: "wide" },
           { title: "Мала", value: "small" },
         ],
       },
       initialValue: "small",
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) =>
+        Rule.required().custom((value) =>
+          value === "large" ||
+          value === "tall" ||
+          value === "wide" ||
+          value === "small"
+            ? true
+            : "Оберіть один із запропонованих розмірів"
+        ),
     }),
     defineField({
       name: "coverPosition",
-      title: "Позиція обкладинки",
+      title: "Позиція фото",
       type: "string",
       group: "advanced",
       initialValue: "center center",
       description:
-        "Використовуйте лише якщо важлива частина фотографії обрізається неправильно. Наприклад: center 40%.",
+        "Лише якщо важлива частина обкладинки обрізається неправильно. Наприклад: center 40%.",
     }),
   ],
   preview: {
@@ -181,20 +194,6 @@ export const project = defineType({
       area: "area",
       media: "cover",
     },
-    prepare({ title, category, area, media }) {
-      const categoryLabel =
-        category === "house"
-          ? "Будинок"
-          : category === "commercial"
-            ? "Комерційне приміщення"
-            : category === "apartment"
-              ? "Квартира"
-              : "";
-      return {
-        title: title || "Без назви",
-        subtitle: [categoryLabel, area].filter(Boolean).join(" · "),
-        media,
-      };
-    },
+    prepare: projectListPreview,
   },
 });

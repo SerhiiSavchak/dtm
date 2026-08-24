@@ -9,6 +9,12 @@ import type { PortfolioRecord, SanityProjectDocument } from "./types";
 
 const hardcodedRecords = hardcodedProjects.map(hardcodedToRecord);
 
+export function publishedPortfolioOrFallback(
+  mapped: PortfolioRecord[]
+): PortfolioRecord[] {
+  return mapped.length > 0 ? mapped : hardcodedRecords;
+}
+
 /**
  * Sanity is the primary Portfolio source.
  * Hardcoded `data/projects.ts` is used only when the client is unconfigured,
@@ -33,8 +39,7 @@ export async function getPortfolioProjects(): Promise<PortfolioRecord[]> {
     const mapped = (docs ?? [])
       .map(mapSanityProject)
       .filter((item): item is PortfolioRecord => Boolean(item));
-    if (mapped.length === 0) return hardcodedRecords;
-    return mapped;
+    return publishedPortfolioOrFallback(mapped);
   } catch (error) {
     console.error("[portfolio] Sanity fetch failed; using hardcoded projects", error);
     return hardcodedRecords;

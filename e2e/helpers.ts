@@ -2,8 +2,14 @@ import { expect, type Page } from "@playwright/test";
 
 const calc = (page: Page) => page.locator("#estimate");
 
-export async function openHome(page: Page) {
-  await page.emulateMedia({ reducedMotion: "reduce" });
+export async function openHome(
+  page: Page,
+  options?: { reducedMotion?: boolean }
+) {
+  const reduce = options?.reducedMotion !== false;
+  await page.emulateMedia({
+    reducedMotion: reduce ? "reduce" : "no-preference",
+  });
   await page.goto("/");
   await expect(page.locator(".site-header.is-booted")).toBeVisible({
     timeout: 15_000,

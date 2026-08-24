@@ -2031,6 +2031,11 @@ html[data-motion="reduce"] .arch-corner {
 }
 
 .in-progress-board {
+  --blinds-canvas: calc(
+    (100cqw - 3 * var(--in-progress-gap)) * var(--open-grow) /
+      (var(--open-grow) + 3 * var(--shut-grow))
+  );
+  container-type: inline-size;
   display: flex;
   align-items: stretch;
   gap: var(--in-progress-gap);
@@ -2086,14 +2091,37 @@ html[data-motion="reduce"] .arch-corner {
   height: 100%;
 }
 
+/* Media is a fixed open-panel canvas. The panel is a moving clip —
+   not a box that reflows object-cover (that reads as hover-zoom). */
 .in-progress-visual {
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: 50%;
+  width: var(--blinds-canvas);
+  height: 100%;
+  margin-left: calc(var(--blinds-canvas) / -2);
   overflow: hidden;
-  transform: scale(1.03);
+  transform: none;
   transform-origin: 50% 50%;
 }
 
 .in-progress-panel.is-active .in-progress-visual {
-  transform: scale(1);
+  transform: none;
+}
+
+.in-progress-visual .media-full,
+.in-progress-visual .in-progress-video-el,
+.in-progress-visual .in-progress-image {
+  transform: none;
+}
+
+.in-progress-visual .media-lqip {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  transform: none;
 }
 
 .in-progress-image {
@@ -2186,7 +2214,10 @@ html[data-motion="reduce"] .arch-corner {
   transition-delay: calc(var(--i) * 90ms);
 }
 
-.in-progress-board.is-armed .in-progress-visual,
+.in-progress-board.is-armed .in-progress-visual {
+  transition: none;
+}
+
 .in-progress-board.is-armed .in-progress-shade,
 .in-progress-board.is-armed .in-progress-tick,
 .in-progress-board.is-armed .in-progress-caption {
@@ -2203,9 +2234,12 @@ html[data-motion="reduce"] .arch-corner {
   opacity: 1;
 }
 
-.in-progress-board.is-animating .in-progress-panel,
+.in-progress-board.is-animating .in-progress-panel {
+  will-change: flex-grow;
+}
+
 .in-progress-board.is-animating .in-progress-visual {
-  will-change: transform, opacity, clip-path;
+  will-change: auto;
 }
 
 .in-progress-board.is-interactive .in-progress-panel {
@@ -2213,7 +2247,11 @@ html[data-motion="reduce"] .arch-corner {
   transition-delay: 0s;
 }
 
-.in-progress-board.is-interactive .in-progress-visual,
+.in-progress-board.is-interactive .in-progress-visual {
+  transition: none;
+  transition-delay: 0s;
+}
+
 .in-progress-board.is-interactive .in-progress-shade,
 .in-progress-board.is-interactive .in-progress-tick,
 .in-progress-board.is-interactive .in-progress-caption {
@@ -2901,21 +2939,24 @@ html[data-motion="ok"] .process-rail-fill {
     flex-basis: min(34vw, 30rem);
   }
 
-  .project-slide.is-lead,
-  .project-slide[data-span="large"] {
+  .project-slide.is-lead {
     flex-basis: min(42vw, 36rem);
   }
 
+  .project-slide[data-span="large"]:not(.is-lead) {
+    flex-basis: min(36vw, 32rem);
+  }
+
   .project-slide[data-span="wide"]:not(.is-lead) {
-    flex-basis: min(38vw, 34rem);
+    flex-basis: min(33vw, 29rem);
   }
 
   .project-slide[data-span="tall"]:not(.is-lead) {
-    flex-basis: min(32vw, 28rem);
+    flex-basis: min(27vw, 23.5rem);
   }
 
   .project-slide[data-span="small"]:not(.is-lead) {
-    flex-basis: min(28vw, 24rem);
+    flex-basis: min(23vw, 20rem);
   }
 }
 

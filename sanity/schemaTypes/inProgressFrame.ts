@@ -1,19 +1,7 @@
 import { orderRankField, orderRankOrdering } from "@sanity/orderable-document-list";
 import { defineField, defineType } from "sanity";
+import { frameListPreview } from "../lib/previews";
 import { uniqueDraftSlug } from "../lib/slugify";
-
-const FRAME_ADMIN_TITLES: Record<string, string> = {
-  "house-living": "Вітальня",
-  "house-media": "Медіазона",
-  "house-niche": "Ніша",
-  "house-sconce": "Бра",
-  "house-bedroom": "Спальня",
-  "house-bed-two": "Спальня — друге фото",
-  "house-vanity": "Санвузол",
-  "house-wardrobe": "Гардероб",
-  "house-bath": "Ванна",
-  "kitchen-video": "Кухня — відео",
-};
 
 export const inProgressFrame = defineType({
   name: "inProgressFrame",
@@ -36,7 +24,7 @@ export const inProgressFrame = defineType({
       type: "string",
       group: "content",
       description:
-        "Лише для зручності в адмінці, на сайті не показується. Наприклад: Кухня — відео.",
+        "Лише в адмінці, на сайті не показується. Наприклад: Кухня — відео.",
     }),
     defineField({
       name: "still",
@@ -44,7 +32,7 @@ export const inProgressFrame = defineType({
       type: "image",
       group: "content",
       options: { hotspot: true },
-      description: "Саме фото або кадр, який видно, поки не грає відео.",
+      description: "Фото або кадр, який видно, поки не грає відео.",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -62,7 +50,7 @@ export const inProgressFrame = defineType({
       group: "advanced",
       initialValue: "center center",
       description:
-        "Використовуйте лише якщо важлива частина фотографії обрізається неправильно.",
+        "Лише якщо важлива частина фотографії обрізається неправильно.",
     }),
     defineField({
       name: "frameId",
@@ -70,7 +58,7 @@ export const inProgressFrame = defineType({
       type: "slug",
       group: "advanced",
       hidden: true,
-      description: "Створюється автоматично. Не змінюйте після публікації.",
+      readOnly: true,
       options: {
         isUnique: (value, context) => context.defaultIsUnique(value, context),
       },
@@ -85,17 +73,6 @@ export const inProgressFrame = defineType({
       video: "video.asset",
       filename: "still.asset.originalFilename",
     },
-    prepare({ label, frameId, media, video, filename }) {
-      const kind = video ? "Відео + фото" : "Фото";
-      const fallback =
-        (typeof frameId === "string" && FRAME_ADMIN_TITLES[frameId]) ||
-        filename ||
-        (video ? "Відео" : "Фото");
-      return {
-        title: (typeof label === "string" && label.trim()) || fallback,
-        subtitle: kind,
-        media,
-      };
-    },
+    prepare: frameListPreview,
   },
 });

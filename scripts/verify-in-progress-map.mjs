@@ -43,9 +43,42 @@ const frames = inProgressMedia.map((item, index) => ({
 }));
 
 const boardIds = [...inProgressCompositionIds];
-assert("hardcoded board is 4 unique", parseBoardIds({ boardIds })?.length === 4);
+assert(
+  "invalid zero board ids",
+  parseBoardIds({ boardIds: [] }) === null
+);
+assert(
+  "invalid one board id",
+  parseBoardIds({ boardIds: ["house-living"] }) === null
+);
 assert("valid record", isValidInProgressRecord(frames, boardIds) === true);
 assert("invalid short board", isValidInProgressRecord(frames, boardIds.slice(0, 3)) === false);
+assert(
+  "invalid five board ids",
+  parseBoardIds({ boardIds: [...boardIds, "extra"] }) === null
+);
+assert(
+  "duplicate board refs invalid",
+  parseBoardIds({
+    boardIds: ["house-living", "house-bedroom", "house-vanity", "house-living"],
+  }) === null
+);
+assert(
+  "assemble null when board missing frame",
+  assembleInProgressRecord(
+    frames.map((item) => ({
+      frameId: item.id,
+      src: item.src,
+      video: item.video,
+      objectPosition: item.objectPosition,
+    })),
+    { boardIds: ["house-living", "house-bedroom", "house-vanity", "missing"] }
+  ) === null
+);
+assert(
+  "assemble null when docs empty",
+  assembleInProgressRecord([], { boardIds }) === null
+);
 assert(
   "invalid unknown board id",
   isValidInProgressRecord(frames, ["house-living", "house-bedroom", "house-vanity", "missing"]) === false

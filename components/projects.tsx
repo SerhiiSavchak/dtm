@@ -11,6 +11,7 @@ import { type Project } from "@/data/projects";
 import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
 import { useProjectTrack } from "@/lib/project-track";
 import { useDictionary, useLocale } from "@/lib/i18n/locale-context";
+import { editorialCardSpan } from "@/lib/portfolio-layout";
 import { recordToProject } from "@/lib/sanity/map-project";
 import type { PortfolioRecord } from "@/lib/sanity/types";
 import { MediaImage } from "./media-image";
@@ -21,13 +22,13 @@ import { HoverMediaLabel } from "./fx/hover-media-label";
 import { MediaParallax } from "./fx/media-parallax";
 import { MediaReveal } from "./fx/media-reveal";
 
-function slideAspect(project: Project, lead: boolean) {
+function slideAspect(span: Project["span"], lead: boolean) {
   // Covers are 9:16 Telegram stills (720–1052px). 16:10/16:11 slots
   // crop to ~450px of height then stretch width past the source.
-  if (lead || project.span === "large" || project.span === "tall") {
+  if (lead || span === "large" || span === "tall") {
     return "aspect-[4/5]";
   }
-  if (project.span === "small") return "aspect-[4/5] md:aspect-[5/6]";
+  if (span === "small") return "aspect-[4/5] md:aspect-[5/6]";
   return "aspect-[4/5]";
 }
 
@@ -195,6 +196,7 @@ export function Projects({ records }: { records: PortfolioRecord[] }) {
                 key={project.slug}
                 project={project}
                 lead={i === 0}
+                layoutSpan={editorialCardSpan(i)}
                 active={i === activeProjectIndex}
                 onOpen={() => onSlideClick(() => setOpenSlug(project.slug))}
               />
@@ -218,11 +220,13 @@ export function Projects({ records }: { records: PortfolioRecord[] }) {
 function ProjectSlide({
   project,
   lead,
+  layoutSpan,
   active,
   onOpen,
 }: {
   project: Project;
   lead: boolean;
+  layoutSpan: Project["span"];
   active: boolean;
   onOpen: () => void;
 }) {
@@ -233,11 +237,9 @@ function ProjectSlide({
     <article
       data-slide
       data-project={project.slug}
-      data-span={project.span}
+      data-span={layoutSpan}
       aria-current={active ? "true" : undefined}
-      className={`project-slide group/card ${
-        lead || project.span === "large" ? "is-lead" : ""
-      }`}
+      className={`project-slide group/card ${lead ? "is-lead" : ""}`}
     >
       <button
         type="button"
@@ -250,7 +252,7 @@ function ProjectSlide({
         <div className="project-media">
           <div className="project-media-crop">
             <div
-              className={`project-media-frame relative w-full ${slideAspect(project, lead)}`}
+              className={`project-media-frame relative w-full ${slideAspect(layoutSpan, lead)}`}
             >
               {lead ? (
                 <MediaReveal variant="primary" className="absolute inset-0">
@@ -262,7 +264,7 @@ function ProjectSlide({
                         lqip={project.coverLqip}
                         fill
                         quality={slideQuality(lead)}
-                        sizes={slideSizes(lead, project.span)}
+                        sizes={slideSizes(lead, layoutSpan)}
                         className="object-cover"
                         style={{ objectPosition: project.coverPosition }}
                       />
@@ -277,7 +279,7 @@ function ProjectSlide({
                     lqip={project.coverLqip}
                     fill
                     quality={slideQuality(lead)}
-                    sizes={slideSizes(lead, project.span)}
+                    sizes={slideSizes(lead, layoutSpan)}
                     className="object-cover"
                     style={{ objectPosition: project.coverPosition }}
                   />

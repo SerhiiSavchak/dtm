@@ -1,4 +1,5 @@
 import { defineField, defineType } from "sanity";
+import { galleryItemPreview } from "../lib/previews";
 
 export const projectMedia = defineType({
   name: "projectMedia",
@@ -32,7 +33,7 @@ export const projectMedia = defineType({
     }),
     defineField({
       name: "fit",
-      title: "Як показати у великому вікні",
+      title: "Відображення фото",
       type: "string",
       group: "advanced",
       options: {
@@ -47,16 +48,16 @@ export const projectMedia = defineType({
     }),
     defineField({
       name: "objectPosition",
-      title: "Позиція у великому вікні",
+      title: "Позиція фото",
       type: "string",
       group: "advanced",
       initialValue: "center center",
       description:
-        "Використовуйте лише якщо важлива частина фотографії обрізається неправильно.",
+        "Лише якщо важлива частина фотографії обрізається неправильно.",
     }),
     defineField({
       name: "thumbPosition",
-      title: "Позиція в мініатюрі",
+      title: "Позиція мініатюри",
       type: "string",
       group: "advanced",
       initialValue: "center center",
@@ -69,12 +70,6 @@ export const projectMedia = defineType({
       filename: "image.asset.originalFilename",
       video: "video.asset",
     },
-    prepare({ media, filename, video }) {
-      return {
-        title: filename || (video ? "Фото з відео" : "Фото"),
-        subtitle: video ? "Є відео" : undefined,
-        media,
-      };
-    },
+    prepare: galleryItemPreview,
   },
 });

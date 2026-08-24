@@ -68,6 +68,35 @@ assert("malformed span falls back to small", mapSanityProject({
   gallery: [{ src: "https://cdn.sanity.io/images/x/y/c.jpg" }],
 })?.span === "small");
 
+assert("missing cover is invalid", mapSanityProject({
+  titleUa: "X",
+  slug: "x",
+  category: "apartment",
+  gallery: [{ src: "https://cdn.sanity.io/images/x/y/c.jpg" }],
+}) === null);
+
+assert("missing title is invalid", mapSanityProject({
+  slug: "x",
+  category: "apartment",
+  coverUrl: "https://cdn.sanity.io/images/x/y/c.jpg",
+  gallery: [{ src: "https://cdn.sanity.io/images/x/y/c.jpg" }],
+}) === null);
+
+assert("empty gallery is invalid", mapSanityProject({
+  titleUa: "X",
+  slug: "x",
+  category: "apartment",
+  coverUrl: "https://cdn.sanity.io/images/x/y/c.jpg",
+  gallery: [],
+}) === null);
+
+assert("gallery order preserved", mapped?.media[0]?.src?.endsWith("/a.jpg") === true);
+assert("default fit is contain", mapped?.media[0]?.fit === "contain");
+assert("cover fit from CMS", mapped?.media[1]?.fit === "cover");
+assert("thumbPosition kept", mapped?.media[0]?.thumbPosition === "center 20%");
+assert("objectPosition kept", mapped?.media[0]?.objectPosition === "center center");
+assert("category apartment", mapped?.category === "apartment");
+
 const en = recordToProject(mapped, "en");
 assert("EN title", en.title === "Test 01");
 assert("EN workType", en.workType === "Shell");
