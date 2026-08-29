@@ -1,0 +1,490 @@
+{
+  "version": 1,
+  "generatedAt": "2026-08-29T11:12:41.777Z",
+  "dataset": "development",
+  "projects": [
+    {
+      "slug": "interior-living",
+      "titleUa": "Кухня-вітальня",
+      "titleEn": null,
+      "category": "house",
+      "locationKey": "lviv",
+      "descriptionUa": [
+        "Відкритий простір: кухня без ручок, чорна стільниця, обідній стіл і зона з диваном."
+      ],
+      "descriptionEn": [],
+      "area": "74 м²",
+      "workTypeUa": "Під ключ",
+      "workTypeEn": null,
+      "durationUa": "4 місяці",
+      "durationEn": null,
+      "year": "2025",
+      "cover": "https://cdn.sanity.io/images/l1d717lp/development/1a3b1e5fc08abccffbacd168dbee6fe353099db5-720x1280.jpg",
+      "coverLqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAYDBwX/xAApEAABBAEDAgQHAAAAAAAAAAABAAIDBBEFBhIhIgcxYYETJDJBcXKC/8QAFgEBAQEAAAAAAAAAAAAAAAAAAwQC/8QAGxEAAgMBAQEAAAAAAAAAAAAAAAECAxETMUH/2gAMAwEAAhEDEQA/AOlUyJIA3pkHOVrJCI+4gY9Vw3Y+o6nY16rFJencxzsFpd0XRd91LbNLq/DsSd8zQeD/AFWFcjbqe4Uwa0DBcB7opTcroql9kTpiwiJpI5IqOmE3LST2ptu5Q1atbkngMbHZIHmrvc9ll+vSY0co2WG8hH9jnzK8yhrtLp8r1/Qr0IrNKxdhdDG6KQuGWhp4u/KiVbfwslYvWyL8T7rW7rlYZGjhGxuCistd2Hpms6jJdth5meBkh2ETtNvQouKWF3HTrtgaREwfyFnLDG36WNHsiJIBzMxG05zlERIGf//Z",
+      "coverPosition": "center 40%",
+      "span": "large",
+      "media": [
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/1a3b1e5fc08abccffbacd168dbee6fe353099db5-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAYDBwX/xAApEAABBAEDAgQHAAAAAAAAAAABAAIDBBEFBhIhIgcxYYETJDJBcXKC/8QAFgEBAQEAAAAAAAAAAAAAAAAAAwQC/8QAGxEAAgMBAQEAAAAAAAAAAAAAAAECAxETMUH/2gAMAwEAAhEDEQA/AOlUyJIA3pkHOVrJCI+4gY9Vw3Y+o6nY16rFJencxzsFpd0XRd91LbNLq/DsSd8zQeD/AFWFcjbqe4Uwa0DBcB7opTcroql9kTpiwiJpI5IqOmE3LST2ptu5Q1atbkngMbHZIHmrvc9ll+vSY0co2WG8hH9jnzK8yhrtLp8r1/Qr0IrNKxdhdDG6KQuGWhp4u/KiVbfwslYvWyL8T7rW7rlYZGjhGxuCistd2Hpms6jJdth5meBkh2ETtNvQouKWF3HTrtgaREwfyFnLDG36WNHsiJIBzMxG05zlERIGf//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 40%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/b40bf12699f8ad217b3af41c9efec269d1f396ad-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQABAAMBAQAAAAAAAAAAAAAAAAUGBwME/8QAKRAAAQMDBAAEBwAAAAAAAAAAAQIDBAAFEQYSEyEUMVFhFSI0cYGR8f/EABkBAAIDAQAAAAAAAAAAAAAAAAADAQQFAv/EAB4RAAICAQUBAAAAAAAAAAAAAAABAgMREhMhMUFR/9oADAMBAAIRAxEAPwCftURuXHbfjq3tLGQoV7JtrCUoWUklKgR7VDWOY5btEsS4C9w5M4UM9Y8qskm6tK0Uu5D65TAc2Y+UGlxgdzswdocKKlgeJwFk5/FKhNO3YXm2IkutL5AeNR8skf2lV3Q286iwr4rhxM8seoX9PxjZZ45iR0Qnofuraxq6BKsV4tgWlHC2lKWyACOsn71Fa7YamzG1Mx0qWlGAQMYrPGdNSXJbzklxSSsk59amu7PPrCypdY6Nj0ffmF2JlSI7KSSd2zyJ9aVSbU38NhpjMKcUhJzk+9KNb8ZG2vheHWUKdUCM5rlKgsFGSjsdg0pWdHs0JLgiuFA6ApSlNFH/2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 48%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/3606de5f8defd736cc1f8ae1ec1244c9519766bc-1280x720.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAALABQDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAYBBAUH/8QAIRAAAgEEAgIDAAAAAAAAAAAAAQIDAAQFEQYhEjEHE1H/xAAVAQEBAAAAAAAAAAAAAAAAAAADBP/EABoRAAICAwAAAAAAAAAAAAAAAAACASEDETH/2gAMAwEAAhEDEQA/AG35FyC43GYm4NpdXDyN4kW67I1+0oZzlFpdYyRVxWThZRstKhC110HytCraIXodeqwOSANJFbMFaCRWLIRsHVBLb0PC9J4ljTcYG1l+2VAy7C79UVVxeQurewhjhmKIB0AB1RVK5KiiZsV9P//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 46%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/0f3f3562c17d6c2250458d1420a7886ce5fd3317-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAQFAgYHA//EACUQAAEEAgEDBAMAAAAAAAAAAAIAAQMEBRESBiExByJBcRMzof/EABcBAQEBAQAAAAAAAAAAAAAAAAIBAwT/xAAdEQACAgIDAQAAAAAAAAAAAAAAAQIDETESE1Eh/9oADAMBAAIRAxEAPwDYq1e/jn9pvZq/DE+yb6dWMGTil9rFxP5AuzsqObKQYe5JDYvRwuxu3GQtMvQ8tjL7OTFDLILfsgJuTKO2UdkVcZaLsrDb8otIs5iQZiGsZSRN2YiHuiPch9RH9Vuh5eoM6ZDZirRAXNyP6Vd0j0tXwFe2+LnmyVlx9zgD8WXUcjgYc7k3vWJzGIR4/iF9b+1Lirx4bjHQAYY9fDeUbE22o6LX8Szs4fNlDqzHHZglaTe3bu38Rdkt069qd5Z4ITN/JODIs+D8Ncr0k1pCCoLC+llMTyCPN967Ii60czIIGXdt+H0iIiI//9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 50%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/ee3791509bbd9e659670bd580c83d69930902520-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQABAAMBAQAAAAAAAAAAAAAAAAUGBwID/8QAKRAAAgICAgIAAwkAAAAAAAAAAQIDBAAFESEGEiIxQQcTFDJCUWFxgf/EABgBAAMBAQAAAAAAAAAAAAAAAAECAwQA/8QAGxEBAAICAwAAAAAAAAAAAAAAAQARAgMTITH/2gAMAwEAAhEDEQA/ANGq2P5yYruCoYkcZj1ne7CetZSKSOAIvZVu89bVu6fGdMVtS+s0bFuG/MecnyBcpxqk2QbKqvwmzGCOuPbGZ54jqPxOp+9bliZG7P8AmM4yvuBxpqUG/wDZ7qLtaaTVXL6SiPkgyE9/sctOm8YvP4hp6lqRYJayFR+rnk/XJrwbV2SrxTq4Rl7Zhk1aobDSt7QFrdP5leOWUf1k6crPZRTGmenjELazVLWeRHZWJLAdHGc19pr3iDGP1P1APHeMYE6iqLdy4TQR109IlCqM7rfE/ffWMYdXkOyRl3x/Wz2GkkqqXPzI6xjGaJnn/9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 46%"
+        }
+      ]
+    },
+    {
+      "slug": "interior-stone",
+      "titleUa": "Камінь і латунь",
+      "titleEn": null,
+      "category": "apartment",
+      "locationKey": "lviv",
+      "descriptionUa": [
+        "Мармур, шевронний паркет і латунна фурнітура в санвузлі та проходах."
+      ],
+      "descriptionEn": [],
+      "area": "86 м²",
+      "workTypeUa": "Чорнові та чистові",
+      "workTypeEn": null,
+      "durationUa": "5 місяців",
+      "durationEn": null,
+      "year": "2024",
+      "cover": "https://cdn.sanity.io/images/l1d717lp/development/73b3e8b9d241aa9f49a31e437d8820df4c3449dd-720x1280.jpg",
+      "coverLqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAMFBAYHAv/EACYQAAIBAwMDBAMAAAAAAAAAAAECAwAEBQYRIRIxQQcTIlEVQoH/xAAWAQADAAAAAAAAAAAAAAAAAAABAgP/xAAbEQADAAIDAAAAAAAAAAAAAAAAARESUQIiMf/aAAwDAQACEQMRAD8A6xp/KtcAq5B6eBt5rUfU83N3j54rOV4Wd1QsvnnzUGhsizzINiIRGSSfus3WN7D7EQ3LAyo2yjc7dQ8VNOhahmad9LMFDiYRcoZpz8ndjySe9Khi9ScLbNLDPJOjo5G3tN2pTp8ITeVI9J2uBisoZybx5nT5KfiB/Kurq6xvuRmCxjEgICNK3Y1zqb8o84ks5enqHII4q5wOGu7i6SfJTMzIdwOwqGWi8PV9pnOvezypY2syyOXD9Q53pW/LdGNQvB2FKPXQmBrFlbxiOIhf1qyHA2HG1KUq8HZEZ3+6UpRCf//Z",
+      "coverPosition": "center 58%",
+      "span": "tall",
+      "media": [
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/73b3e8b9d241aa9f49a31e437d8820df4c3449dd-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAMFBAYHAv/EACYQAAIBAwMDBAMAAAAAAAAAAAECAwAEBQYRIRIxQQcTIlEVQoH/xAAWAQADAAAAAAAAAAAAAAAAAAABAgP/xAAbEQADAAIDAAAAAAAAAAAAAAAAARESUQIiMf/aAAwDAQACEQMRAD8A6xp/KtcAq5B6eBt5rUfU83N3j54rOV4Wd1QsvnnzUGhsizzINiIRGSSfus3WN7D7EQ3LAyo2yjc7dQ8VNOhahmad9LMFDiYRcoZpz8ndjySe9Khi9ScLbNLDPJOjo5G3tN2pTp8ITeVI9J2uBisoZybx5nT5KfiB/Kurq6xvuRmCxjEgICNK3Y1zqb8o84ks5enqHII4q5wOGu7i6SfJTMzIdwOwqGWi8PV9pnOvezypY2syyOXD9Q53pW/LdGNQvB2FKPXQmBrFlbxiOIhf1qyHA2HG1KUq8HZEZ3+6UpRCf//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 58%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/208633dc9b241f12363b9e16677ab9015731a12f-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAQHAgUGA//EACsQAAEDAwMCBAcBAAAAAAAAAAIAAQMEBREGEiETMSJBUWEUFSMkMnGB4f/EABcBAQEBAQAAAAAAAAAAAAAAAAECAwD/xAAaEQEAAwADAAAAAAAAAAAAAAAAARESAiFR/9oADAMBAAIRAxEAPwCy6fWFLZYYaSj+4EfCMIt+P9Wd6vsdYwNWSlEL4fpE2B/1VfpivYRGMyB93OHZe2pbw0pxxSH9Pbz7I3PoWF82pGw2/D+iKsIblGQM5Hn0fPdFW3U5y1TxyPAQltdmx35WzK0115mCntsXxMjD4mzjhTLXY4qPDtE0rN5v3Uitllt2yeICjYe5Dw6wvteZQw0RqOAWje1mWPPcyLeU2r67oj07ke33flFpfE5lKpn8WFNkgjnHZKLEOOyIoXLkq2zUT1Jv03b9OiIgv//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 52%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/80d7d42d49c99416deb37f5c334de1ec563bc0c7-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQABAAMBAQAAAAAAAAAAAAAAAAYHCAUE/8QAJxAAAgICAQMDBAMAAAAAAAAAAQIDBAAFERIhMQYTQQciUXFDYYH/xAAYAQACAwAAAAAAAAAAAAAAAAAAAgMEBf/EAB8RAQACAQQDAQAAAAAAAAAAAAEAAhEDISJBEjFCUf/aAAwDAQACEQMRAD8Ajmie1twypYRZR/GT3yYelda+p26WbrseodBB/vKe01iRdxB0OysWABB4OXJqDPdsV61mR3Lgjq+eciLvi2eoycip3JNPShaxKRKQC3gYzzW4Gr2GjR3AH5xiGqpmSOnjaZqqXVg2laTyFcHgfvL29G7SGTbVWdHVgCekj85nmjrrcrpY6OeDyo54P7y2fp5LO+3jF1mjUoR1MPGDYw0/YGn9vUuDZxxy2i6+CB84zhI0yF1hf3Iw3ZicYFMGCDbLlmeYSXs/cSe+SWpI8dVnjdlZfBBxjKWd5ohtO96d2t1qLlp2Y+4e5/zGMZo19EoWOTP/2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 40%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/d45ba8525745060ee9b8124aa0a188f4d05ca783-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQABAAMBAQAAAAAAAAAAAAAAAAQGBwUC/8QAJBAAAQMEAgICAwAAAAAAAAAAAQIDBAAFBhESIRMxInEHUYH/xAAZAQACAwEAAAAAAAAAAAAAAAADBQABAgT/xAAdEQACAgIDAQAAAAAAAAAAAAAAAQIDERIEITET/9oADAMBAAIRAxEAPwDPvxxIgM3BxdzQytnjrTvrddfNzZ7g0yxZhGDxd4ktjXRNcHEIyYs9h19CXEJUNpPYqzzhHk3NCkR0oLYK9hOhvdcNk9ZIJGO00jYcPx+NZ8fixGYsVzSeS1ujtSj7NKzh/KkMOeNb7aVJA6U5o0pe7L32NlTUuiHFgW2C5Cdt7nkaKxyUsdHR96/Ve8keCrmW4TaH1pOjx6GjWg4ja4sJth6Ywhck+gR0kfVSMoYgvNlyTDY0Hh8kJ0rX8po+O5PbIqVmssmL3yLjzdwWLhbnHZJAK1IWSPqlW28R2U3B0Rdss7+KONK0qkuss19JMv4WoS0aPqouYLKI3JPR5A0pR14wL9RTJj63nytZBVr3SlKsh//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 48%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/92577266596eb74f4aba20281460210736e477ff-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQABAQEAAwAAAAAAAAAAAAAAAAUGAwQH/8QAJRAAAQQBBAEEAwAAAAAAAAAAAQACAwQhBRESEwYiIzHBQVFx/8QAFgEBAQEAAAAAAAAAAAAAAAAAAgMA/8QAHBEAAgICAwAAAAAAAAAAAAAAAAECEQMhEhMx/9oADAMBAAIRAxEAPwC5JBJBK4dfFp+W7YTvjiiIeeAHwD9LYx61De27qbDuM8lmLbKj9RlkmiZGGvHAB2+PpRevBrZOOoTEDriHADYciASileWVa02rl3Mj0NGwOyIWKjQ6VdluabE6nUkZaafcEuAf4uHVPGrd6+bLZ3VmvIJiYd1qqbWsjGwAVjT4A1pszDAwwH8n9pxTboLpGGn8AtXXiZ9sRkgDiRlF6D2lx3OSir1IPJkOi0FzAfgkK/qHpkZG3DWjARFsRpHVBwiIqBP/2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 44%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/be0242954080db2649d9641fbd577940f880a3bc-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAUGBAcD/8QAJRAAAQMEAgEEAwAAAAAAAAAAAQACAwQFBhESITEHIkFRExVh/8QAFgEBAQEAAAAAAAAAAAAAAAAAAwQF/8QAHxEAAgEEAgMAAAAAAAAAAAAAAAECERITMSFRAzJB/9oADAMBAAIRAxEAPwCV9Prc28RvpZXcHRScwfhydCnFPVTxtJLRIQN/Sn/TWKpF/j/Hye1ko5AK4vkQF6m00AlxJ0ii3lp8EdMaMLowUL3e0A6QrLSe4w4A2HH8xc6ZzjE9nu39pzkdTF+zfKCCHEka+e1yvFsmlut2eauLhKyPZ0eimc97qhfKcSDR4n2n6UzglPIuWKpNxtfBUzyzuk3yjjB8Nce0Kjt1ptNZRxz1Z5zPGz34/iE9PJ0FWHZwnBmB2QhpHT4nAp1ezxyOmA8NboIQij6iy2VkdTKGAB3QQhC1o6MyWz//2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 50%"
+        }
+      ]
+    },
+    {
+      "slug": "hidden-doors",
+      "titleUa": "Коридор з прихованими дверима",
+      "titleEn": null,
+      "category": "apartment",
+      "locationKey": "lviv",
+      "descriptionUa": [
+        "Фактурна штукатурка, полотна в рівень зі стіною, великоформатна плитка."
+      ],
+      "descriptionEn": [],
+      "area": "64 м²",
+      "workTypeUa": "Чистове оздоблення",
+      "workTypeEn": null,
+      "durationUa": "3 місяці",
+      "durationEn": null,
+      "year": "2025",
+      "cover": "https://cdn.sanity.io/images/l1d717lp/development/cd90a733dd2d358e95c68813f3b827da86147462-720x1280.jpg",
+      "coverLqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQABAQEBAQEAAAAAAAAAAAAAAAYFBwME/8QAJxAAAQQCAQMCBwAAAAAAAAAAAgABAwQFESEGElETIgdBUmFxodH/xAAVAQEBAAAAAAAAAAAAAAAAAAADAv/EABgRAQEBAQEAAAAAAAAAAAAAAAABESEx/9oADAMBAAIRAxEAPwCm6pxsmKzsNsGf0z9pu36demVkIKfcT8OO9q4ztKLJw+kfGxdt/dcusyWL5XMZJAQDWjLcn1a8I96RY9G0QnwUUumLvIn2ipvhzQCr0dj43Hnt3z+UVp1lW7hhJt39vyUo1eWvPftyysQyA7MOuW261rM4lIXPubhm8r5c4BBRcgHucm07Ohturxf9OTNFg6YNxqNkUJa6nGlHVijPTeiL68Pz/ESweMvESFZE5pdObG7M/hat+Qhgcd7FudOiISOU9aTyxZshAyYeweEREk8S/9k=",
+      "coverPosition": "center 46%",
+      "span": "wide",
+      "media": [
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/cd90a733dd2d358e95c68813f3b827da86147462-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQABAQEBAQEAAAAAAAAAAAAAAAYFBwME/8QAJxAAAQQCAQMCBwAAAAAAAAAAAgABAwQFESEGElETIgdBUmFxodH/xAAVAQEBAAAAAAAAAAAAAAAAAAADAv/EABgRAQEBAQEAAAAAAAAAAAAAAAABESEx/9oADAMBAAIRAxEAPwCm6pxsmKzsNsGf0z9pu36demVkIKfcT8OO9q4ztKLJw+kfGxdt/dcusyWL5XMZJAQDWjLcn1a8I96RY9G0QnwUUumLvIn2ipvhzQCr0dj43Hnt3z+UVp1lW7hhJt39vyUo1eWvPftyysQyA7MOuW261rM4lIXPubhm8r5c4BBRcgHucm07Ohturxf9OTNFg6YNxqNkUJa6nGlHVijPTeiL68Pz/ESweMvESFZE5pdObG7M/hat+Qhgcd7FudOiISOU9aTyxZshAyYeweEREk8S/9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 46%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/c8e31df55f2caee10f8bef57cc610707eed91425-960x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAYHBQP/xAAmEAACAQIFBAIDAAAAAAAAAAABAgADBAUREiFBBhUiMRMUUWFx/8QAFgEBAQEAAAAAAAAAAAAAAAAAAAIB/8QAFhEBAQEAAAAAAAAAAAAAAAAAAAER/9oADAMBAAIRAxEAPwBdubu5vHShbK1Vh4qx9CcU6ZqVLwG8b5Kg4y2ErXS+HYS5syiKSjEkHmbGIYZZDEmroij9CSJ1bdMVjRXRQbTl+ISjG+VDpVgAOIQJ1h1x2+pQ82AB9EzSvsfZqzFWOf8AYu0yXNPXvtzM+s7faIzMmUM/eNe5JJhF1GIXYwjWv//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 48%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/5566bbb70114db9661a6efccd115a033da1f996f-960x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGgABAQACAwAAAAAAAAAAAAAABgADBAUHCP/EACEQAAEDBAIDAQAAAAAAAAAAAAECAwQABRESBhMhMVFB/8QAFwEAAwEAAAAAAAAAAAAAAAAAAQIDBP/EABkRAAMBAQEAAAAAAAAAAAAAAAABEQIhEv/aAAwDAQACEQMRAD8AWcKt9rl212JIZHe4MBfyuq+Q8fuUbk86ztrLcds7JIHkg0/41IEWeNV4/cVyd7bbnXZU0ZU6tIQoJwDj7WfbbXCuIn08+O2JTTziCk5Cj7qp3foS03R4RUOONZ8KqoL1Bm803HLiWXUqSfNZxyS62ZtybGhiYHx16qTtqPtH5hPc35p22hKYaAAANRTEwNLTce7crUkuDcjPon8qpbKbSpwFSQTiqjQw/9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 52%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/9d5143d77c1e927be0942d247aa15006234b966d-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAQACAwAAAAAAAAAAAAAAAAcGCAIEBf/EACkQAAIBAwMCBQUBAAAAAAAAAAECAwAEBQYREiEiIzFBUXEHFBYmMmL/xAAWAQEBAQAAAAAAAAAAAAAAAAADAgT/xAAcEQADAAMBAQEAAAAAAAAAAAAAAQIDEjIhETH/2gAMAwEAAhEDEQA/AKFk7GXHYiGa4RZFPm6eY+RXizRqUVk68uoX1rLEvBdWIifZl9jUE+tGor3HaykisLloUMSIVQ7bUErZ+DU/n6UyDVYxqfbLeW8XE7lWYb0rXC9njWYF5Hd2UMxJ9aUmhGxsrj7u6kxsDWIjeRgp7z029anevtA5XVWevMpjJIJVj4q0IbvBA9qzjTCXdjgsbkoQH7B4e2+4rnqfBXsxGodLyPa5dBymgH8zD496BZFDTY1S6XhBPx6dJpor2J0njcoVYdR0FKzu7zz5O4e6ubMW9y58VP8AY6E0ptglJWdCd2isYW6+CK7Uc0kV2ODbbGlKzZORo6I7rxv2u/4gKOfko2FKUpMfKIrpn//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 44%"
+        }
+      ]
+    },
+    {
+      "slug": "oak-kitchen",
+      "titleUa": "Кухня з дубовими фасадами",
+      "titleEn": null,
+      "category": "apartment",
+      "locationKey": "lviv",
+      "descriptionUa": [
+        "Нижній ряд з дерева, мармурова стільниця, обідній стіл у тому ж камені.",
+        "тестовий текст"
+      ],
+      "descriptionEn": [],
+      "area": "78 м²",
+      "workTypeUa": "Під ключ",
+      "workTypeEn": null,
+      "durationUa": "4,5 місяця",
+      "durationEn": null,
+      "year": "2025",
+      "cover": "https://cdn.sanity.io/images/l1d717lp/development/fa1a5324e42b3b3df21986a2ed1acf6846d38ce2-720x1280.jpg",
+      "coverLqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAUGAQMEB//EACUQAAIBBAICAgIDAAAAAAAAAAECAwAEBRESIQYxEyIHQRYygf/EABcBAQADAAAAAAAAAAAAAAAAAAQBAgP/xAAcEQACAwEAAwAAAAAAAAAAAAAAAQIRMUESEyH/2gAMAwEAAhEDEQA/APVvIoIZYS8TqxH9tH0apjsUkACk966rEmZknb4YYnSR/tJv9mpPH2FwrK8qtwI5HfrVVcqJWlZy13fQ3ZWEFU4ggEUqTz8rzZFmGtAADqlF9l/bF+FcNUi3ltK9xHZSsVXo8eq48t5DfjGXXytIhETFddf5V1/IeXjsMRHaRsRLdvwBX2FHs1UbmCLI4BW5c9qRyJ7IrWSlqDxrprwUpuMPZyzEmRowWJ90qOsZhb2scIYkIOIpRmhiw5PPstdXt1dSSsAYoQqBRoDfupnxuJP47Y7G/p+6Up/EAIST6zzAdAOdUpSiPRccP//Z",
+      "coverPosition": "center 42%",
+      "span": "small",
+      "media": [
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/fa1a5324e42b3b3df21986a2ed1acf6846d38ce2-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAUGAQMEB//EACUQAAIBBAICAgIDAAAAAAAAAAECAwAEBRESIQYxEyIHQRYygf/EABcBAQADAAAAAAAAAAAAAAAAAAQBAgP/xAAcEQACAwEAAwAAAAAAAAAAAAAAAQIRMUESEyH/2gAMAwEAAhEDEQA/APVvIoIZYS8TqxH9tH0apjsUkACk966rEmZknb4YYnSR/tJv9mpPH2FwrK8qtwI5HfrVVcqJWlZy13fQ3ZWEFU4ggEUqTz8rzZFmGtAADqlF9l/bF+FcNUi3ltK9xHZSsVXo8eq48t5DfjGXXytIhETFddf5V1/IeXjsMRHaRsRLdvwBX2FHs1UbmCLI4BW5c9qRyJ7IrWSlqDxrprwUpuMPZyzEmRowWJ90qOsZhb2scIYkIOIpRmhiw5PPstdXt1dSSsAYoQqBRoDfupnxuJP47Y7G/p+6Up/EAIST6zzAdAOdUpSiPRccP//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 42%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/e790c6e38e7fde6c5e8c2e812c9c626f5cbdd551-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAYEBQcD/8QAJRAAAQQCAQQCAwEAAAAAAAAAAQACAwQFERIGITFBE3EiI1GB/8QAFwEAAwEAAAAAAAAAAAAAAAAAAgMEAf/EABsRAAICAwEAAAAAAAAAAAAAAAABAhESEyED/9oADAMBAAIRAxEAPwDVMV1PBLZfWsSxSdvLD5/xK/Vxrvs84e3Lvr2FEtYRlPqIuik38rPkGvRUVlKzYyJEzufI72VLCeSsdKOLOtW1kY4GsrGERN7Dn5QmSDF4+OJjZ7LGyAfkEIwLEXFdcYexfaJzbluNYdggcQPtd6fUZy2alpU4mwbadOLtnazKrj5KObeK4PF0B4kjftaD0Zh5Kt2S/KO7tEFw8la/OKXDcnfS0s1LrZSHHk72eRQmR37TzdECT/ChJ1jNhSnF0xVgaIR3Gi73r7VxYhZC+tFG3TNAaQhVsmRNsRNDwGjQ0PCEISwj/9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 48%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/30b2c6cbd592b6045ee550cef3fbcc6f330545a9-960x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAMFBgcE/8QAKhAAAQQCAAMGBwAAAAAAAAAAAQACAwQFEQYTIQcSFTFRYSIyQUJxkaH/xAAWAQEBAQAAAAAAAAAAAAAAAAADBAL/xAAbEQADAAIDAAAAAAAAAAAAAAAAAQIDIhIhQf/aAAwDAQACEQMRAD8Aluz2HXA5qHzqySQfoqrY6MMyGV0PtA/quXAz2xScQ1HEaFjnNHs4KrViPEMqR6gKaHuNT1IG2wc9yE62wOncdoVAIzGZ2avmrJrtc42IGjp6hMx3PhFySx80rgdjqB7bULgXu77gCfie1p/C0y3Whbhp2NjaGiPYGvqsY4S7Et+GfW7TWzEeaFwHqdlCLmxFjR//2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 40%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/c3bee9a48df623bde5b319767e3345a7fb78a134-960x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGgAAAgIDAAAAAAAAAAAAAAAAAAQCBgMFB//EACQQAAEDAwMFAQEAAAAAAAAAAAEAAgMEERIFBkEHExQxkSJR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAwL/xAAaEQACAwEBAAAAAAAAAAAAAAAAAQIDESEi/9oADAMBAAIRAxEAPwBrf0fj75qXcSMjk+Gyz7pGUsRA9xhMdXIhFuajm4khc34QVHWcXtp3HmIFFR2JVr6jnxoXF7y0kAuKFYafAx/vG9yhJhJuur2oR1MmmSRG7g4t+hK11QH0FI6/qEApOZjaqtb5A7nbBc3LgpjXomQ0tN22huTRe3KOrzBsuzskivNp8rm7hc/1CejAx9IQaxcR/9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 38%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/f6933b30cf7d0add73718337bc1c73cf90942a45-960x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAUGBAL/xAAnEAACAQQCAAQHAAAAAAAAAAABAhEAAwQFBiESExQiJDFBQlFxof/EABgBAAIDAAAAAAAAAAAAAAAAAAEDAAIE/8QAGREBAQADAQAAAAAAAAAAAAAAAQACESEx/9oADAMBAAIRAxEAPwDJ6NlAJU1w4tLILpI+2e6tdhZw9yUfHVUMwCh9pFT2Txc4fKMjzDbZDjgrDTVXlDsjs4r5Sm5a7SYmirnjmoU6tCYEsx/tFHUN2PB1tvXr8PcdQJIWeqT5+TdxdpezCxcungI/FOsliEkE1PbXsmfqKzq+zgKl4fsQ+mVmMTcaip/TOy6+2FMCT8v3RTjKWl//2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 44%"
+        }
+      ]
+    },
+    {
+      "slug": "house-bedroom",
+      "titleUa": "Спальня з робочим місцем",
+      "titleEn": null,
+      "category": "house",
+      "locationKey": "lviv",
+      "descriptionUa": [
+        "М’яке узголів’я, підсвітлена стіна, стіл біля вікна, шафа з дзеркалом."
+      ],
+      "descriptionEn": [],
+      "area": "168 м²",
+      "workTypeUa": "Чистове оздоблення",
+      "workTypeEn": null,
+      "durationUa": "6 місяців",
+      "durationEn": null,
+      "year": "2024",
+      "cover": "https://cdn.sanity.io/images/l1d717lp/development/322643b54f3ce2e025c7924c2d4d4c9e8931306d-960x1280.jpg",
+      "coverLqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAIFBgME/8QAJhAAAQMEAgAGAwAAAAAAAAAAAQIDBAAFERIGIRMUFTFBUSIkgf/EABcBAAMBAAAAAAAAAAAAAAAAAAADBAX/xAAbEQEAAgMBAQAAAAAAAAAAAAABAAIDBBESMf/aAAwDAQACEQMRAD8A1sB2AqMhacqKjr18Ul0RGjqx4gIqMqTZoNocMtUhEkhQToes46qDx+82/wBNaN3eeS+ScKcScEZ67rIrq29dH7LnYqnJXud6tEKV4Ljv5BIJ7oqfyO3wHrmpfl2lZQnvHv1RQFkgoT02W92y0beshGmhWHHRk5+qzPJeYP8AKFiFaoiI9s2GzikDZYB+Pqkv8dqTHaD6AsBQ96aI0htsaJCcDrFJz7l+FSNx69RWdpt1BkHckEAD+CioVyP7aqKkNnKHBjnFRe8n/9k=",
+      "coverPosition": "center 40%",
+      "span": "large",
+      "media": [
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/322643b54f3ce2e025c7924c2d4d4c9e8931306d-960x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAIFBgME/8QAJhAAAQMEAgAGAwAAAAAAAAAAAQIDBAAFERIGIRMUFTFBUSIkgf/EABcBAAMBAAAAAAAAAAAAAAAAAAADBAX/xAAbEQEAAgMBAQAAAAAAAAAAAAABAAIDBBESMf/aAAwDAQACEQMRAD8A1sB2AqMhacqKjr18Ul0RGjqx4gIqMqTZoNocMtUhEkhQToes46qDx+82/wBNaN3eeS+ScKcScEZ67rIrq29dH7LnYqnJXud6tEKV4Ljv5BIJ7oqfyO3wHrmpfl2lZQnvHv1RQFkgoT02W92y0beshGmhWHHRk5+qzPJeYP8AKFiFaoiI9s2GzikDZYB+Pqkv8dqTHaD6AsBQ96aI0htsaJCcDrFJz7l+FSNx69RWdpt1BkHckEAD+CioVyP7aqKkNnKHBjnFRe8n/9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 40%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/5aa8f12a5d43a0d4679b46861f34a5727f24f62e-960x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGgAAAQUBAAAAAAAAAAAAAAAAAAIFBgcIA//EACYQAAIBBAEDBAMBAAAAAAAAAAECAwAEBREGEjFREyFBYQcUIpH/xAAVAQEBAAAAAAAAAAAAAAAAAAADBP/EABoRAAMBAAMAAAAAAAAAAAAAAAABAhEDEiH/2gAMAwEAAhEDEQA/AHfHZq+xd00WVtHRj3I7DX1U5iP7tqjqw0VB0KqPm3KZb6REaRIppv59u6mlpl8jx24hEUjTHISRp1dW/TXXg0EpsWmkXxgLMDHj7YmiunHm9DEwoXMh79R+aKVBaZtzOEtJc5mbHLXDRNA7PbED58GmXLyTzxWsEp3LEyiOX514qZfkxVXm87KACyKWPk0wSRo15Y7UHcy7/wBqN04vEVqVUemiuMSLbYGyimcdaxrvZ9+1FQ/IswuiASAAABv6oqvvgK4dW6f/2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 42%"
+        }
+      ]
+    },
+    {
+      "slug": "marble-vanity",
+      "titleUa": "Умивальник зі смуг мармуру",
+      "titleEn": null,
+      "category": "house",
+      "locationKey": "lviv",
+      "descriptionUa": [
+        "Набірний камінь на тумбі, латунний змішувач, ніша з полицями."
+      ],
+      "descriptionEn": [],
+      "area": "81 м²",
+      "workTypeUa": "Чистове оздоблення",
+      "workTypeEn": null,
+      "durationUa": "3,5 місяця",
+      "durationEn": null,
+      "year": "2024",
+      "cover": "https://cdn.sanity.io/images/l1d717lp/development/0afe0f17842ab16f89dde200762f612295d9168e-720x1280.jpg",
+      "coverLqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAYCBQf/xAApEAABAwQBAwEJAAAAAAAAAAABAAIDBAUREiEGMUETFSIjMlFSYXGB/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAIDAf/EABoRAQEAAgMAAAAAAAAAAAAAAAABAhESMTL/2gAMAwEAAhEDEQA/ALaG1BrMkAftbjoGvyIy12O+pys0tmNbfbjHNPM6KEt1ZvxyFU2CzxQSTNYwBuAozE9yTns0/aitpKKMOxgIq8YTaNtdb6XV15Z4dHE8Kit1wxNNg+AoKml16wrs930sfP1wSu/QP+NNz4CNB3prj755KLhzSHc8on0x5F1PeKym662hk1DdWAAcEflep2pxe1zj3LQSiLJ3T5eY3P8AP/ERFVN//9k=",
+      "coverPosition": "center 48%",
+      "span": "tall",
+      "media": [
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/d80e1cad4ade7221edc59bb68b4c5dd77d027581-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAUGBAcI/8QAJhAAAgICAgEDBAMAAAAAAAAAAQIDBAARBSEGEhMiBxRBYTFCcf/EABcBAQEBAQAAAAAAAAAAAAAAAAIEAwH/xAAcEQADAQEAAwEAAAAAAAAAAAAAAQIRAwQhMTL/2gAMAwEAAhEDEQA/AHNyJKchV68nsnoSgdA5i8vrmpDDLUQ/JRtgcsbXKx1IpKzhSG77G8ivNJhMkKCcxr6R8R+ci8zXNYUcPTWiqHkPt4kX2ZCSNk/vDGnFpEKSBiJCP7HDDy1QhX+mMfJYpG5BAjqB6dnZ/nJbye2oeEMN6A7y7u1oZrnvSsqqq67/ADnOvqj5FxlLj2q1YkkvHQTQ2V/ZyjtzdakY86zDdW5GFIFDOAdb1hk/4lYtWeFilmo+85J+esMETkpDb1j36qcrb4rh7E9KT0S9KGPev8ziXBM1+4r23aR5HHqZj2cMMpv6ZR8PRXEVYq3HQxQoFRV6AwwwwHT/2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 48%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/5d069bc5648872150262256671ad476e6a5a86d3-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAUGAQMHBP/EACgQAAEEAgECBQUBAAAAAAAAAAEAAgMEBREhBjEHEhMiURQVQUJhcf/EABkBAAMAAwAAAAAAAAAAAAAAAAECBAADBf/EABkRAQADAQEAAAAAAAAAAAAAAAABETECIf/aAAwDAQACEQMRAD8A8brT3SuY0EnW9BSuOdJFWnMzSwubxtb9iu/yV4WHfd3ws2qVm16hgHJbobPCnbVNuZEOsvI4G0Wi703nxYfqk4g8gtPCKHqeryVEVWug0avrSMABa3uCpS5agxVOWa25jWsGxzpRU2Xr4uo90xDXNHmaCew+VyPPdQXutsyKdQuFMO9xH7/3/F0KTakcz1/l7N+R+LjLqo9rSQedIr5hOm61PHRQtjafKOTruUT0zxybxXyNr7t9KJSIZD7gO5Vh8PcfXb07NM1pbK4EFwPPCIiEYv3St2afDxmVwcWuLQSPwEREkYadf//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 46%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/9498c0d68c972e54072c4de45e6075871c41d310-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAQFBgEC/8QAJxAAAQQCAQIFBQAAAAAAAAAAAQACAwQFERIhMRMUQVFhByJigcH/xAAXAQEBAQEAAAAAAAAAAAAAAAADBAEF/8QAGxEAAwADAQEAAAAAAAAAAAAAAAECAxExEiL/2gAMAwEAAhEDEQA/AKn0/ZJXzNjIZWMeLC3TGn3Pcqrns75q24M+1hHb0Wes5ICUFh0HjqF4y07IhU4t6v2NoltsRvRFzUTPOnQHVoKEtn5jHeA/AIUOWn7Y8L5QncuO8ZpBV3Kz86tB3x/EvNjY56paG8ZG9QfdJTWTJBDC9pbJCdfpdCektIQzu33Wuc4kmMeqF3Jxl1kfDQEKLJj3bY81pI31eJm+PEaIWVzUTIb7Swa5d0IVshULPAdI4nvtCEIa6zVw/9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 44%"
+        }
+      ]
+    },
+    {
+      "slug": "house-living",
+      "titleUa": "Ніша з диваном",
+      "titleEn": null,
+      "category": "house",
+      "locationKey": "lviv",
+      "descriptionUa": [
+        "Диван у шафах, дерев’яна панель, зона ТБ і санвузол з дерев’яною тумбою."
+      ],
+      "descriptionEn": [],
+      "area": "154 м²",
+      "workTypeUa": "Під ключ",
+      "workTypeEn": null,
+      "durationUa": "5,5 місяця",
+      "durationEn": null,
+      "year": "2025",
+      "cover": "https://cdn.sanity.io/images/l1d717lp/development/053dbcc7d6ee969a7fb16ac13d03b42e8daebe3b-1052x1280.jpg",
+      "coverLqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAYABQDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAYFBwL/xAAkEAABAwMDBAMAAAAAAAAAAAACAAEDBAURITFBBhITFAdRkf/EABYBAQEBAAAAAAAAAAAAAAAAAAQFA//EAB0RAAICAwEBAQAAAAAAAAAAAAECAAMEESEiE3H/2gAMAwEAAhEDEQA/AOuwP09OLxiw+EhyxZ2dRl0qrXbJDOScWBn0xqsr5DoBoqCm9GQ45DkxgH4U7cqCkio4/bnnM9MdxaZUwUHFYHR7GK/2B7Pdx6+twVRDDDMQNz27oo2408bVL4HTH0iqGl4MWidOlaS6SAc8z9w7Px+LMu1smInaSLyCwu4sL6O/DoixxbnNnrv7E5FSivzyQ1zprg1Vh6SXOG2ZEROa9twK0rqf/9k=",
+      "coverPosition": "center 48%",
+      "span": "wide",
+      "media": [
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/053dbcc7d6ee969a7fb16ac13d03b42e8daebe3b-1052x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAYABQDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAYFBwL/xAAkEAABAwMDBAMAAAAAAAAAAAACAAEDBAURITFBBhITFAdRkf/EABYBAQEBAAAAAAAAAAAAAAAAAAQFA//EAB0RAAICAwEBAQAAAAAAAAAAAAECAAMEESEiE3H/2gAMAwEAAhEDEQA/AOuwP09OLxiw+EhyxZ2dRl0qrXbJDOScWBn0xqsr5DoBoqCm9GQ45DkxgH4U7cqCkio4/bnnM9MdxaZUwUHFYHR7GK/2B7Pdx6+twVRDDDMQNz27oo2408bVL4HTH0iqGl4MWidOlaS6SAc8z9w7Px+LMu1smInaSLyCwu4sL6O/DoixxbnNnrv7E5FSivzyQ1zprg1Vh6SXOG2ZEROa9twK0rqf/9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 48%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/b0b54ae89060a698798e05982876fc280dc2f248-960x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAAAAQFBgcCA//EACcQAAICAgAFAgcAAAAAAAAAAAECAwQAEQUGEiExE1EHFBUiI0Fh/8QAFgEBAQEAAAAAAAAAAAAAAAAAAwEC/8QAGhEAAwADAQAAAAAAAAAAAAAAAAERAgMhMf/aAAwDAQACEQMRAD8AZ5fFKw8zh0bo8Rodk/wZ4cd4Tak1ZsxenETpF9sU+EZjh4ra0g6RH2JH7y682SD6Sg95Tg4umslDM5KyhyNYY1OfyHDLWQ65MhmXjsdSo6p6h2C50MtnO1n5VY6LkGWMlmIPY7zPnlkr24ZIHKSKezDyMVrWZ7DzvPK8jlu5Y7OFoXGJt9JCWz95wyPcnq84YsMU/9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 42%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/dddc2f136e2a2adeab10bb46504e87b7a206cd71-960x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAUDBggE/8QAJRAAAgIBAwQBBQAAAAAAAAAAAQIDBAAREiEFBiIxBxNBUWFx/8QAFwEBAAMAAAAAAAAAAAAAAAAAAwABAv/EAB0RAAICAQUAAAAAAAAAAAAAAAABAhEhAxIxUWH/2gAMAwEAAhEDEQA/AM/U4CkybFO4ngDGvcdO2UjNyORTt8dw04x92DHXk7lhM4Q7R47vWuXP5FrI3R1e0QZw3j/MKNyk/BHhV2Z/lAVyOeMM6b6KLTj94YoVDuCeWvaWeA8/fnGd/rk9pVNyUsqjgE64j1O3F/UHYsoJOmuTh2XZBcm+rYd0BIJwyy068QrppGvr8YYi028mdx//2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 40%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/397d15f3aba4210e3cf8970cc5bb699f8584a33f-960x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAUGBAj/xAAmEAACAQQBAwMFAAAAAAAAAAABAgMABAUREgYTMQcUITJBUWGB/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAIEA//EABoRAAIDAQEAAAAAAAAAAAAAAAABAhFBIRL/2gAMAwEAAhEDEQA/AKa5nS0tTPPy4oNlR51+aW2OchzGUSG0ZpWYbLH41qpm16ju73F93KBpIuw3JyvHZ3Wj0juLe7zMrQH6UZtedDdTJeYu8HTbkqLdsbMx2XAoprPNqQiisbKKJjrXJ9K4+1lsWIyszgqEjIVV39/jxUT6bTWGJyU3twEklHHW/wB+Kh8gTHdKqHQow8rpl7JlYhu8vz/aINz5gsqh3ToC/wATkJrgyQ5F4UYA8O2Dqim1tK7QIWYk6oqhISz/2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 46%"
+        }
+      ]
+    },
+    {
+      "slug": "millwork-brass",
+      "titleUa": "Двері та столярка",
+      "titleEn": null,
+      "category": "apartment",
+      "locationKey": "lviv",
+      "descriptionUa": [
+        "Приховані полотна з латунною кромкою, шафи без ручок, шеврон до виходу."
+      ],
+      "descriptionEn": [],
+      "area": "74 м²",
+      "workTypeUa": "Столярка та двері",
+      "workTypeEn": null,
+      "durationUa": "2,5 місяця",
+      "durationEn": null,
+      "year": "2024",
+      "cover": "https://cdn.sanity.io/images/l1d717lp/development/afe7f616893dcb1ff6d7d1c5629d617d7c8253be-720x1280.jpg",
+      "coverLqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAQFBgcC/8QAJhAAAgICAQIFBQAAAAAAAAAAAQIAAwQRBgUhEjFRYYEHFSIyQf/EABkBAAIDAQAAAAAAAAAAAAAAAAIDAAEEBf/EABwRAAMAAgMBAAAAAAAAAAAAAAABAhExAxJRIv/aAAwDAQACEQMRAD8AsmNRvi99Z/atip+DE8NCp8Jqc7HmB2jvH71yul9UrLbcWE6PnHcatGxACzKwO+3aIucKUM462OoNVoPRRCck+UIAeSmfS7NOZh9bDt47NeIn4kV0rlF1nIBhWXqwLFVQe0r/AArq32rpHIir6d8cBT7ntILgCl+W4pYlnLEkyX9qMP0KY6u8o3mjNS6oOyMh/oMIktqAaLAEGEpRXoPaTAbnaulwjEBx+Q9Y9wPY5PgOCQxfRhCLl6NdrZrucoGS+oQhNpzj/9k=",
+      "coverPosition": "center 50%",
+      "span": "small",
+      "media": [
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/afe7f616893dcb1ff6d7d1c5629d617d7c8253be-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAQFBgcC/8QAJhAAAgICAQIFBQAAAAAAAAAAAQIAAwQRBgUhEjFRYYEHFSIyQf/EABkBAAIDAQAAAAAAAAAAAAAAAAIDAAEEBf/EABwRAAMAAgMBAAAAAAAAAAAAAAABAhExAxJRIv/aAAwDAQACEQMRAD8AsmNRvi99Z/atip+DE8NCp8Jqc7HmB2jvH71yul9UrLbcWE6PnHcatGxACzKwO+3aIucKUM462OoNVoPRRCck+UIAeSmfS7NOZh9bDt47NeIn4kV0rlF1nIBhWXqwLFVQe0r/AArq32rpHIir6d8cBT7ntILgCl+W4pYlnLEkyX9qMP0KY6u8o3mjNS6oOyMh/oMIktqAaLAEGEpRXoPaTAbnaulwjEBx+Q9Y9wPY5PgOCQxfRhCLl6NdrZrucoGS+oQhNpzj/9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 50%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/77d9653e6b24378befdf80dbae482815912c99a8-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGwABAAICAwAAAAAAAAAAAAAAAAQFAgYDBwj/xAAnEAABBAEDAwMFAAAAAAAAAAABAAIDBBEFEiEGEzFBUcEUImFxgf/EABYBAQEBAAAAAAAAAAAAAAAAAAQFA//EABwRAAMAAQUAAAAAAAAAAAAAAAABAgMEERITMf/aAAwDAQACEQMRAD8Ahadpk8pb3ZOPYKbbrClP2zlxPhXen9nvRxgne4bgMeQsupaobqMXHlnwjYmrZvlTk1t73ZG2PIwis60bTGdw5BRL60F7GT9PrzDUakhbljGFriFa9VtAu1iPWP4XUEfXBicx+m2y1nGY38nP9W6Vepamr1oJbepQfWMBBjP2/rCBpOEW8cjdQqqVTLGCAvZub6lFz6ZPGKoy9pySfKKtxJu7PMmwbPyCpfO3OSeERSl6WX4SI7lljA1liZrfYPKIi0TZnsj/2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 46%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/0afe0f17842ab16f89dde200762f612295d9168e-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAYCBQf/xAApEAABAwQBAwEJAAAAAAAAAAABAAIDBAUREiEGMUETFSIjMlFSYXGB/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAIDAf/EABoRAQEAAgMAAAAAAAAAAAAAAAABAhESMTL/2gAMAwEAAhEDEQA/ALaG1BrMkAftbjoGvyIy12O+pys0tmNbfbjHNPM6KEt1ZvxyFU2CzxQSTNYwBuAozE9yTns0/aitpKKMOxgIq8YTaNtdb6XV15Z4dHE8Kit1wxNNg+AoKml16wrs930sfP1wSu/QP+NNz4CNB3prj755KLhzSHc8on0x5F1PeKym662hk1DdWAAcEflep2pxe1zj3LQSiLJ3T5eY3P8AP/ERFVN//9k=",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 44%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/b23a75c034ad7560eae85665c857185d17cc5117-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAQHAQUGAv/EACkQAAEDAwIEBgMAAAAAAAAAAAEAAgMEBRESIQYUIlEHEzFBYYEyUnH/xAAYAQADAQEAAAAAAAAAAAAAAAABAwQCAP/EABsRAAICAwEAAAAAAAAAAAAAAAABETEDEyEC/9oADAMBAAIRAxEAPwCXd6YaPTOThc3JafJqRK12kNO67e4xgsGe4UZlKJayJuMh0jRj7UiTVFLZraettpjGuQteNiCPQopj7bCKmp6Acyu9vlEei5Zs7gct+ws2kCW607C4N6wc/wAXi5dI7bqueI+L+TruXt7wZmnqf+q2+KTST9ODuKi5QRVMzS8E63HY/KKnje5nuc6QAuJJKJewbpLW8SqyagsFRLTODX/jnsqDjyZdRJLnHJJ90RdmsOCiWw4GERFOUn//2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 48%"
+        },
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/ce99e1e5e41cb93f8b76c9b28223fa8b1e113e54-1280x720.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAALABQDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAABgAFB//EACMQAAEEAgEDBQAAAAAAAAAAAAEAAgMEBREGBxITISIxUYH/xAAVAQEBAAAAAAAAAAAAAAAAAAADBP/EABkRAAIDAQAAAAAAAAAAAAAAAAACAREhA//aAAwDAQACEQMRAD8AIca4hPy65LNZyghc492i3YTvBdNbmHhlfR5F4C1xO2R+p/UK6eTyxuPY9zd/S6BJcsCpJqZ3wUCNcaUum4DZreaoWJ4Rl/L7yS9zBsqWPfkebTyXEklSGek2NHJaP//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 70%"
+        }
+      ]
+    },
+    {
+      "slug": "marble-desk",
+      "titleUa": "Кабінет",
+      "titleEn": null,
+      "category": "commercial",
+      "locationKey": "lviv",
+      "descriptionUa": [
+        "Мармуровий стіл, графіка на стіні, трекове світло."
+      ],
+      "descriptionEn": [],
+      "area": "36 м²",
+      "workTypeUa": "Чистове оздоблення",
+      "workTypeEn": null,
+      "durationUa": "2 місяці",
+      "durationEn": null,
+      "year": "2025",
+      "cover": "https://cdn.sanity.io/images/l1d717lp/development/57ed932f12c7cb0df14942b25325754d9236797e-720x1280.jpg",
+      "coverLqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAMAAwAAAAAAAAAAAAAAAAUGBwEDBP/EACgQAAEDBAAFAwUAAAAAAAAAAAEAAgMEBQYRBxIhMVETQUIIFCJScf/EABgBAAMBAQAAAAAAAAAAAAAAAAECAwQF/8QAHBEAAgICAwAAAAAAAAAAAAAAAAECERJRIjEy/9oADAMBAAIRAxEAPwDHjXfiZZXtjae/lStgq4axjnQA6a7lJPuqZC1slQXE/IOIcehAV6wX7atmmfBHywAk67dlF9WzRdE7HTucwHSKSD/SLmEA6PREcQZkeODV4hbuNsFR/Dor3Y7gt1tk0rHURpox3LuxK2Xh/kEGT41SXJgLHyDUjf1cO4XZn17r8fsRrLZbDdJObToh7DyqKKJOTMguFFNTVkscrdOB3067GkU1QZcLlAaqtxqsime47YyIkBEaQtnP0wzySYxconu2yOcco8bC2CoIjiLwBzDyiJG+LGl6KpdL3V09W6OP0g0AfBERc3OWzQorR//Z",
+      "coverPosition": "center 55%",
+      "span": "large",
+      "media": [
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/57ed932f12c7cb0df14942b25325754d9236797e-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAMAAwAAAAAAAAAAAAAAAAUGBwEDBP/EACgQAAEDBAAFAwUAAAAAAAAAAAEAAgMEBQYRBxIhMVETQUIIFCJScf/EABgBAAMBAQAAAAAAAAAAAAAAAAECAwQF/8QAHBEAAgICAwAAAAAAAAAAAAAAAAECERJRIjEy/9oADAMBAAIRAxEAPwDHjXfiZZXtjae/lStgq4axjnQA6a7lJPuqZC1slQXE/IOIcehAV6wX7atmmfBHywAk67dlF9WzRdE7HTucwHSKSD/SLmEA6PREcQZkeODV4hbuNsFR/Dor3Y7gt1tk0rHURpox3LuxK2Xh/kEGT41SXJgLHyDUjf1cO4XZn17r8fsRrLZbDdJObToh7DyqKKJOTMguFFNTVkscrdOB3067GkU1QZcLlAaqtxqsime47YyIkBEaQtnP0wzySYxconu2yOcco8bC2CoIjiLwBzDyiJG+LGl6KpdL3V09W6OP0g0AfBERc3OWzQorR//Z",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 55%"
+        }
+      ]
+    },
+    {
+      "slug": "atrium-lights",
+      "titleUa": "Сходова зона",
+      "titleEn": null,
+      "category": "house",
+      "locationKey": "lviv",
+      "descriptionUa": [
+        "Камінь на стінах, підвіси з кулями, скляне огородження."
+      ],
+      "descriptionEn": [],
+      "area": "142 м²",
+      "workTypeUa": "Чистове оздоблення",
+      "workTypeEn": null,
+      "durationUa": "4 місяці",
+      "durationEn": null,
+      "year": "2023",
+      "cover": "https://cdn.sanity.io/images/l1d717lp/development/95d181187518d870ce9d5d2c540e46bbdc720493-720x1280.jpg",
+      "coverLqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAUGAwIH/8QAJBAAAQQBBAICAwAAAAAAAAAAAQACAxEEBRITIQYxFGFBUXH/xAAWAQEBAQAAAAAAAAAAAAAAAAAFBAb/xAAdEQACAgIDAQAAAAAAAAAAAAAAAQIDEhMEETJR/9oADAMBAAIRAxEAPwBvokttthaNrhZPdhU+KYwJnQsDXOkAJcfalvHNLY+SV3KWEMBFFVmdg8Gkzzsy28lghv56R/I47nFstpvwaRrujcTYqjXaFKcmQexK5336QhtcformzjRg4SvAvto7+lTajGRpU73V76+0l0GPblU73sTjUM6Z+Nm4nx4zHCA7fffa0dtKdb7Zn8u5omwXUK/SFk3LiAqwhD6hjYMMRxbkvI6OxOPIoI4/H5Mhjam4wS6/f9QhN2eQmv0eZRzvc27HaEIRhef/2Q==",
+      "coverPosition": "center 36%",
+      "span": "tall",
+      "media": [
+        {
+          "src": "https://cdn.sanity.io/images/l1d717lp/development/95d181187518d870ce9d5d2c540e46bbdc720493-720x1280.jpg",
+          "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAUGAwIH/8QAJBAAAQQBBAICAwAAAAAAAAAAAQACAxEEBRITIQYxFGFBUXH/xAAWAQEBAQAAAAAAAAAAAAAAAAAFBAb/xAAdEQACAgIDAQAAAAAAAAAAAAAAAQIDEhMEETJR/9oADAMBAAIRAxEAPwBvokttthaNrhZPdhU+KYwJnQsDXOkAJcfalvHNLY+SV3KWEMBFFVmdg8Gkzzsy28lghv56R/I47nFstpvwaRrujcTYqjXaFKcmQexK5336QhtcformzjRg4SvAvto7+lTajGRpU73V76+0l0GPblU73sTjUM6Z+Nm4nx4zHCA7fffa0dtKdb7Zn8u5omwXUK/SFk3LiAqwhD6hjYMMRxbkvI6OxOPIoI4/H5Mhjam4wS6/f9QhN2eQmv0eZRzvc27HaEIRhef/2Q==",
+          "fit": "contain",
+          "objectPosition": "center center",
+          "thumbPosition": "center 36%"
+        }
+      ]
+    }
+  ]
+}

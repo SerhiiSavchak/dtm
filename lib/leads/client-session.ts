@@ -32,7 +32,7 @@ export function canSubmitLead(guards: LeadSubmitGuards): boolean {
   return true;
 }
 
-/** UI success only after the server confirms Telegram delivery. */
+/** UI success after HTTP 200 and a confirmed lead id. Channel mix is internal. */
 export function isConfirmedLeadDelivery(
   resOk: boolean,
   data: {
@@ -43,9 +43,9 @@ export function isConfirmedLeadDelivery(
 ): data is {
   ok: true;
   leadId: string;
-  delivered: { telegram: true; email?: boolean };
+  delivered?: { telegram?: boolean; email?: boolean };
 } {
-  return Boolean(resOk && data?.ok && data.leadId && data.delivered?.telegram);
+  return Boolean(resOk && data?.ok && data.leadId);
 }
 
 /**

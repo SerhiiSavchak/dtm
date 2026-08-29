@@ -5,7 +5,7 @@ import { logLead } from "./log";
 import type { LeadInput } from "./schema";
 import type { TelegramSendResult } from "./telegram";
 
-export type ChannelStatus = "sent" | "failed" | "skipped";
+export type ChannelStatus = "sent" | "failed" | "not_configured";
 
 export type LeadSuccessBody = {
   ok: true;
@@ -54,19 +54,37 @@ function duplicateBody(body: LeadSuccessBody): LeadSuccessBody {
   return { ...body, duplicate: true };
 }
 
-function channelFromTelegram(result: PromiseSettledResult<TelegramSendResult>): ChannelStatus {
-  return result.status === "fulfilled" && result.value.ok ? "sent" : "failed";
+export function channelFromTelegram(
+  result: PromiseSettledResult<TelegramSendResult>
+): ChannelStatus {
+  if (result.status !== "fulfilled") return "failed";
+  if (result.value.ok) return "sent";
+  if (result.value.reason === "unconfigured") return "not_configured";
+  return "failed";
 }
 
-function channelFromEmail(result: PromiseSettledResult<EmailSendResult>): ChannelStatus {
-  return result.status === "fulfilled" && result.value.ok ? "sent" : "failed";
+export function channelFromEmail(
+  result: PromiseSettledResult<EmailSendResult>
+): ChannelStatus {
+  if (result.status !== "fulfilled") return "failed";
+  if (result.value.ok) return "sent";
+  if (result.value.reason === "unconfigured") return "not_configured";
+  return "failed";
+}
+
+/** At least one configured channel delivered. Unconfigured is not a failure. */
+export function isLeadDelivered(
+  telegram: ChannelStatus,
+  email: ChannelStatus
+): boolean {
+  return telegram === "sent" || email === "sent";
 }
 
 /**
- * Same submissionId → at most one Telegram on this instance.
+ * Same submissionId → at most one send on this instance.
  * New submissionId → new lead even if phone/answers/IP are identical.
  * Failed delivery is not cached, so a retry of the same ID may send.
- * Success requires Telegram delivery. Email is a duplicate channel only.
+ * Success if any configured channel sent. Zero configured channels → failure.
  */
 export async function deliverParsedLead(
   input: LeadInput,
@@ -147,7 +165,7 @@ export async function deliverParsedLead(
     const telegram = channelFromTelegram(telegramResult);
     const email = channelFromEmail(emailResult);
 
-    if (telegramResult.status === "fulfilled" && telegramResult.value.ok) {
+    if (telegram === "sent" && telegramResult.status === "fulfilled" && telegramResult.value.ok) {
       logLead("telegram_send_success", {
         requestId,
         leadId: lead.leadId,
@@ -157,6 +175,7 @@ export async function deliverParsedLead(
     } else {
       const value =
         telegramResult.status === "fulfilled" ? telegramResult.value : null;
+      const unconfigured = telegram === "not_configured";
       logLead(
         "telegram_send_failed",
         {
@@ -164,12 +183,13 @@ export async function deliverParsedLead(
           leadId: lead.leadId,
           durationMs: value && !value.ok ? value.durationMs : undefined,
           statusCode: value && !value.ok ? value.statusCode : undefined,
-          errorType:
-            value && !value.ok
+          errorType: unconfigured
+            ? "unconfigured"
+            : value && !value.ok
               ? value.errorType ?? value.reason
               : "rejected",
         },
-        "error"
+        unconfigured ? "info" : "error"
       );
     }
 
@@ -201,7 +221,7 @@ export async function deliverParsedLead(
         ? telegramResult.value.messageId
         : undefined;
 
-    if (telegram !== "sent") {
+    if (!isLeadDelivered(telegram, email)) {
       cache.fail(input.submissionId);
       failGate(new Error("delivery_failed"));
       logLead(
@@ -209,7 +229,8 @@ export async function deliverParsedLead(
         {
           requestId,
           leadId: lead.leadId,
-          errorType: "telegram_failed",
+          errorType: "delivery_failed",
+          telegram,
           email,
         },
         "error"
@@ -217,7 +238,7 @@ export async function deliverParsedLead(
       return {
         status: 503,
         body: { ok: false, error: "delivery_failed", requestId },
-        telegramAttempted: true,
+        telegramAttempted: telegram !== "not_configured",
       };
     }
 
@@ -243,7 +264,7 @@ export async function deliverParsedLead(
     return {
       status: 200,
       body,
-      telegramAttempted: true,
+      telegramAttempted: telegram !== "not_configured",
       telegramMessageId,
     };
   } catch (error) {

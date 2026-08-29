@@ -66,14 +66,26 @@ test.describe("lead API UI states", () => {
     ).toBeVisible();
   });
 
-  test("telegram false is not success", async ({ page }) => {
-    await submitWithStatus(page, 200, {
-      ok: true,
-      leadId: "DTM-TEST-0001",
-      delivered: { telegram: false, email: true },
+  test("503 delivery_failed is not success", async ({ page }) => {
+    await submitWithStatus(page, 503, {
+      ok: false,
+      error: "delivery_failed",
+      requestId: "test",
     });
     await expect(page.locator("#estimate .calc-feedback-msg")).toContainText(
       "Не вдалося надіслати запит"
     );
+  });
+
+  test("email-only 200 is success", async ({ page }) => {
+    await submitWithStatus(page, 200, {
+      ok: true,
+      leadId: "DTM-TEST-0001",
+      visitorDraft: "draft",
+      delivered: { telegram: false, email: true },
+    });
+    await expect(
+      page.getByRole("heading", { name: /Дякуємо! Ми отримали вашу заявку/ })
+    ).toBeVisible();
   });
 });

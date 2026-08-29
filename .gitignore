@@ -42,6 +42,7 @@ yarn-error.log*
 
 # local audit / encode scratch
 /tmp/
+/backups/
 /tmp-qa/
 /tmp-stills/
 /scripts/_media-audit.js

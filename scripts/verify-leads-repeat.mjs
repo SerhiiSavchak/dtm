@@ -145,8 +145,9 @@ async function testEmailChannelMatrix() {
   assert("C email failed", rejected.body.ok && rejected.body.delivered.email === false);
 
   const telegramDown = await run(false, { ok: true, messageId: "em-ok" });
-  assertEqual("D status", telegramDown.status, 503);
-  assert("D failed", telegramDown.body.ok === false);
+  assertEqual("D status", telegramDown.status, 200);
+  assert("D telegram failed", telegramDown.body.ok && telegramDown.body.delivered.telegram === false);
+  assert("D email sent", telegramDown.body.ok && telegramDown.body.delivered.email === true);
 
   const bothDown = await run(false, { ok: false, reason: "resend_error", errorType: "resend_error" });
   assertEqual("E status", bothDown.status, 503);
@@ -215,12 +216,12 @@ function testPhoneMask() {
 
 function testConfirmedDeliveryGuard() {
   assert(
-    "email-only not success",
+    "email-only is success",
     isConfirmedLeadDelivery(true, {
       ok: true,
       leadId: "DTM-1111-2222",
       delivered: { telegram: false, email: true },
-    }) === false
+    }) === true
   );
   assert(
     "telegram success",
@@ -328,7 +329,7 @@ function testSourceGuards() {
   assert("no return-home reset", !calc.includes('href="#top"'));
   assert("reset handler on success", calc.includes("onClick={onReset}"));
   assert("submitLock released in finally", calc.includes("submitLockRef.current = false"));
-  assert("client requires telegram delivery", calc.includes("isConfirmedLeadDelivery"));
+  assert("client requires confirmed delivery", calc.includes("isConfirmedLeadDelivery"));
   assert("abort on reset", calc.includes("abortRef.current?.abort()"));
   assert("client fetch no-store", calc.includes('cache: "no-store"'));
   assert("no window.open handoff", !calc.includes("window.open"));
@@ -406,12 +407,48 @@ async function testTelegramOkAnd429() {
   else process.env.TELEGRAM_CHAT_ID = prevChat;
 }
 
+async function testDeliveryMatrix() {
+  async function run(tg, em) {
+    const cache = new SubmissionIdempotency(10 * 60 * 1000);
+    return deliverParsedLead(validInput(), cache, {
+      sendTelegram: async () => tg,
+      sendEmail: async () => em,
+    });
+  }
+  const sentTg = { ok: true, messageId: 1 };
+  const failTg = { ok: false, reason: "timeout", errorType: "timeout" };
+  const skipTg = { ok: false, reason: "unconfigured", errorType: "unconfigured" };
+  const sentEm = { ok: true, messageId: "e1" };
+  const failEm = { ok: false, reason: "resend_error", errorType: "resend_error" };
+  const skipEm = { ok: false, reason: "unconfigured", errorType: "unconfigured" };
+
+  const bothSent = await run(sentTg, sentEm);
+  assertEqual("M both sent", bothSent.status, 200);
+  const tgSentEmFail = await run(sentTg, failEm);
+  assertEqual("M tg sent em fail", tgSentEmFail.status, 200);
+  const tgFailEmSent = await run(failTg, sentEm);
+  assertEqual("M tg fail em sent", tgFailEmSent.status, 200);
+  const bothFail = await run(failTg, failEm);
+  assertEqual("M both fail", bothFail.status, 503);
+  const tgSentEmSkip = await run(sentTg, skipEm);
+  assertEqual("M tg sent em skip", tgSentEmSkip.status, 200);
+  const tgFailEmSkip = await run(failTg, skipEm);
+  assertEqual("M tg fail em skip", tgFailEmSkip.status, 503);
+  const tgSkipEmSent = await run(skipTg, sentEm);
+  assertEqual("M tg skip em sent", tgSkipEmSent.status, 200);
+  const tgSkipEmFail = await run(skipTg, failEm);
+  assertEqual("M tg skip em fail", tgSkipEmFail.status, 503);
+  const bothSkip = await run(skipTg, skipEm);
+  assertEqual("M both skip", bothSkip.status, 503);
+}
+
 const tests = [
   ["intentional repeat", testIntentionalRepeat],
   ["accidental duplicate", testAccidentalDuplicate],
   ["inflight coalesce", testInflightCoalesce],
   ["retry after failed send", testRetryAfterFailedSend],
   ["email channel matrix A-E", testEmailChannelMatrix],
+  ["delivery matrix", testDeliveryMatrix],
   ["email send controlled failures", testEmailSendControlledFailures],
   ["confirmed delivery guard", async () => testConfirmedDeliveryGuard()],
   ["phone mask", async () => testPhoneMask()],

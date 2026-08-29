@@ -442,7 +442,7 @@ export function ProjectDossier({
             <div ref={stripRef} className="project-dossier-filmstrip">
               {media.map((item, index) => (
                 <button
-                  key={mediaKey(item)}
+                  key={`${index}:${mediaKey(item)}`}
                   type="button"
                   aria-label={
                     item.video

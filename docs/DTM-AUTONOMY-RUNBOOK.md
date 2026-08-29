@@ -43,7 +43,7 @@
 
 Env на хостингу: імена з `.env.example`. Після зміни секретів — новий деплой.
 
-Якщо git відв’язався: клієнт з **своєї** копії репозиторію підключає проєкт заново. Без доступу до git клієнт не відновить деплой з коду.
+Технічні вимоги до будь-якого майбутнього хоста: [HOSTING-REQUIREMENTS.md](./HOSTING-REQUIREMENTS.md).
 
 ---
 
@@ -65,14 +65,21 @@ Env на хостингу: імена з `.env.example`. Після зміни �
 
 ## Заявки (Telegram / email)
 
-**Успіх форми = доставлений Telegram.** Email — дубль. Якщо Telegram впав, відповідь API `503 delivery_failed`, навіть якщо email пішов.
+Успіх форми = **хоча б один налаштований канал доставив** заявку. Відвідувач не бачить, який саме.
 
-| Telegram | Email | Поведінка зараз |
+Неналаштований канал не є помилкою. Якщо **жоден** канал не налаштований або всі налаштовані впали → `503 delivery_failed`.
+
+| Telegram | Email | Результат |
 | --- | --- | --- |
-| ok | ok | `200`, `delivered.telegram/email: true` |
-| ok | fail / не налаштовано | `200`, заявка прийнята, email `false` |
-| fail | ok | `503`, відвідувач бачить помилку |
-| fail | fail | `503` |
+| sent | sent | `200` |
+| sent | failed | `200` |
+| failed | sent | `200` |
+| failed | failed | `503` |
+| sent | not configured | `200` |
+| failed | not configured | `503` |
+| not configured | sent | `200` |
+| not configured | failed | `503` |
+| not configured | not configured | `503` |
 
 Публічне `t.me/...` у футері — **інший** канал, ніж бот заявок.
 
@@ -122,30 +129,76 @@ Env на хостингу: імена з `.env.example`. Після зміни �
 
 ## Бекап CMS (безкоштовно, вручну)
 
-Раз на місяць або після великої правки портфоліо/відео. Експорт рахується в API-квоту Sanity — для малого сайту це нормально.
+Раз на місяць або після великої правки портфоліо/відео. Експорт рахується в API-квоту Sanity.
 
-На машині з Node, клоном репо і `npx sanity login` під **акаунтом клієнта**:
-
-```bash
-# Замінити production на фактичний бойовий датасет після міграції.
-npx sanity dataset export production backups/dtm-production-YYYY-MM-DD.tar.gz
-```
-
-Не додавати `--no-assets`: у tar.gz мають бути документи **і** файли (фото/відео).
-
-Схема Studio — у git, не в експорті. Права користувачів manage — не в експорті.
-
-Відновлення (руйнівне, лише свідомо):
+**Перед експортом:** переконайтесь, що цільовий dataset саме той, який потрібен. За замовчуванням скрипт експортує лише `development`. Інший dataset (у т.ч. `production`) — лише з `ALLOW_NON_DEVELOPMENT_BACKUP=1` (це **read-only** export, без мутацій).
 
 ```bash
-npx sanity dataset import backups/dtm-production-YYYY-MM-DD.tar.gz production --replace
+# Перевірити env (має бути development для звичайної роботи)
+# NEXT_PUBLIC_SANITY_DATASET=development
+
+npm run sanity:backup
+# архів: backups/dtm-development-<timestamp>.tar.gz (gitignored), з ассетами
+# не перезаписує існуючий файл з тим самим ім'ям
+
+# Лише якщо свідомо потрібен read-only export іншого dataset:
+# ALLOW_NON_DEVELOPMENT_BACKUP=1 npm run sanity:backup -- production
 ```
 
-`--replace` перезаписує документи з тими самими id. Спочатку імпорт у тимчасовий датасет, якщо не впевнені.
+Перевірка читабельності архіву **без** restore:
 
-Зберігати копію tar.gz **поза** ноутбуком розробника (диск клієнта / хмара клієнта).
+```bash
+npm run test:backup-integrity
+```
 
-Автоматичний cron на платному інфра не додаємо.
+Порівнює document ID з live `development` GROQ. **Не** виконує `dataset import`.
+
+### Restore (руйнівний)
+
+**НЕ запускати «щоб перевірити» на активному development або production.**
+
+`--replace` перезаписує документи з тими самими id у **цільовому** dataset.
+
+Обов’язковий safety check перед будь-яким import:
+
+1. Dataset у команді = навмисна ціль (зазвичай одноразовий disposable dataset, не `production`).
+2. Архів з іменем `dtm-<той-самий-dataset>-…` або явно звірений вміст.
+3. Немає секретів у команді / логах (токен лише через `sanity login` / локальний CLI).
+
+```bash
+# ПРИКЛАД — тільки на disposable dataset після окремого рішення:
+# npx sanity dataset import backups/dtm-development-YYYY-MM-DD.tar.gz <disposable> --replace
+#
+# НІКОЛИ не ганяти --replace проти активного development «для QA»
+# і НІКОЛИ проти production у цій фазі розробки.
+```
+
+Схема Studio — у git. Права користувачів manage — не в експорті.
+
+## Last-known-good snapshot (сайт без живого Sanity)
+
+Ієрархія джерел (атомарно, без змішування):
+
+1. **Валідний live Sanity** → published GROQ
+2. **Недоступний / порожній / невалідний Sanity** → `data/generated/*.snapshot.json` (якщо version і структура валідні)
+3. **Невалідний / відсутній snapshot** → legacy hardcoded (`data/projects.ts`, `data/in-progress-scenes.ts`)
+
+Коли ганяти `cms:snapshot`:
+
+- після **прийнятих** реальних змін CMS на `development`;
+- перед комітом/деплоєм, щоб last-known-good у git відповідав опублікованому контенту;
+- не після зламаного/порожнього CMS (скрипт **abort** і не затирає попередні файли).
+
+```bash
+# NEXT_PUBLIC_SANITY_DATASET має бути development
+npm run cms:snapshot
+```
+
+Читає **published** GROQ (без мутацій) і пише `data/generated/portfolio.snapshot.json` та `in-progress.snapshot.json`. Порожній або битий CMS **не** затирає попередній валідний файл.
+
+Симуляція аутеджу Sanity (лише non-production): заголовок `x-dtm-simulate-sanity-failure: 1` → сайт читає snapshot.
+
+Після відновлення Sanity API знову читає live; snapshot лишається запасним.
 
 ---
 
@@ -165,8 +218,11 @@ Hero/kitchen fallback лежать у git (`/videos`, `/images`) і їдуть �
 
 | Що сталося | Що робити |
 | --- | --- |
-| Випадково видалили роботу в Studio | History/restore в Sanity, якщо ще доступна; інакше import бекапу |
-| Квота API/CDN/bandwidth Sanity | Зачекати скидання місяця або зменшити відео; не змішувати fallback частково — сайт уже вміє повний hardcoded fallback при падінні fetch |
+| Аутедж Sanity (API/CDN) | Нічого не імпортувати. Сайт на last-known-good snapshot. Після відновлення API знову live. |
+| Випадково видалили роботу в Studio | History/restore в Sanity, якщо ще доступна; інакше import бекапу лише в **disposable** dataset для перевірки, потім обережний restore у development. Не `--replace` «наосліп» у production. |
+| Зламаний / застарілий snapshot у git | Не деплоїти битий JSON. Відновити попередній коміт snapshot або `cms:snapshot` з валідного live development. Сайт тимчасово піде на hardcoded, якщо snapshot невалідний. |
+| Втрата доступу до акаунту Sanity | Відновити доступ (invite / owner). Контент у dataset лишається; бекап у `backups/` + snapshot у git — запасний канал. Не створювати новий проєкт «з нуля» без плану міграції. |
+| Квота API/CDN/bandwidth Sanity | Зачекати скидання місяця або зменшити відео; повний fallback (snapshot → hardcoded), без часткового змішування джерел |
 | Хостинг пауза / ліміт | Інший акаунт/провайдер + той самий git + ті самі env |
 | Збій білду | Логи хостингу; `npm run build` локально; не чіпати DNS |
 | Токен бота відкликано | BotFather → новий токен → env → redeploy |
