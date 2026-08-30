@@ -6,7 +6,23 @@
 
 ---
 
-## Акаунти: хто чим володіє
+## Репозиторій (орієнтир)
+
+| Шлях | Призначення |
+| --- | --- |
+| `app/` | Next.js App Router: головна, `/admin`, API лідів |
+| `components/` | UI: портфоліо, dossier, in-progress, калькулятор |
+| `lib/` | Sanity fetch/map, fallback, leads, media, i18n |
+| `data/` | Legacy hardcoded fallback + `generated/*.snapshot.json` (LKG) |
+| `sanity/` | Studio schema, structure, slugify |
+| `scripts/` | backup, snapshot, migrate/import, verify, QA |
+| `e2e/` | Playwright регресії |
+| `public/` | Hero/in-progress fallback медіа (не client source) |
+| `/new-materials/` | **gitignored** — вихідні файли клієнта для імпорту (поза `public/`) |
+| `backups/` | **gitignored** — `npm run sanity:backup` |
+| `tmp/` | **gitignored** — тимчасові маніфести імпорту |
+
+---
 
 Ціль після передачі: **клієнт** володіє Sanity-проєктом, git, хостингом, доменом, Telegram-ботом і (якщо є) Resend. Розробник — зайвий collaborator, якого можна прибрати.
 

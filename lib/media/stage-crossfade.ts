@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 export const STAGE_CROSSFADE_MS = 180;
 export const STAGE_LOADER_DELAY_MS = 150;
@@ -22,7 +28,9 @@ export function useStageCrossfade<T>(
   const shownKey = keyOf(shown);
   const incomingKey = incoming ? keyOf(incoming) : null;
 
-  requestRef.current = targetKey;
+  useLayoutEffect(() => {
+    requestRef.current = targetKey;
+  }, [targetKey]);
 
   if (reduced) {
     if (shownKey !== targetKey || incoming) {

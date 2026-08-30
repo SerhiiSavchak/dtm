@@ -51,7 +51,6 @@ const publicFiles = [];
 function walk(dir) {
   for (const entry of readdirSync(dir)) {
     const full = path.join(dir, entry);
-    const rel = path.relative(ROOT, full);
     if (skipDirs.has(entry)) continue;
     const stat = statSync(full);
     if (stat.isDirectory()) walk(full);

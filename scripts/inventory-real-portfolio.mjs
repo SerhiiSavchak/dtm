@@ -1,5 +1,5 @@
 /**
- * Inventory + normalize client Portfolio source under public/new-materials.
+ * Inventory + normalize client Portfolio source under /new-materials/.
  * Writes manifest to tmp/ (gitignored). Does NOT mutate Sanity.
  */
 import { createHash } from "node:crypto";
@@ -16,8 +16,10 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
+import { resolveNewMaterialsDir } from "./resolve-new-materials-dir.mjs";
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SOURCE = path.join(ROOT, "public", "new-materials");
+const SOURCE = resolveNewMaterialsDir(ROOT);
 const OUT = path.join(ROOT, "tmp", "real-portfolio-import");
 const NORM = path.join(OUT, "normalized");
 const MANIFEST = path.join(OUT, "manifest.json");

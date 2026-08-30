@@ -1,5 +1,6 @@
 /**
  * Import curated real Portfolio projects into Sanity dataset "development".
+ * Source media: /new-materials/ (preferred) or legacy /public/new-materials/.
  * Idempotent. Does NOT touch In-progress. Does NOT write production.
  * Does NOT delete demo projects — pass --purge-demo after successful verify.
  */
@@ -18,10 +19,11 @@ import {
   REAL_PORTFOLIO_PROJECTS,
   realProjectDocumentId,
 } from "./real-portfolio-projects.mjs";
+import { resolveNewMaterialsDir } from "./resolve-new-materials-dir.mjs";
 
 const WRITE_DATASET = "development";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SOURCE = path.join(ROOT, "public", "new-materials");
+const SOURCE = resolveNewMaterialsDir(ROOT);
 const NORM = path.join(ROOT, "tmp", "real-portfolio-import", "normalized");
 
 const DEMO_ID_PREFIX = "dtm-project-";

@@ -48,6 +48,7 @@ yarn-error.log*
 /scripts/_media-audit.js
 
 # client source media (temporary; never commit originals)
+/new-materials/
 /public/new-materials/
 
 # vercel
