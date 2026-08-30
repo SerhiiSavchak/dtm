@@ -1,5 +1,12 @@
 import type { PreviewValue } from "sanity";
 
+export const OBJECT_TYPE_LABELS: Record<string, string> = {
+  new_build: "Новобудова",
+  secondary: "Вторинне житло",
+  private_house: "Приватний будинок",
+  commercial: "Комерційне приміщення",
+};
+
 export const CATEGORY_LABELS: Record<string, string> = {
   apartment: "Квартира",
   house: "Будинок",
@@ -21,14 +28,18 @@ export const FRAME_ADMIN_TITLES: Record<string, string> = {
 
 export function projectListPreview(args: {
   title?: string;
+  objectType?: string;
   category?: string;
   area?: string;
   media?: PreviewValue["media"];
 }) {
-  const categoryLabel = CATEGORY_LABELS[args.category ?? ""] ?? "";
+  const typeLabel =
+    OBJECT_TYPE_LABELS[args.objectType ?? ""] ??
+    CATEGORY_LABELS[args.category ?? ""] ??
+    "";
   return {
     title: args.title?.trim() || "Без назви",
-    subtitle: [categoryLabel, args.area].filter(Boolean).join(" · "),
+    subtitle: [typeLabel, args.area].filter(Boolean).join(" · "),
     media: args.media,
   };
 }

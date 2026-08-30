@@ -71,8 +71,17 @@ export type Dictionary = {
       house: string;
       commercial: string;
     };
+    objectTypes: {
+      new_build: string;
+      secondary: string;
+      private_house: string;
+      commercial: string;
+    };
     facts: {
+      objectType: string;
+      location: string;
       type: string;
+      rooms: string;
       area: string;
       workType: string;
       duration: string;
@@ -248,7 +257,7 @@ const uk: Dictionary = {
   meta: {
     title: "DTM — Дім Твоєї Мрії · Комплексний ремонт у Львові",
     description:
-      "DTM — комплексний ремонт квартир, будинків і комерційних приміщень у Львові під ключ. Кошторис, організація робіт, прораб, комплектація та контроль виконання",
+      "DTM — комплексний ремонт квартир, будинків і комерційних приміщень у Львові під ключ. Кошторис, організація робіт, виконроб, комплектація та контроль виконання",
   },
   brand: {
     name: "DTM",
@@ -293,7 +302,7 @@ const uk: Dictionary = {
         text: "Зрозуміла структура робіт і етапів перед стартом",
       },
       {
-        title: "Організація робіт і прораб",
+        title: "Організація робіт і виконроб",
         text: "Команда, графік і ведення процесу на об’єкті",
       },
       {
@@ -329,8 +338,17 @@ const uk: Dictionary = {
       house: "Будинок",
       commercial: "Комерційне приміщення",
     },
+    objectTypes: {
+      new_build: "Новобудова",
+      secondary: "Вторинне житло",
+      private_house: "Приватний будинок",
+      commercial: "Комерційне приміщення",
+    },
     facts: {
+      objectType: "Тип об'єкта",
+      location: "Локація",
       type: "Тип",
+      rooms: "Кімнати",
       area: "Площа",
       workType: "Тип робіт",
       duration: "Тривалість",
@@ -362,6 +380,11 @@ const uk: Dictionary = {
       },
       {
         index: "04",
+        title: "Проєкт, виготовлення та монтаж меблів",
+        description: "Проєкт меблів, виготовлення та монтаж",
+      },
+      {
+        index: "05",
         title: "Дизайн інтер’єру",
         description:
           "Проєктування простору, підбір матеріалів та авторський нагляд на всіх етапах",
@@ -393,7 +416,7 @@ const uk: Dictionary = {
       {
         index: "04",
         title: "Організація робіт",
-        text: "Збираємо команду, матеріали та графік виконання",
+        text: "Плануємо етапи й матеріали для виконання, збираємо команду та графік",
       },
       {
         index: "05",
@@ -403,7 +426,7 @@ const uk: Dictionary = {
       {
         index: "06",
         title: "Передача готового об’єкта",
-        text: "Завершуємо фінішні роботи й передаємо простір у користування",
+        text: "Виконуємо післяремонтний клінінг, завершуємо фінішні роботи й передаємо простір у користування",
       },
     ],
   },
@@ -440,16 +463,12 @@ const uk: Dictionary = {
         a: "Так. Можна починати без готового дизайн-проєкту або проговорити на консультації, чи він потрібен для вашого об’єкта",
       },
       {
-        q: "Чи працюєте ви з новобудовами?",
-        a: "Так, працюємо з новобудовами, вторинним житлом і об’єктами після демонтажу",
-      },
-      {
         q: "Чи можна замовити тільки окремі роботи?",
         a: "Основний напрям — комплексний ремонт. Окремі роботи обговорюємо залежно від обсягу й етапу",
       },
       {
         q: "Як відбувається контроль ремонту?",
-        a: "Контроль веде відповідальний від DTM: організація робіт, прораб на об’єкті та регулярна фото- й відеозвітність",
+        a: "Контроль веде відповідальний від DTM: організація робіт, виконроб на об’єкті та регулярна фото- й відеозвітність",
       },
       {
         q: "Коли краще звертатися перед початком ремонту?",
@@ -652,7 +671,7 @@ const en: Dictionary = {
         text: "A clear structure of works and stages before the start",
       },
       {
-        title: "Work organisation & site manager",
+        title: "Work organisation & site supervisor",
         text: "Team, schedule and on-site process management",
       },
       {
@@ -688,8 +707,17 @@ const en: Dictionary = {
       house: "House",
       commercial: "Commercial space",
     },
+    objectTypes: {
+      new_build: "New build",
+      secondary: "Secondary housing",
+      private_house: "Private house",
+      commercial: "Commercial space",
+    },
     facts: {
+      objectType: "Property type",
+      location: "Location",
       type: "Type",
+      rooms: "Rooms",
       area: "Area",
       workType: "Scope",
       duration: "Duration",
@@ -721,6 +749,11 @@ const en: Dictionary = {
       },
       {
         index: "04",
+        title: "Furniture design, production and installation",
+        description: "Furniture project, production and installation",
+      },
+      {
+        index: "05",
         title: "Interior design",
         description:
           "Spatial design, material selection and author supervision at every stage",
@@ -752,7 +785,7 @@ const en: Dictionary = {
       {
         index: "04",
         title: "Work organisation",
-        text: "We assemble the team, materials and execution schedule",
+        text: "We plan stages and materials for delivery, assemble the team and schedule",
       },
       {
         index: "05",
@@ -762,7 +795,7 @@ const en: Dictionary = {
       {
         index: "06",
         title: "Handover",
-        text: "We finish the space and hand it over ready to use",
+        text: "We carry out post-renovation cleaning, complete finishing works and hand the space over ready to use",
       },
     ],
   },
@@ -799,16 +832,12 @@ const en: Dictionary = {
         a: "Yes. You can start without a finished design, or get advice on whether you need one for your property",
       },
       {
-        q: "Do you work with new builds?",
-        a: "Yes — new builds, secondary housing and sites after demolition",
-      },
-      {
         q: "Can I order only selected works?",
         a: "Our focus is full-cycle renovation. Partial scopes are discussed case by case",
       },
       {
         q: "How is the renovation controlled?",
-        a: "A DTM lead owns the process: work organisation, a site foreman, and regular photo / video reporting",
+        a: "A DTM lead owns the process: work organisation, a site supervisor on site, and regular photo / video reporting",
       },
       {
         q: "When should I get in touch before starting?",

@@ -1,6 +1,7 @@
 import type { InProgressItem } from "@/data/in-progress-scenes";
 import type { Project, ProjectCategory, ProjectMedia } from "@/data/projects";
 import type { Locale } from "@/lib/i18n/dictionaries";
+import type { ObjectType } from "@/lib/portfolio/object-type";
 
 export type SanityGalleryItem = {
   src?: string | null;
@@ -16,10 +17,14 @@ export type SanityProjectDocument = {
   titleEn?: string | null;
   slug?: string | null;
   category?: string | null;
+  objectType?: string | null;
+  locationUa?: string | null;
+  locationEn?: string | null;
   locationKey?: string | null;
   descriptionUa?: unknown;
   descriptionEn?: unknown;
   area?: string | null;
+  rooms?: number | null;
   workTypeUa?: string | null;
   workTypeEn?: string | null;
   durationUa?: string | null;
@@ -38,14 +43,19 @@ export type PortfolioRecord = {
   titleUa: string;
   titleEn: string | null;
   category: ProjectCategory;
+  objectType: ObjectType | null;
+  locationUa?: string | null;
+  locationEn?: string | null;
   locationKey?: "lviv";
   descriptionUa: string[];
   descriptionEn: string[];
   area: string | null;
+  rooms?: number | null;
   workTypeUa: string | null;
   workTypeEn: string | null;
   durationUa: string | null;
   durationEn: string | null;
+  /** Kept for snapshot/compat; public UI does not render year. */
   year: string | null;
   cover: string;
   coverLqip: string | null;

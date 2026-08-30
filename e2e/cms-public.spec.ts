@@ -6,7 +6,7 @@ test.describe("cms public surfaces", () => {
     await openHome(page);
     await page.locator("#projects").scrollIntoViewIfNeeded();
     const cards = page.getByRole("button", { name: /Відкрити проєкт/ });
-    await expect(cards).toHaveCount(10);
+    await expect(cards).toHaveCount(7);
 
     await cards.first().click();
     await expect(page.getByRole("button", { name: "Закрити" })).toBeVisible();
@@ -69,7 +69,7 @@ test.describe("cms public surfaces", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openHome(page);
     await page.locator("#projects").scrollIntoViewIfNeeded();
-    await expect(page.getByRole("button", { name: /Відкрити проєкт/ })).toHaveCount(10);
+    await expect(page.getByRole("button", { name: /Відкрити проєкт/ })).toHaveCount(7);
     await page.locator("#in-progress").scrollIntoViewIfNeeded();
     await expect(page.locator(".in-progress-panel")).toHaveCount(4);
   });

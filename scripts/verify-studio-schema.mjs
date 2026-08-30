@@ -21,14 +21,18 @@ assert.deepEqual(
     "Додаткові налаштування",
   ]
 );
-assert.equal(field(project, "titleUa").title, "Назва");
+assert.equal(field(project, "titleUa").title, "Назва об'єкта");
+assert.equal(field(project, "objectType").title, "Тип об'єкта");
+assert.equal(field(project, "category").hidden, true);
 assert.equal(field(project, "slug").hidden, true);
 assert.equal(field(project, "slug").readOnly, true);
 assert.equal(field(project, "locationKey").hidden, true);
+assert.equal(field(project, "locationUa").title, "Локація");
+assert.equal(field(project, "rooms").title, "Кількість кімнат");
+assert.equal(field(project, "year").hidden, true);
 assert.equal(field(project, "orderRank").hidden, true);
 
 const initials = project.initialValue();
-assert.equal(initials.locationKey, "lviv");
 assert.equal(initials.span, "small");
 assert.equal(initials.slug._type, "slug");
 assert.match(initials.slug.current, /^proekt-/);

@@ -97,10 +97,72 @@ assert("thumbPosition kept", mapped?.media[0]?.thumbPosition === "center 20%");
 assert("objectPosition kept", mapped?.media[0]?.objectPosition === "center center");
 assert("category apartment", mapped?.category === "apartment");
 
+assert("year never mapped for public", mapped?.year === null);
+assert(
+  "locationUa mapped",
+  mapSanityProject({
+    titleUa: "X",
+    slug: "loc",
+    category: "house",
+    locationUa: "м. Львів, вул. Тест",
+    locationEn: "Lviv, Test St.",
+    rooms: 2,
+    coverUrl: "https://cdn.sanity.io/images/x/y/c.jpg",
+    gallery: [{ src: "https://cdn.sanity.io/images/x/y/c.jpg" }],
+  })?.locationUa === "м. Львів, вул. Тест"
+);
+assert(
+  "rooms mapped for apartment",
+  mapSanityProject({
+    titleUa: "X",
+    slug: "rooms",
+    category: "apartment",
+    rooms: 3,
+    coverUrl: "https://cdn.sanity.io/images/x/y/c.jpg",
+    gallery: [{ src: "https://cdn.sanity.io/images/x/y/c.jpg" }],
+  })?.rooms === 3
+);
+
+assert(
+  "objectType mapped",
+  mapSanityProject({
+    titleUa: "X",
+    slug: "obj",
+    objectType: "new_build",
+    category: "house",
+    coverUrl: "https://cdn.sanity.io/images/x/y/c.jpg",
+    gallery: [{ src: "https://cdn.sanity.io/images/x/y/c.jpg" }],
+  })?.objectType === "new_build"
+);
+assert(
+  "category derived from objectType",
+  mapSanityProject({
+    titleUa: "X",
+    slug: "obj",
+    objectType: "new_build",
+    category: "house",
+    coverUrl: "https://cdn.sanity.io/images/x/y/c.jpg",
+    gallery: [{ src: "https://cdn.sanity.io/images/x/y/c.jpg" }],
+  })?.category === "apartment"
+);
+
 const en = recordToProject(mapped, "en");
 assert("EN title", en.title === "Test 01");
 assert("EN workType", en.workType === "Shell");
 assert("EN description", Array.isArray(en.description) && en.description[0] === "Paragraph EN");
+assert("year omitted on Project", en.year === undefined);
+
+const loc = mapSanityProject({
+  titleUa: "Будинок",
+  slug: "loc-en",
+  category: "house",
+  locationUa: "с. Сокільники",
+  locationEn: "Sokilnyky",
+  coverUrl: "https://cdn.sanity.io/images/x/y/c.jpg",
+  gallery: [{ src: "https://cdn.sanity.io/images/x/y/c.jpg" }],
+});
+assert("EN location", recordToProject(loc, "en").location === "Sokilnyky");
+assert("UA location", recordToProject(loc, "uk").location === "с. Сокільники");
 
 const uk = recordToProject(mapped, "uk");
 assert("UA title", uk.title === "Тест 01");

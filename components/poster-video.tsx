@@ -29,6 +29,8 @@ type PosterVideoProps = {
   quality?: number;
   /** After the sharp poster can paint. */
   onPosterReady?: () => void;
+  /** After the video has a renderable frame (canplay / loadeddata). */
+  onVideoReady?: () => void;
   /**
    * Hero may use `auto` once the poster is ready. Below-the-fold should stay
    * `metadata` / `none`.
@@ -59,6 +61,7 @@ export function PosterVideo({
   priority = false,
   quality = 90,
   onPosterReady,
+  onVideoReady,
   preload = "metadata",
   objectPosition,
   active,
@@ -85,10 +88,11 @@ export function PosterVideo({
   const tryReveal = useCallback((el: HTMLVideoElement) => {
     if (el.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
     if (el.videoWidth < 2 || el.videoHeight < 2) return;
+    onVideoReady?.();
     el.play()
       .then(() => setVideoReady(true))
       .catch(() => setVideoFailed(true));
-  }, []);
+  }, [onVideoReady]);
 
   useEffect(() => {
     const el = videoRef.current;
