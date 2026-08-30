@@ -11,6 +11,8 @@ import {
 type MediaImageProps = Omit<ImageProps, "src" | "placeholder" | "alt"> & {
   src: SiteImageSrc;
   alt: string;
+  /** Sanity LQIP or other data-URL blur. Local paths still use site-images. */
+  lqip?: string;
   /** Called once after the final image has loaded. */
   onReady?: () => void;
 };
@@ -24,6 +26,7 @@ type MediaImageProps = Omit<ImageProps, "src" | "placeholder" | "alt"> & {
 export function MediaImage({
   src,
   alt,
+  lqip,
   className = "",
   onLoad,
   onError,
@@ -32,11 +35,12 @@ export function MediaImage({
   sizes,
   fill,
   quality,
+  style,
   ...rest
 }: MediaImageProps) {
   const resolved = resolveSiteImage(src);
   const srcKey = typeof resolved === "string" ? resolved : resolved.src;
-  const blurDataURL = getBlurDataUrl(src);
+  const blurDataURL = lqip || getBlurDataUrl(src);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const [shown, setShown] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -80,6 +84,7 @@ export function MediaImage({
           alt=""
           aria-hidden="true"
           className={`media-lqip ${className}`}
+          style={style}
           draggable={false}
         />
       ) : null}
@@ -96,6 +101,7 @@ export function MediaImage({
         className={`media-full ${shown && !failed ? "is-shown" : ""} ${
           failed ? "is-failed" : ""
         } ${className}`}
+        style={style}
         onLoad={(event) => {
           reveal(true);
           onLoad?.(event);

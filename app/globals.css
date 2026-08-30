@@ -2031,6 +2031,11 @@ html[data-motion="reduce"] .arch-corner {
 }
 
 .in-progress-board {
+  --blinds-canvas: calc(
+    (100cqw - 3 * var(--in-progress-gap)) * var(--open-grow) /
+      (var(--open-grow) + 3 * var(--shut-grow))
+  );
+  container-type: inline-size;
   display: flex;
   align-items: stretch;
   gap: var(--in-progress-gap);
@@ -2086,14 +2091,37 @@ html[data-motion="reduce"] .arch-corner {
   height: 100%;
 }
 
+/* Media is a fixed open-panel canvas. The panel is a moving clip —
+   not a box that reflows object-cover (that reads as hover-zoom). */
 .in-progress-visual {
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: 50%;
+  width: var(--blinds-canvas);
+  height: 100%;
+  margin-left: calc(var(--blinds-canvas) / -2);
   overflow: hidden;
-  transform: scale(1.03);
+  transform: none;
   transform-origin: 50% 50%;
 }
 
 .in-progress-panel.is-active .in-progress-visual {
-  transform: scale(1);
+  transform: none;
+}
+
+.in-progress-visual .media-full,
+.in-progress-visual .in-progress-video-el,
+.in-progress-visual .in-progress-image {
+  transform: none;
+}
+
+.in-progress-visual .media-lqip {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  transform: none;
 }
 
 .in-progress-image {
@@ -2186,7 +2214,10 @@ html[data-motion="reduce"] .arch-corner {
   transition-delay: calc(var(--i) * 90ms);
 }
 
-.in-progress-board.is-armed .in-progress-visual,
+.in-progress-board.is-armed .in-progress-visual {
+  transition: none;
+}
+
 .in-progress-board.is-armed .in-progress-shade,
 .in-progress-board.is-armed .in-progress-tick,
 .in-progress-board.is-armed .in-progress-caption {
@@ -2203,9 +2234,12 @@ html[data-motion="reduce"] .arch-corner {
   opacity: 1;
 }
 
-.in-progress-board.is-animating .in-progress-panel,
+.in-progress-board.is-animating .in-progress-panel {
+  will-change: flex-grow;
+}
+
 .in-progress-board.is-animating .in-progress-visual {
-  will-change: transform, opacity, clip-path;
+  will-change: auto;
 }
 
 .in-progress-board.is-interactive .in-progress-panel {
@@ -2213,7 +2247,11 @@ html[data-motion="reduce"] .arch-corner {
   transition-delay: 0s;
 }
 
-.in-progress-board.is-interactive .in-progress-visual,
+.in-progress-board.is-interactive .in-progress-visual {
+  transition: none;
+  transition-delay: 0s;
+}
+
 .in-progress-board.is-interactive .in-progress-shade,
 .in-progress-board.is-interactive .in-progress-tick,
 .in-progress-board.is-interactive .in-progress-caption {
@@ -2382,22 +2420,45 @@ html[data-motion="reduce"] .in-progress-visual {
   opacity: 1;
 }
 
-.in-progress-viewer-wait {
+.in-progress-viewer-wait,
+.project-dossier-wait,
+.media-stage-loader {
   position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 4;
-  width: 0.5rem;
-  height: 0.5rem;
+  left: 50%;
+  top: 50%;
+  z-index: 5;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin: -0.6875rem 0 0 -0.6875rem;
+  border: 1.5px solid color-mix(in oklab, var(--paper) 16%, transparent);
+  border-top-color: var(--accent);
   border-radius: 50%;
-  background: var(--accent);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 160ms var(--ease-out-soft);
+  transition: opacity 180ms var(--ease-out-soft);
+  animation: none;
 }
 
-.in-progress-viewer-wait.is-on {
-  opacity: 0.85;
+.in-progress-viewer-wait.is-on,
+.project-dossier-wait.is-on,
+.media-stage-loader.is-on {
+  opacity: 1;
+  animation: media-stage-spin 720ms linear infinite;
+}
+
+@keyframes media-stage-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.project-dossier-thumb.is-pending::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  pointer-events: none;
 }
 
 .in-progress-viewer-hit {
@@ -2901,21 +2962,24 @@ html[data-motion="ok"] .process-rail-fill {
     flex-basis: min(34vw, 30rem);
   }
 
-  .project-slide.is-lead,
-  .project-slide[data-span="large"] {
+  .project-slide.is-lead {
     flex-basis: min(42vw, 36rem);
   }
 
+  .project-slide[data-span="large"]:not(.is-lead) {
+    flex-basis: min(36vw, 32rem);
+  }
+
   .project-slide[data-span="wide"]:not(.is-lead) {
-    flex-basis: min(38vw, 34rem);
+    flex-basis: min(33vw, 29rem);
   }
 
   .project-slide[data-span="tall"]:not(.is-lead) {
-    flex-basis: min(32vw, 28rem);
+    flex-basis: min(27vw, 23.5rem);
   }
 
   .project-slide[data-span="small"]:not(.is-lead) {
-    flex-basis: min(28vw, 24rem);
+    flex-basis: min(23vw, 20rem);
   }
 }
 
@@ -2943,6 +3007,27 @@ html[data-motion="ok"] .process-rail-fill {
   .project-swipe-hint {
     display: none;
   }
+}
+
+.project-slide-caption {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.project-slide-title {
+  min-width: 0;
+}
+
+.project-slide-area {
+  align-self: start;
+  justify-self: end;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ==========================================================================
@@ -2992,6 +3077,7 @@ html[data-motion="ok"] .process-rail-fill {
   flex-direction: column;
   min-width: 0;
   max-width: 100%;
+  background: var(--ink-deep);
 }
 
 .project-dossier-utility {
@@ -3061,14 +3147,14 @@ html[data-motion="ok"] .process-rail-fill {
   flex: 0 0 auto;
   height: 52svh;
   min-height: 14.5rem;
-  background: #121214;
+  background: var(--ink-deep);
 }
 
 .project-dossier-stage {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #121214;
+  background: var(--ink-deep);
 }
 
 .project-dossier-layer {
@@ -3082,36 +3168,25 @@ html[data-motion="ok"] .process-rail-fill {
   opacity: 1;
 }
 
-.project-dossier-wait {
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 4;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 160ms var(--ease-out-soft);
+/* LQIP in the modal stage must match the decoded image box.
+   Global .media-lqip uses 110% + scale(1.05) for card covers; that
+   reads as a crop/zoom jump once the sharp contain/cover frame lands. */
+.project-dossier-stage .media-frame .media-lqip,
+.project-dossier-layer .media-frame .media-lqip,
+.project-dossier-thumb .media-frame .media-lqip {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  transform: none;
 }
 
-.project-dossier-wait.is-on {
-  opacity: 0.85;
-}
-
-.project-dossier-stage[data-fit="contain"] .media-full,
-.project-dossier-stage[data-fit="contain"] .media-lqip,
-.project-dossier-stage[data-fit="contain"] .media-video,
 .project-dossier-layer[data-fit="contain"] .media-full,
 .project-dossier-layer[data-fit="contain"] .media-lqip,
 .project-dossier-layer[data-fit="contain"] .media-video {
   object-fit: contain;
 }
 
-.project-dossier-stage[data-fit="cover"] .media-full,
-.project-dossier-stage[data-fit="cover"] .media-lqip,
-.project-dossier-stage[data-fit="cover"] .media-video,
 .project-dossier-layer[data-fit="cover"] .media-full,
 .project-dossier-layer[data-fit="cover"] .media-lqip,
 .project-dossier-layer[data-fit="cover"] .media-video {
@@ -3152,7 +3227,7 @@ html[data-motion="ok"] .process-rail-fill {
   min-width: 0;
   width: 100%;
   max-width: 100%;
-  padding: 0.85rem max(1.125rem, env(safe-area-inset-right, 0px)) 0.35rem
+  padding: 0.85rem max(1.125rem, env(safe-area-inset-right, 0px)) 0
     max(1.125rem, env(safe-area-inset-left, 0px));
   overflow-x: auto;
   overflow-y: hidden;
@@ -3160,7 +3235,8 @@ html[data-motion="ok"] .process-rail-fill {
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
   scrollbar-width: thin;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--ink-deep);
+  border-bottom: 0;
 }
 
 .project-dossier-thumb {
@@ -3188,6 +3264,7 @@ html[data-motion="ok"] .process-rail-fill {
   width: 100%;
   height: 100%;
   max-width: none;
+  transform: none;
 }
 
 .project-dossier-thumb .media-full,
@@ -3272,6 +3349,10 @@ html[data-motion="ok"] .process-rail-fill {
   min-width: 0;
 }
 
+.project-dossier-fact.is-wide {
+  grid-column: 1 / -1;
+}
+
 .project-dossier-facts dt {
   margin: 0;
   font-family: var(--font-mono), ui-monospace, monospace;
@@ -3286,6 +3367,7 @@ html[data-motion="ok"] .process-rail-fill {
   font-size: 0.9375rem;
   line-height: 1.4;
   color: var(--paper);
+  font-variant-numeric: tabular-nums;
 }
 
 .project-dossier-copy {

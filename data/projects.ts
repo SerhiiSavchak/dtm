@@ -1,3 +1,5 @@
+import type { ObjectType } from "@/lib/portfolio/object-type";
+
 export type ProjectCategory = "apartment" | "house" | "commercial";
 
 export type ProjectMediaFit = "cover" | "contain";
@@ -5,6 +7,8 @@ export type ProjectMediaFit = "cover" | "contain";
 export type ProjectMedia = {
   src: string;
   video?: string | null;
+  /** Optional LQIP (Sanity metadata.lqip). Local stills use site-images. */
+  lqip?: string;
   /** Stage object-fit. Portrait/detail stills use contain; landscape/hero may cover. */
   fit: ProjectMediaFit;
   objectPosition: string;
@@ -17,14 +21,22 @@ export type Project = {
   title: string;
   isPlaceholder?: boolean;
   category: ProjectCategory;
+  /** Client-facing classification for cards and dossier facts. */
+  objectType?: ObjectType;
+  /** Free-text location from CMS (preferred). */
+  location?: string;
+  /** Legacy hardcoded-only city key. */
   locationKey?: "lviv";
   description?: string | string[];
   area?: string;
   workType?: string;
   duration?: string;
+  /** Intentionally unused on public Portfolio (client: do not show year). */
   year?: string;
+  rooms?: number;
   type?: string;
   cover: string;
+  coverLqip?: string;
   coverPosition: string;
   media: ProjectMedia[];
   span: "large" | "tall" | "wide" | "small";

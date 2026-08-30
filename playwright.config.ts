@@ -10,14 +10,14 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: "http://localhost:3010",
+    baseURL: "http://localhost:3000",
     trace: "off",
     colorScheme: "dark",
   },
   webServer: {
-    command: "npx next dev --port 3010 --hostname localhost",
-    url: "http://localhost:3010",
-    reuseExistingServer: !process.env.CI,
+    command: "npx next dev --port 3000 --hostname localhost",
+    url: "http://localhost:3000",
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   projects: [

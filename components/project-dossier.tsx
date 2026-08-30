@@ -12,11 +12,13 @@ import {
 import { createPortal } from "react-dom";
 import {
   projectMedia,
-  projects,
+  type Project,
   type ProjectMedia,
 } from "@/data/projects";
 import { useDictionary } from "@/lib/i18n/locale-context";
+import { dossierFacts } from "@/lib/portfolio/labels";
 import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
+import { useStageCrossfade } from "@/lib/media/stage-crossfade";
 import { preloadSiteImage } from "@/lib/media-preload";
 import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 import { MediaImage } from "./media-image";
@@ -58,65 +60,36 @@ function getReduced() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-const CROSSFADE_MS = 180;
-const SLOW_WAIT_MS = 150;
 
 function DossierStage({
   item,
   alt,
   sizes,
   reduced,
+  onBusyChange,
 }: {
   item: ProjectMedia;
   alt: string;
   sizes: string;
   reduced: boolean;
+  onBusyChange?: (busy: boolean) => void;
 }) {
-  const [shown, setShown] = useState(item);
-  const [incoming, setIncoming] = useState<ProjectMedia | null>(null);
-  const [incomingOn, setIncomingOn] = useState(false);
-  const [slow, setSlow] = useState(false);
-  const targetKey = mediaKey(item);
-  const shownKey = mediaKey(shown);
-  const incomingKey = incoming ? mediaKey(incoming) : null;
-
-  if (reduced) {
-    if (shownKey !== targetKey || incoming) {
-      setShown(item);
-      setIncoming(null);
-      setIncomingOn(false);
-      setSlow(false);
-    }
-  } else if (shownKey !== targetKey && incomingKey !== targetKey) {
-    setIncoming(item);
-    setIncomingOn(false);
-    setSlow(false);
-  } else if (shownKey === targetKey && incoming) {
-    setIncoming(null);
-    setIncomingOn(false);
-    setSlow(false);
-  }
+  const {
+    shown,
+    incoming,
+    incomingOn,
+    showLoader,
+    busy,
+    onIncomingReady,
+    onIncomingFail,
+  } = useStageCrossfade(item, mediaKey, reduced);
 
   useEffect(() => {
-    if (!incoming || incomingOn || reduced) return;
-    const wait = window.setTimeout(() => setSlow(true), SLOW_WAIT_MS);
-    return () => window.clearTimeout(wait);
-  }, [incoming, incomingOn, reduced]);
-
-  useEffect(() => {
-    if (!incomingOn || !incoming) return;
-    const next = incoming;
-    const fade = window.setTimeout(() => {
-      setShown(next);
-      setIncoming(null);
-      setIncomingOn(false);
-      setSlow(false);
-    }, CROSSFADE_MS);
-    return () => window.clearTimeout(fade);
-  }, [incoming, incomingOn]);
+    onBusyChange?.(busy);
+  }, [busy, onBusyChange]);
 
   return (
-    <div className="project-dossier-stage" data-fit={item.fit}>
+    <div className="project-dossier-stage" aria-busy={busy || undefined}>
       <div className="project-dossier-layer is-shown" data-fit={shown.fit}>
         <DossierFrame item={shown} alt={alt} sizes={sizes} priority />
       </div>
@@ -130,19 +103,15 @@ function DossierStage({
             alt={alt}
             sizes={sizes}
             priority
-            onReady={() => {
-              setSlow(false);
-              setIncomingOn(true);
-            }}
-            onFail={() => {
-              setIncoming(null);
-              setIncomingOn(false);
-              setSlow(false);
-            }}
+            onReady={onIncomingReady}
+            onFail={onIncomingFail}
           />
         </div>
       ) : null}
-      <span className={`project-dossier-wait ${slow ? "is-on" : ""}`} aria-hidden />
+      <span
+        className={`media-stage-loader project-dossier-wait ${showLoader ? "is-on" : ""}`}
+        aria-hidden
+      />
     </div>
   );
 }
@@ -169,6 +138,7 @@ function DossierFrame({
     return (
       <PosterVideo
         poster={item.src}
+        posterLqip={item.lqip}
         mp4={item.video}
         alt={alt}
         sizes={sizes}
@@ -179,6 +149,7 @@ function DossierFrame({
         preload="metadata"
         quality={IMAGE_QUALITY.feature}
         onPosterReady={onReady}
+        onVideoReady={onReady}
       />
     );
   }
@@ -187,6 +158,7 @@ function DossierFrame({
     <MediaImage
       src={item.src}
       alt={alt}
+      lqip={item.lqip}
       fill
       quality={IMAGE_QUALITY.feature}
       sizes={sizes}
@@ -201,12 +173,14 @@ function DossierFrame({
 
 export function ProjectDossier({
   slug,
+  projects,
   onClose,
   onNavigate,
 }: {
   slug: string;
+  projects: Project[];
   onClose: () => void;
-  onNavigate: (slug: string) => void;
+  onNavigate: (next: string) => void;
 }) {
   const t = useDictionary().projects;
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -218,6 +192,7 @@ export function ProjectDossier({
   const titleId = useId();
   const reduced = useSyncExternalStore(subscribeReduced, getReduced, () => false);
   const [mediaIndex, setMediaIndex] = useState(0);
+  const [stageBusy, setStageBusy] = useState(false);
   const [activeSlug, setActiveSlug] = useState(slug);
   if (activeSlug !== slug) {
     setActiveSlug(slug);
@@ -235,31 +210,17 @@ export function ProjectDossier({
   const stageSizes = IMAGE_SIZES.dossierStage;
 
   const title = project.title;
-  const category = t.categories[project.category];
-  const location = project.locationKey
-    ? t.location[project.locationKey]
-    : null;
-  const area = project.area
-    ? resolveCopy(project.area, t.areaPlaceholder)
-    : null;
   const paragraphs = descriptionParagraphs(
     project.description,
     t.descriptionPlaceholder
   );
 
-  const facts = [
-    project.type ? { label: t.facts.type, value: project.type } : null,
-    area ? { label: t.facts.area, value: area } : null,
-    project.workType
-      ? { label: t.facts.workType, value: project.workType }
-      : null,
-    project.duration
-      ? { label: t.facts.duration, value: project.duration }
-      : null,
-    project.year ? { label: t.facts.year, value: project.year } : null,
-  ].filter((fact): fact is { label: string; value: string } => fact !== null);
+  const facts = dossierFacts(project, t);
 
-  const mediaAlt = `DTM: ${category}`;
+  const mediaAlt =
+    project.objectType && t.objectTypes[project.objectType]
+      ? `DTM: ${t.objectTypes[project.objectType]}`
+      : `DTM: ${t.categories[project.category]}`;
 
   const goMedia = useCallback(
     (next: number) => {
@@ -278,7 +239,7 @@ export function ProjectDossier({
         });
       }
     },
-    [stageSizes]
+    [projects, stageSizes]
   );
 
   useEffect(() => {
@@ -388,7 +349,7 @@ export function ProjectDossier({
         quality: IMAGE_QUALITY.feature,
       });
     });
-  }, [project, projectIndex, safeIndex, stageSizes]);
+  }, [project, projectIndex, projects, safeIndex, stageSizes]);
 
   if (typeof document === "undefined" || !project || !current) return null;
 
@@ -425,6 +386,7 @@ export function ProjectDossier({
               alt={mediaAlt}
               sizes={stageSizes}
               reduced={reduced}
+              onBusyChange={setStageBusy}
             />
             {media.length > 1 ? (
               <p className="project-dossier-counter" aria-live="polite">
@@ -438,7 +400,7 @@ export function ProjectDossier({
             <div ref={stripRef} className="project-dossier-filmstrip">
               {media.map((item, index) => (
                 <button
-                  key={mediaKey(item)}
+                  key={`${index}:${mediaKey(item)}`}
                   type="button"
                   aria-label={
                     item.video
@@ -448,12 +410,13 @@ export function ProjectDossier({
                   aria-current={index === safeIndex ? "true" : undefined}
                   className={`project-dossier-thumb ${
                     index === safeIndex ? "is-active" : ""
-                  }`}
+                  }${index === safeIndex && stageBusy ? " is-pending" : ""}`}
                   onClick={() => goMedia(index)}
                 >
                   <MediaImage
                     src={item.src}
                     alt=""
+                    lqip={item.lqip}
                     fill
                     quality={IMAGE_QUALITY.thumb}
                     sizes={IMAGE_SIZES.dossierThumb}
@@ -498,15 +461,14 @@ export function ProjectDossier({
             <h2 id={titleId} className="project-dossier-title">
               {title}
             </h2>
-            <p className="project-dossier-meta">
-              {category}
-              {location ? ` · ${location}` : ""}
-            </p>
 
             {facts.length > 0 ? (
               <dl className="project-dossier-facts">
                 {facts.map((fact) => (
-                  <div key={fact.label} className="project-dossier-fact">
+                  <div
+                    key={fact.label}
+                    className={`project-dossier-fact${fact.wide ? " is-wide" : ""}`}
+                  >
                     <dt>{fact.label}</dt>
                     <dd>{fact.value}</dd>
                   </div>

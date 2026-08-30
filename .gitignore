@@ -42,9 +42,14 @@ yarn-error.log*
 
 # local audit / encode scratch
 /tmp/
+/backups/
 /tmp-qa/
 /tmp-stills/
 /scripts/_media-audit.js
+
+# client source media (temporary; never commit originals)
+/new-materials/
+/public/new-materials/
 
 # vercel
 .vercel

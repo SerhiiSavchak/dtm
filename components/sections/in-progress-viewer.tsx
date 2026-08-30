@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { type InProgressItem } from "@/data/media";
 import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
+import { useStageCrossfade } from "@/lib/media/stage-crossfade";
 import { preloadSiteImage } from "@/lib/media-preload";
 import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 import { MediaImage } from "../media-image";
@@ -12,8 +13,6 @@ import type { SiteImageSrc } from "@/lib/site-images";
 const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 const VIEWER_SIZES = IMAGE_SIZES.inProgressViewer;
-const CROSSFADE_MS = 180;
-const SLOW_WAIT_MS = 150;
 
 function focusable(root: HTMLElement) {
   return [...root.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
@@ -28,6 +27,8 @@ function ViewerVideo({
   playLabel,
   pauseLabel,
   onReady,
+  onFail,
+  lqip,
 }: {
   poster: SiteImageSrc;
   mp4: string;
@@ -35,10 +36,19 @@ function ViewerVideo({
   playLabel: string;
   pauseLabel: string;
   onReady?: () => void;
+  onFail?: () => void;
+  lqip?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [ready, setReady] = useState(false);
+  const signaled = useRef(false);
+
+  const signalReady = useCallback(() => {
+    if (signaled.current) return;
+    signaled.current = true;
+    onReady?.();
+  }, [onReady]);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -93,7 +103,8 @@ function ViewerVideo({
         quality={IMAGE_QUALITY.editorial}
         sizes={VIEWER_SIZES}
         className="object-contain"
-        onReady={onReady}
+        onReady={signalReady}
+        lqip={lqip}
       />
       <video
         ref={videoRef}
@@ -105,8 +116,16 @@ function ViewerVideo({
         onCanPlay={(event) => {
           const el = event.currentTarget;
           if (el.videoWidth < 2) return;
+          signalReady();
           if (!el.paused) setReady(true);
         }}
+        onLoadedData={(event) => {
+          const el = event.currentTarget;
+          if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+            signalReady();
+          }
+        }}
+        onError={() => onFail?.()}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       >
@@ -130,12 +149,14 @@ function ViewerFrame({
   playLabel,
   pauseLabel,
   onReady,
+  onFail,
 }: {
   item: InProgressItem;
   alt: string;
   playLabel: string;
   pauseLabel: string;
   onReady?: () => void;
+  onFail?: () => void;
 }) {
   if (item.video) {
     return (
@@ -146,6 +167,8 @@ function ViewerFrame({
         playLabel={playLabel}
         pauseLabel={pauseLabel}
         onReady={onReady}
+        onFail={onFail}
+        lqip={item.lqip}
       />
     );
   }
@@ -160,6 +183,8 @@ function ViewerFrame({
       priority
       className="object-contain"
       onReady={onReady}
+      onError={() => onFail?.()}
+      lqip={item.lqip}
     />
   );
 }
@@ -175,38 +200,15 @@ function ViewerStage({
   playLabel: string;
   pauseLabel: string;
 }) {
-  const [shown, setShown] = useState(item);
-  const [incoming, setIncoming] = useState<InProgressItem | null>(null);
-  const [incomingOn, setIncomingOn] = useState(false);
-  const [slow, setSlow] = useState(false);
-
-  if (shown.id !== item.id && incoming?.id !== item.id) {
-    setIncoming(item);
-    setIncomingOn(false);
-    setSlow(false);
-  } else if (shown.id === item.id && incoming) {
-    setIncoming(null);
-    setIncomingOn(false);
-    setSlow(false);
-  }
-
-  useEffect(() => {
-    if (!incoming || incomingOn) return;
-    const wait = window.setTimeout(() => setSlow(true), SLOW_WAIT_MS);
-    return () => window.clearTimeout(wait);
-  }, [incoming, incomingOn]);
-
-  useEffect(() => {
-    if (!incomingOn || !incoming) return;
-    const next = incoming;
-    const fade = window.setTimeout(() => {
-      setShown(next);
-      setIncoming(null);
-      setIncomingOn(false);
-      setSlow(false);
-    }, CROSSFADE_MS);
-    return () => window.clearTimeout(fade);
-  }, [incoming, incomingOn]);
+  const {
+    shown,
+    incoming,
+    incomingOn,
+    showLoader,
+    busy,
+    onIncomingReady,
+    onIncomingFail,
+  } = useStageCrossfade(item, (frame) => frame.id, false);
 
   return (
     <>
@@ -227,14 +229,16 @@ function ViewerStage({
             alt={alt}
             playLabel={playLabel}
             pauseLabel={pauseLabel}
-            onReady={() => {
-              setSlow(false);
-              setIncomingOn(true);
-            }}
+            onReady={onIncomingReady}
+            onFail={onIncomingFail}
           />
         </div>
       ) : null}
-      <span className={`in-progress-viewer-wait ${slow ? "is-on" : ""}`} aria-hidden />
+      <span
+        className={`media-stage-loader in-progress-viewer-wait ${showLoader ? "is-on" : ""}`}
+        aria-hidden
+      />
+      <span className="sr-only" aria-live="polite" aria-busy={busy || undefined} />
     </>
   );
 }
