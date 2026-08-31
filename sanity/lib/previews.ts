@@ -59,19 +59,32 @@ export function galleryItemPreview(args: {
 export function frameListPreview(args: {
   label?: string;
   frameId?: string;
+  mediaType?: string;
+  still?: unknown;
+  poster?: unknown;
   media?: PreviewValue["media"];
   video?: unknown;
   filename?: string;
 }) {
-  const kind = args.video ? "Відео + фото" : "Фото";
+  const kind =
+    args.mediaType === "video"
+      ? args.poster || args.still
+        ? "Відео + обкладинка"
+        : "Відео"
+      : args.video
+        ? "Відео + фото"
+        : "Фото";
   const fallback =
     (typeof args.frameId === "string" && FRAME_ADMIN_TITLES[args.frameId]) ||
     args.filename ||
-    (args.video ? "Відео" : "Фото");
+    (args.mediaType === "video" || args.video ? "Відео" : "Фото");
+  const previewMedia = (args.poster ?? args.still ?? args.media) as
+    | PreviewValue["media"]
+    | undefined;
   return {
     title: (typeof args.label === "string" && args.label.trim()) || fallback,
     subtitle: kind,
-    media: args.media,
+    media: previewMedia,
   };
 }
 

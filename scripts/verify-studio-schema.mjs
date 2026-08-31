@@ -42,6 +42,8 @@ assert.deepEqual(
   ["Матеріал", "Додаткові налаштування"]
 );
 assert.equal(field(inProgressFrame, "label").title, "Назва для адмінки");
+assert.equal(field(inProgressFrame, "mediaType").title, "Тип матеріалу");
+assert.equal(field(inProgressFrame, "poster").title, "Обкладинка відео");
 assert.equal(field(inProgressFrame, "frameId").hidden, true);
 assert.equal(field(inProgressFrame, "frameId").readOnly, true);
 assert.equal(field(inProgressFrame, "orderRank").hidden, true);

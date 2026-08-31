@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -67,29 +68,40 @@ function DossierStage({
   sizes,
   reduced,
   onBusyChange,
+  onRejected,
 }: {
   item: ProjectMedia;
   alt: string;
   sizes: string;
   reduced: boolean;
   onBusyChange?: (busy: boolean) => void;
+  onRejected?: () => void;
 }) {
   const {
     shown,
     incoming,
     incomingOn,
     showLoader,
+    pending,
     busy,
     onIncomingReady,
     onIncomingFail,
   } = useStageCrossfade(item, mediaKey, reduced);
 
-  useEffect(() => {
-    onBusyChange?.(busy);
-  }, [busy, onBusyChange]);
+  const handleFail = useCallback(() => {
+    onIncomingFail();
+    onRejected?.();
+  }, [onIncomingFail, onRejected]);
+
+  useLayoutEffect(() => {
+    onBusyChange?.(busy || pending);
+  }, [busy, pending, onBusyChange]);
 
   return (
-    <div className="project-dossier-stage" aria-busy={busy || undefined}>
+    <div
+      className={`project-dossier-stage${pending ? " is-pending" : ""}`}
+      aria-busy={busy || undefined}
+    >
       <div className="project-dossier-layer is-shown" data-fit={shown.fit}>
         <DossierFrame item={shown} alt={alt} sizes={sizes} priority />
       </div>
@@ -104,7 +116,7 @@ function DossierStage({
             sizes={sizes}
             priority
             onReady={onIncomingReady}
-            onFail={onIncomingFail}
+            onFail={handleFail}
           />
         </div>
       ) : null}
@@ -193,6 +205,7 @@ export function ProjectDossier({
   const reduced = useSyncExternalStore(subscribeReduced, getReduced, () => false);
   const [mediaIndex, setMediaIndex] = useState(0);
   const [stageBusy, setStageBusy] = useState(false);
+  const stableIndexRef = useRef(0);
   const [activeSlug, setActiveSlug] = useState(slug);
   if (activeSlug !== slug) {
     setActiveSlug(slug);
@@ -204,6 +217,10 @@ export function ProjectDossier({
   const media = projectMedia(project);
   const safeIndex = Math.min(mediaIndex, Math.max(0, media.length - 1));
   const current = media[safeIndex] ?? media[0];
+
+  const revertMediaIndex = useCallback(() => {
+    setMediaIndex(stableIndexRef.current);
+  }, []);
   const lastMedia = media.length - 1;
   const canPrevProject = projectIndex > 0;
   const canNextProject = projectIndex < projects.length - 1;
@@ -224,9 +241,10 @@ export function ProjectDossier({
 
   const goMedia = useCallback(
     (next: number) => {
+      if (next !== safeIndex) stableIndexRef.current = safeIndex;
       setMediaIndex(Math.max(0, Math.min(lastMedia, next)));
     },
-    [lastMedia]
+    [lastMedia, safeIndex]
   );
 
   const preloadCover = useCallback(
@@ -387,6 +405,7 @@ export function ProjectDossier({
               sizes={stageSizes}
               reduced={reduced}
               onBusyChange={setStageBusy}
+              onRejected={revertMediaIndex}
             />
             {media.length > 1 ? (
               <p className="project-dossier-counter" aria-live="polite">

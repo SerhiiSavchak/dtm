@@ -57,7 +57,7 @@ export function SiteFooter() {
           </div>
         </Reveal>
 
-        <div className="mt-12 border-t border-border pt-8 md:mt-14 md:pt-10 lg:mt-14 lg:pt-8">
+        <div className="mt-10 border-t border-border pt-8 md:mt-12 md:pt-9 lg:mt-12 lg:pt-8">
           {/* Mobile / tablet — stacked, centered. Unchanged composition. */}
           <div className="mx-auto flex max-w-5xl flex-col items-center gap-8 text-center md:gap-10 nav:hidden">
             <div className="flex flex-col items-center">
@@ -119,7 +119,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-2 border-t border-border pt-5 text-center sm:flex-row sm:gap-8 nav:mt-6 nav:items-center nav:justify-between nav:pt-4 nav:text-left">
+        <div className="mt-6 flex flex-col items-center justify-center gap-2 border-t border-border pt-4 text-center sm:flex-row sm:gap-8 nav:mt-6 nav:items-center nav:justify-between nav:pt-4 nav:text-left">
           <span className="label text-muted">
             © {new Date().getFullYear()} {t.footer.copyright}
           </span>

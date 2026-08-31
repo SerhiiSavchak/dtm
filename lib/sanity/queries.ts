@@ -2,14 +2,15 @@ export const IN_PROGRESS_FRAMES_QUERY = /* groq */ `
 *[_type == "inProgressFrame"
   && !(_id in path("drafts.**"))
   && defined(frameId.current)
-  && defined(still.asset)
+  && (defined(still.asset) || defined(poster.asset) || defined(video.asset))
 ] | order(orderRank asc) {
   _id,
   "frameId": frameId.current,
+  mediaType,
   objectPosition,
   orderRank,
-  "src": still.asset->url,
-  "lqip": still.asset->metadata.lqip,
+  "src": coalesce(poster.asset->url, still.asset->url),
+  "lqip": coalesce(poster.asset->metadata.lqip, still.asset->metadata.lqip),
   "video": video.asset->url
 }
 `;

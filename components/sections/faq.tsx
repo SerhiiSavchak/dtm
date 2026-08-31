@@ -71,7 +71,7 @@ export function Faq() {
                         className={`faq-panel ${isOpen ? "is-open" : ""}`}
                     >
                       <div>
-                        <p className="faq-answer type-body-sm max-w-[40rem] pb-7 pt-2 text-muted md:pb-8 md:pt-3">
+                        <p className="faq-answer type-body-sm max-w-[40rem] text-muted">
                           <CopyText>{item.a}</CopyText>
                         </p>
                       </div>

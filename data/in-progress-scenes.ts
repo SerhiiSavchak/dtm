@@ -19,7 +19,8 @@ export type InProgressPanel = "wide" | "portrait" | "narrow" | "video";
 
 export type InProgressItem = {
   id: string;
-  src: string;
+  /** Photo src or optional video poster. Omitted for video-only items. */
+  src?: string;
   video?: string | null;
   /** Optional Sanity LQIP. Local stills use site-images. */
   lqip?: string;

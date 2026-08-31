@@ -7,7 +7,8 @@ import {
 } from "react";
 
 export const STAGE_CROSSFADE_MS = 180;
-export const STAGE_LOADER_DELAY_MS = 150;
+/** Anti-flicker threshold before showing the spinner (measured ~80ms). */
+export const STAGE_LOADER_DELAY_MS = 80;
 
 /**
  * Keeps the outgoing layer visible until the incoming media signals readiness.
@@ -23,6 +24,7 @@ export function useStageCrossfade<T>(
   const [incomingOn, setIncomingOn] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
   const requestRef = useRef(keyOf(target));
+  const rejectKeyRef = useRef<string | null>(null);
 
   const targetKey = keyOf(target);
   const shownKey = keyOf(shown);
@@ -39,14 +41,21 @@ export function useStageCrossfade<T>(
       setIncomingOn(false);
       setShowLoader(false);
     }
+  } else if (shownKey === targetKey) {
+    rejectKeyRef.current = null;
+    if (incoming) {
+      setIncoming(null);
+      setIncomingOn(false);
+      setShowLoader(false);
+    }
   } else if (shownKey !== targetKey && incomingKey !== targetKey) {
-    setIncoming(target);
-    setIncomingOn(false);
-    setShowLoader(false);
-  } else if (shownKey === targetKey && incoming) {
-    setIncoming(null);
-    setIncomingOn(false);
-    setShowLoader(false);
+    if (rejectKeyRef.current !== targetKey) {
+      setIncoming(target);
+      setIncomingOn(false);
+      setShowLoader(false);
+    }
+  } else if (shownKey !== targetKey && incomingKey === targetKey) {
+    // waiting on incoming — keep state
   }
 
   useEffect(() => {
@@ -80,7 +89,9 @@ export function useStageCrossfade<T>(
 
   const onIncomingFail = useCallback(() => {
     if (!incoming) return;
-    if (requestRef.current !== keyOf(incoming)) return;
+    const key = keyOf(incoming);
+    if (requestRef.current !== key) return;
+    rejectKeyRef.current = key;
     setIncoming(null);
     setIncomingOn(false);
     setShowLoader(false);
@@ -91,6 +102,7 @@ export function useStageCrossfade<T>(
     incoming,
     incomingOn,
     showLoader,
+    pending: Boolean(incoming),
     busy: Boolean(incoming && !incomingOn),
     onIncomingReady,
     onIncomingFail,

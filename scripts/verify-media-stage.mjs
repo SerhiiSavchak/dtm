@@ -6,7 +6,7 @@ function assert(label, condition) {
   if (!condition) failures.push(label);
 }
 
-assert("loader delay is positive", STAGE_LOADER_DELAY_MS >= 100);
+assert("loader delay is tuned", STAGE_LOADER_DELAY_MS >= 60 && STAGE_LOADER_DELAY_MS <= 120);
 assert("useStageCrossfade exported", typeof useStageCrossfade === "function");
 
 if (failures.length) {

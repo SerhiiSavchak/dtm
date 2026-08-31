@@ -23,7 +23,11 @@
   --page-gutter: clamp(1.5rem, 4vw, 5.5rem);
   --container-max: 1720px;
   --section-space: clamp(4rem, 6.5vw, 6.5rem);
+  --section-edge: calc(var(--section-space) * 0.5);
+  /* Compact tier — footer page-end, nested bands */
   --section-space-sm: clamp(3rem, 5vw, 4.75rem);
+  --section-edge-sm: calc(var(--section-space-sm) * 0.5);
+  --section-arch-inset: 0.95rem;
   --section-head-gap: clamp(1.35rem, 2.2vw, 2rem);
   --header-bar: 5rem;
   --header-h: calc(var(--header-bar) + env(safe-area-inset-top, 0px));
@@ -273,19 +277,36 @@ input:disabled {
   padding-inline: var(--page-gutter);
 }
 
+/*
+  Homepage section rhythm — split-beat model.
+  Each section contributes half a beat top + half bottom; adjacent halves = one full beat.
+  Arch-rule inset lives in pad-top (not section-head) so eyebrow-to-boundary matches foot-to-boundary.
+*/
 .section-pad {
-  padding-top: var(--section-space);
-  padding-bottom: var(--section-space-sm);
+  padding-top: calc(var(--section-edge) + var(--section-arch-inset));
+  padding-bottom: var(--section-edge);
 }
 
+/* First content section after hero — full opening air */
+#about .section-pad {
+  padding-top: calc(var(--section-space) + var(--section-arch-inset));
+}
+
+/* Last in-main section — full closing beat before footer band */
+#faq .section-pad {
+  padding-bottom: var(--section-space);
+}
+
+/* Terminal band (footer): half-beat join to FAQ, compact page end */
 .section-pad-sm {
-  padding-block: var(--section-space-sm);
+  padding-top: calc(var(--section-edge) + var(--section-arch-inset));
+  padding-bottom: var(--section-space-sm);
 }
 
 .section-head {
   position: relative;
   border-top-width: 0;
-  padding-top: 0.95rem;
+  padding-top: 0;
   margin-bottom: var(--section-head-gap);
 }
 
@@ -2426,15 +2447,18 @@ html[data-motion="reduce"] .in-progress-visual {
   position: absolute;
   left: 50%;
   top: 50%;
-  z-index: 5;
-  width: 1.375rem;
-  height: 1.375rem;
-  margin: -0.6875rem 0 0 -0.6875rem;
-  border: 1.5px solid color-mix(in oklab, var(--paper) 16%, transparent);
+  z-index: 6;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin: -0.875rem 0 0 -0.875rem;
+  border: 2px solid color-mix(in oklab, var(--paper) 24%, transparent);
   border-top-color: var(--accent);
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--ink-deep) 40%, transparent),
+    0 0 0 0.625rem color-mix(in oklab, var(--ink-deep) 52%, transparent);
   transition: opacity 180ms var(--ease-out-soft);
   animation: none;
 }
@@ -2457,7 +2481,7 @@ html[data-motion="reduce"] .in-progress-visual {
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  background: color-mix(in oklab, var(--accent) 18%, transparent);
   pointer-events: none;
 }
 
@@ -2636,7 +2660,7 @@ html[data-motion="reduce"] .in-progress-visual {
 */
 .services-inline-media {
   position: relative;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1.25rem, 2.5vw, 1.75rem);
   width: 100%;
   aspect-ratio: 4 / 5;
   overflow: hidden;
@@ -2810,7 +2834,6 @@ html[data-motion="ok"] .process-rail-fill {
 .project-viewport {
   overflow: hidden;
   max-width: 100%;
-  padding-bottom: 0.25rem;
   cursor: grab;
   touch-action: pan-y;
   user-select: none;
@@ -3155,6 +3178,22 @@ html[data-motion="ok"] .process-rail-fill {
   inset: 0;
   overflow: hidden;
   background: var(--ink-deep);
+}
+
+.project-dossier-stage.is-pending::after,
+.in-progress-viewer-stage-inner.is-pending::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: color-mix(in oklab, var(--ink-deep) 24%, transparent);
+  pointer-events: none;
+  transition: opacity 80ms var(--ease-out-soft);
+}
+
+.in-progress-viewer-stage-inner {
+  position: absolute;
+  inset: 0;
 }
 
 .project-dossier-layer {
@@ -4593,9 +4632,28 @@ html[data-motion="ok"] .media-full:not(.is-shown):not(.is-failed) {
 .faq-answer {
   opacity: 0;
   transform: translateY(-6px);
+  padding-top: 0.5rem;
+  padding-bottom: 1.25rem;
   transition:
     opacity 0.28s var(--ease-out-soft),
     transform 0.32s var(--ease-out-expo);
+}
+
+@media (min-width: 768px) {
+  .faq-answer {
+    padding-top: 0.75rem;
+    padding-bottom: 1.5rem;
+  }
+}
+
+li:last-child .faq-answer {
+  padding-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  li:last-child .faq-answer {
+    padding-bottom: 0.75rem;
+  }
 }
 
 .faq-panel.is-open .faq-answer {

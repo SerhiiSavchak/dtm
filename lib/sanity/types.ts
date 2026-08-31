@@ -67,6 +67,7 @@ export type PortfolioRecord = {
 export type SanityInProgressFrameDocument = {
   _id?: string | null;
   frameId?: string | null;
+  mediaType?: "photo" | "video" | null;
   objectPosition?: string | null;
   orderRank?: string | null;
   src?: string | null;

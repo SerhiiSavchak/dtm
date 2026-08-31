@@ -17,6 +17,7 @@ import { IMAGE_QUALITY } from "@/lib/image-slots";
 import { CopyText } from "../copy-text";
 import { InteractiveArrow } from "../fx/interactive-arrow";
 import { MediaImage } from "../media-image";
+import { VideoPreview } from "../video-preview";
 import { Reveal, RevealGroup } from "../reveal";
 import { SectionHead } from "../section-head";
 import { InProgressViewer } from "./in-progress-viewer";
@@ -51,62 +52,24 @@ function ObjectVideo({
   active: boolean;
   priority?: boolean;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el || !item.video) return;
-    el.muted = true;
-    const reduce = window.matchMedia(REDUCE_MQ).matches;
-    if (!active || reduce || document.hidden) {
-      el.pause();
-      return;
-    }
-    const tryPlay = () => {
-      if (el.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
-      el.play().catch(() => {});
-    };
-    tryPlay();
-    el.addEventListener("canplay", tryPlay);
-    const onVis = () => {
-      if (document.hidden) el.pause();
-      else tryPlay();
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => {
-      el.removeEventListener("canplay", tryPlay);
-      document.removeEventListener("visibilitychange", onVis);
-      el.pause();
-    };
-  }, [active, item.video]);
+  if (!item.video) return null;
 
   return (
     <div className="in-progress-video">
-      <MediaImage
-        src={item.src}
+      <VideoPreview
+        mp4={item.video}
         alt={alt}
-        fill
-        quality={STAGE_QUALITY}
+        poster={item.src}
+        posterLqip={item.lqip}
         sizes={PANEL_SIZES}
+        quality={STAGE_QUALITY}
         priority={priority}
-        className="in-progress-image object-cover"
-        style={{ objectPosition: item.objectPosition }}
-        lqip={item.lqip}
+        imageClassName="in-progress-image object-cover"
+        videoClassName="in-progress-video-el object-cover"
+        objectPosition={item.objectPosition}
+        active={active}
+        preload="metadata"
       />
-      {item.video ? (
-        <video
-          ref={videoRef}
-          className="in-progress-video-el"
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster={item.src}
-          style={{ objectPosition: item.objectPosition }}
-        >
-          <source src={item.video} type="video/mp4" />
-        </video>
-      ) : null}
     </div>
   );
 }
@@ -179,7 +142,7 @@ function MediaPanel({
             active={active && ready}
             priority={priority}
           />
-        ) : (
+        ) : item.src ? (
           <MediaImage
             src={item.src}
             alt={t.mediaAlt}
@@ -191,7 +154,7 @@ function MediaPanel({
             style={{ objectPosition: item.objectPosition }}
             lqip={item.lqip}
           />
-        )}
+        ) : null}
       </div>
       <span className="in-progress-shade" aria-hidden />
       <span className="in-progress-tick" aria-hidden>

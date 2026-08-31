@@ -36,6 +36,35 @@ assert("rejects local video path", mapInProgressFrame({
   video: "/videos/foo.mp4",
 }) === null);
 
+assert("maps video-only frame", mapInProgressFrame({
+  frameId: "clip-a",
+  mediaType: "video",
+  video: "https://cdn.sanity.io/files/x/y/clip.mp4",
+  objectPosition: "center center",
+})?.video?.endsWith("clip.mp4") === true);
+assert("video-only has no src", mapInProgressFrame({
+  frameId: "clip-a",
+  mediaType: "video",
+  video: "https://cdn.sanity.io/files/x/y/clip.mp4",
+})?.src === undefined);
+assert("maps video with optional poster", mapInProgressFrame({
+  frameId: "clip-b",
+  mediaType: "video",
+  src: "https://cdn.sanity.io/images/x/y/poster.jpg",
+  video: "https://cdn.sanity.io/files/x/y/clip.mp4",
+})?.src?.endsWith("poster.jpg") === true);
+assert("rejects photo without still", mapInProgressFrame({
+  frameId: "photo-a",
+  mediaType: "photo",
+}) === null);
+assert("rejects empty frame", mapInProgressFrame({
+  frameId: "empty",
+}) === null);
+assert("rejects video without file", mapInProgressFrame({
+  frameId: "bad-video",
+  mediaType: "video",
+}) === null);
+
 const frames = inProgressMedia.map((item, index) => ({
   ...item,
   src: `https://cdn.sanity.io/images/x/y/${index}.jpg`,

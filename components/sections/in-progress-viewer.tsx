@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { type InProgressItem } from "@/data/media";
 import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
@@ -8,7 +8,7 @@ import { useStageCrossfade } from "@/lib/media/stage-crossfade";
 import { preloadSiteImage } from "@/lib/media-preload";
 import { lockScroll, unlockScroll } from "@/lib/scroll-lock";
 import { MediaImage } from "../media-image";
-import type { SiteImageSrc } from "@/lib/site-images";
+import { VideoPreview } from "../video-preview";
 
 const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -20,127 +20,10 @@ function focusable(root: HTMLElement) {
   );
 }
 
-function ViewerVideo({
-  poster,
-  mp4,
-  alt,
-  playLabel,
-  pauseLabel,
-  onReady,
-  onFail,
-  lqip,
-}: {
-  poster: SiteImageSrc;
-  mp4: string;
-  alt: string;
-  playLabel: string;
-  pauseLabel: string;
-  onReady?: () => void;
-  onFail?: () => void;
-  lqip?: string;
-}) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
-  const [ready, setReady] = useState(false);
-  const signaled = useRef(false);
-
-  const signalReady = useCallback(() => {
-    if (signaled.current) return;
-    signaled.current = true;
-    onReady?.();
-  }, [onReady]);
-
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-    el.muted = true;
-    const allowAuto =
-      window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const tryPlay = () => {
-      if (!allowAuto) return;
-      if (el.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
-      el.play()
-        .then(() => {
-          setPlaying(true);
-          setReady(true);
-        })
-        .catch(() => setPlaying(false));
-    };
-    tryPlay();
-    const onVis = () => {
-      if (document.hidden) {
-        el.pause();
-        setPlaying(false);
-      }
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => {
-      document.removeEventListener("visibilitychange", onVis);
-      el.pause();
-    };
-  }, [mp4]);
-
-  const toggle = () => {
-    const el = videoRef.current;
-    if (!el) return;
-    if (el.paused) {
-      el.play()
-        .then(() => setPlaying(true))
-        .catch(() => setPlaying(false));
-    } else {
-      el.pause();
-      setPlaying(false);
-    }
-  };
-
-  return (
-    <div className="in-progress-viewer-video">
-      <MediaImage
-        src={poster}
-        alt={alt}
-        fill
-        quality={IMAGE_QUALITY.editorial}
-        sizes={VIEWER_SIZES}
-        className="object-contain"
-        onReady={signalReady}
-        lqip={lqip}
-      />
-      <video
-        ref={videoRef}
-        className={`media-video object-contain ${ready ? "is-shown" : ""}`}
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        onCanPlay={(event) => {
-          const el = event.currentTarget;
-          if (el.videoWidth < 2) return;
-          signalReady();
-          if (!el.paused) setReady(true);
-        }}
-        onLoadedData={(event) => {
-          const el = event.currentTarget;
-          if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-            signalReady();
-          }
-        }}
-        onError={() => onFail?.()}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-      >
-        <source src={mp4} type="video/mp4" />
-      </video>
-      <button
-        type="button"
-        className="in-progress-viewer-toggle"
-        aria-label={playing ? pauseLabel : playLabel}
-        onClick={toggle}
-      >
-        {playing ? pauseLabel : playLabel}
-      </button>
-    </div>
-  );
+function frameKey(frame: InProgressItem) {
+  return frame.video
+    ? `${frame.id}::${frame.video}`
+    : `${frame.id}::${frame.src ?? ""}`;
 }
 
 function ViewerFrame({
@@ -160,18 +43,30 @@ function ViewerFrame({
 }) {
   if (item.video) {
     return (
-      <ViewerVideo
-        poster={item.src}
-        mp4={item.video}
-        alt={alt}
-        playLabel={playLabel}
-        pauseLabel={pauseLabel}
-        onReady={onReady}
-        onFail={onFail}
-        lqip={item.lqip}
-      />
+      <div className="in-progress-viewer-video">
+        <VideoPreview
+          mp4={item.video}
+          alt={alt}
+          poster={item.src}
+          posterLqip={item.lqip}
+          sizes={VIEWER_SIZES}
+          quality={IMAGE_QUALITY.editorial}
+          imageClassName="object-contain"
+          videoClassName="object-contain"
+          objectPosition={item.objectPosition}
+          active
+          preload="metadata"
+          showToggle
+          playLabel={playLabel}
+          pauseLabel={pauseLabel}
+          onReady={onReady}
+          onFail={onFail}
+        />
+      </div>
     );
   }
+
+  if (!item.src) return null;
 
   return (
     <MediaImage
@@ -194,50 +89,70 @@ function ViewerStage({
   alt,
   playLabel,
   pauseLabel,
+  onRejected,
+  onBusyChange,
 }: {
   item: InProgressItem;
   alt: string;
   playLabel: string;
   pauseLabel: string;
+  onRejected?: () => void;
+  onBusyChange?: (busy: boolean) => void;
 }) {
   const {
     shown,
     incoming,
     incomingOn,
     showLoader,
+    pending,
     busy,
     onIncomingReady,
     onIncomingFail,
-  } = useStageCrossfade(item, (frame) => frame.id, false);
+  } = useStageCrossfade(item, frameKey, false);
+
+  const handleFail = useCallback(() => {
+    onIncomingFail();
+    onRejected?.();
+  }, [onIncomingFail, onRejected]);
+
+  useLayoutEffect(() => {
+    onBusyChange?.(busy || pending);
+  }, [busy, pending, onBusyChange]);
 
   return (
     <>
-      <div className="in-progress-viewer-layer is-shown">
-        <ViewerFrame
-          item={shown}
-          alt={alt}
-          playLabel={playLabel}
-          pauseLabel={pauseLabel}
-        />
-      </div>
-      {incoming ? (
-        <div
-          className={`in-progress-viewer-layer ${incomingOn ? "is-shown" : ""}`}
-        >
+      <div
+        className={`in-progress-viewer-stage-inner${
+          pending ? " is-pending" : ""
+        }`}
+      >
+        <div className="in-progress-viewer-layer is-shown">
           <ViewerFrame
-            item={incoming}
+            item={shown}
             alt={alt}
             playLabel={playLabel}
             pauseLabel={pauseLabel}
-            onReady={onIncomingReady}
-            onFail={onIncomingFail}
           />
         </div>
-      ) : null}
-      <span
-        className={`media-stage-loader in-progress-viewer-wait ${showLoader ? "is-on" : ""}`}
-        aria-hidden
-      />
+        {incoming ? (
+          <div
+            className={`in-progress-viewer-layer ${incomingOn ? "is-shown" : ""}`}
+          >
+            <ViewerFrame
+              item={incoming}
+              alt={alt}
+              playLabel={playLabel}
+              pauseLabel={pauseLabel}
+              onReady={onIncomingReady}
+              onFail={handleFail}
+            />
+          </div>
+        ) : null}
+        <span
+          className={`media-stage-loader in-progress-viewer-wait ${showLoader ? "is-on" : ""}`}
+          aria-hidden
+        />
+      </div>
       <span className="sr-only" aria-live="polite" aria-busy={busy || undefined} />
     </>
   );
@@ -273,15 +188,30 @@ export function InProgressViewer({
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const touchX = useRef<number | null>(null);
+  const stableIndexRef = useRef(index);
+  const [stageBusy, setStageBusy] = useState(false);
   const titleId = useId();
   const item = items[index] ?? items[0];
   const last = items.length - 1;
 
+  const goTo = useCallback(
+    (next: number) => {
+      if (next !== index) stableIndexRef.current = index;
+      onIndex(next);
+    },
+    [index, onIndex]
+  );
+
+  const revertIndex = useCallback(() => {
+    onIndex(stableIndexRef.current);
+  }, [onIndex]);
+
   useEffect(() => {
     const srcs = [item?.src, items[index - 1]?.src, items[index + 1]?.src].filter(
       Boolean
-    ) as SiteImageSrc[];
+    );
     srcs.forEach((src) => {
+      if (!src) return;
       void preloadSiteImage(src, {
         sizes: VIEWER_SIZES,
         quality: IMAGE_QUALITY.editorial,
@@ -321,12 +251,12 @@ export function InProgressViewer({
       }
       if (event.key === "ArrowRight") {
         event.preventDefault();
-        onIndex(Math.min(last, index + 1));
+        goTo(Math.min(last, index + 1));
         return;
       }
       if (event.key === "ArrowLeft") {
         event.preventDefault();
-        onIndex(Math.max(0, index - 1));
+        goTo(Math.max(0, index - 1));
         return;
       }
       if (event.key !== "Tab") return;
@@ -385,8 +315,8 @@ export function InProgressViewer({
           onTouchEnd={(event) => {
             if (touchX.current == null) return;
             const dx = (event.changedTouches[0]?.clientX ?? 0) - touchX.current;
-            if (dx < -48) onIndex(Math.min(last, index + 1));
-            if (dx > 48) onIndex(Math.max(0, index - 1));
+            if (dx < -48) goTo(Math.min(last, index + 1));
+            if (dx > 48) goTo(Math.max(0, index - 1));
             touchX.current = null;
           }}
         >
@@ -395,6 +325,8 @@ export function InProgressViewer({
             alt={alt}
             playLabel={playLabel}
             pauseLabel={pauseLabel}
+            onRejected={revertIndex}
+            onBusyChange={setStageBusy}
           />
 
           {index > 0 ? (
@@ -403,7 +335,7 @@ export function InProgressViewer({
               tabIndex={-1}
               className="in-progress-viewer-hit is-prev"
               aria-label={prevLabel}
-              onClick={() => onIndex(index - 1)}
+              onClick={() => goTo(index - 1)}
             />
           ) : null}
           {index < last ? (
@@ -412,7 +344,7 @@ export function InProgressViewer({
               tabIndex={-1}
               className="in-progress-viewer-hit is-next"
               aria-label={nextLabel}
-              onClick={() => onIndex(index + 1)}
+              onClick={() => goTo(index + 1)}
             />
           ) : null}
         </div>
@@ -422,7 +354,7 @@ export function InProgressViewer({
             type="button"
             className="btn btn-sm btn-ghost"
             disabled={index === 0}
-            onClick={() => onIndex(index - 1)}
+            onClick={() => goTo(index - 1)}
           >
             ← {prevLabel}
           </button>

@@ -12,23 +12,54 @@ import type {
 const SANITY_IMAGE = /^https:\/\/cdn\.sanity\.io\/images\//;
 const SANITY_FILE = /^https:\/\/cdn\.sanity\.io\/files\//;
 
+function inferMediaType(
+  doc: SanityInProgressFrameDocument
+): "photo" | "video" | null {
+  if (doc.mediaType === "photo" || doc.mediaType === "video") {
+    return doc.mediaType;
+  }
+  const video = doc.video?.trim();
+  const src = doc.src?.trim();
+  if (video && SANITY_FILE.test(video)) return "video";
+  if (src && SANITY_IMAGE.test(src)) return "photo";
+  return null;
+}
+
 export function mapInProgressFrame(
   doc: SanityInProgressFrameDocument
 ): InProgressItem | null {
   const id = doc.frameId?.trim();
-  const src = doc.src?.trim();
-  if (!id || !src || !SANITY_IMAGE.test(src)) return null;
+  if (!id) return null;
 
+  const mediaType = inferMediaType(doc);
+  if (!mediaType) return null;
+
+  const src = doc.src?.trim() || undefined;
   const video = doc.video?.trim() || undefined;
-  if (video && !SANITY_FILE.test(video)) return null;
+
+  if (mediaType === "photo") {
+    if (!src || !SANITY_IMAGE.test(src)) return null;
+    if (video && !SANITY_FILE.test(video)) return null;
+    return {
+      id,
+      src,
+      lqip: doc.lqip || undefined,
+      video: video || undefined,
+      objectPosition: doc.objectPosition?.trim() || "center center",
+      panel: video ? "video" : "portrait",
+    };
+  }
+
+  if (!video || !SANITY_FILE.test(video)) return null;
+  if (src && !SANITY_IMAGE.test(src)) return null;
 
   return {
     id,
     src,
     lqip: doc.lqip || undefined,
-    video: video || undefined,
+    video,
     objectPosition: doc.objectPosition?.trim() || "center center",
-    panel: video ? "video" : "portrait",
+    panel: "video",
   };
 }
 

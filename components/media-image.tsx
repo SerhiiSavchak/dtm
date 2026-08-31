@@ -70,6 +70,31 @@ export function MediaImage({
     const frame = frameRef.current;
     if (!frame) return;
     const img = frame.querySelector("img.media-full") as HTMLImageElement | null;
+    if (!img) return;
+
+    const fail = () => {
+      if (failed) return;
+      setFailed(true);
+      onError?.(undefined as never);
+    };
+
+    img.addEventListener("error", fail);
+    if (img.complete && img.naturalWidth === 0 && img.src) fail();
+
+    const stuck = window.setTimeout(() => {
+      if (!shown && !failed) fail();
+    }, 12_000);
+
+    return () => {
+      img.removeEventListener("error", fail);
+      window.clearTimeout(stuck);
+    };
+  }, [srcKey, shown, failed, onError]);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const img = frame.querySelector("img.media-full") as HTMLImageElement | null;
     if (img?.complete && img.naturalWidth > 0) {
       reveal(true);
     }
@@ -103,7 +128,13 @@ export function MediaImage({
         } ${className}`}
         style={style}
         onLoad={(event) => {
-          reveal(true);
+          const img = event.currentTarget;
+          const done = () => reveal(true);
+          if (typeof img.decode === "function") {
+            img.decode().then(done, done);
+          } else {
+            done();
+          }
           onLoad?.(event);
         }}
         onError={(event) => {
