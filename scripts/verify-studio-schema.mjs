@@ -50,6 +50,9 @@ assert.equal(field(inProgressFrame, "poster").title, "Обкладинка ві�
 assert.equal(field(inProgressFrame, "frameId").hidden, true);
 assert.equal(field(inProgressFrame, "frameId").readOnly, true);
 assert.equal(field(inProgressFrame, "orderRank").hidden, true);
+assert.equal(field(inProgressFrame, "previewVideo").hidden, true);
+assert.equal(field(inProgressFrame, "previewVideo").readOnly, true);
+assert.equal(field(inProgressFrame, "previewVideo").group, "advanced");
 
 const boardField = field(inProgressBoard, "blinds");
 assert.equal(inProgressBoard.title, "4 матеріали на головній");

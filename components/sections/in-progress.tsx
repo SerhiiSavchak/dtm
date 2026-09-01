@@ -66,12 +66,13 @@ function ObjectVideo({
   loadSource: boolean;
   priority?: boolean;
 }) {
-  if (!item.video) return null;
+  const panelMp4 = item.previewVideo ?? item.video;
+  if (!panelMp4) return null;
 
   return (
     <div className="in-progress-video">
       <VideoPreview
-        mp4={item.video}
+        mp4={panelMp4}
         alt={alt}
         poster={item.src}
         posterLqip={item.lqip}

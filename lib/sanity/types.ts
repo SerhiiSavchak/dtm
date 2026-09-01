@@ -76,6 +76,7 @@ export type SanityInProgressFrameDocument = {
   src?: string | null;
   lqip?: string | null;
   video?: string | null;
+  previewVideo?: string | null;
 };
 
 export type SanityInProgressBoardDocument = {

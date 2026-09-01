@@ -14,7 +14,8 @@ export const IN_PROGRESS_FRAMES_QUERY = /* groq */ `
   orderRank,
   "src": coalesce(poster.asset->url, still.asset->url),
   "lqip": coalesce(poster.asset->metadata.lqip, still.asset->metadata.lqip),
-  "video": video.asset->url
+  "video": video.asset->url,
+  "previewVideo": previewVideo.asset->url
 }
 `;
 

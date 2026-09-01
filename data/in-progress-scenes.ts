@@ -22,6 +22,8 @@ export type InProgressItem = {
   /** Photo src or optional video poster. Omitted for video-only items. */
   src?: string;
   video?: string | null;
+  /** Lightweight homepage panel derivative (720p). Falls back to video. */
+  previewVideo?: string | null;
   /** Optional Sanity LQIP. Local stills use site-images. */
   lqip?: string;
   objectPosition: string;

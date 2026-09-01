@@ -26,6 +26,38 @@ const mapped = mapInProgressFrame({
 assert("maps video frame", mapped?.id === "kitchen-video");
 assert("keeps objectPosition", mapped?.objectPosition === "50% 42%");
 assert("keeps video url", mapped?.video?.endsWith("clip.mp4") === true);
+assert(
+  "maps previewVideo when present",
+  mapInProgressFrame({
+    frameId: "clip-preview",
+    mediaType: "video",
+    video: "https://cdn.sanity.io/files/x/y/full.mp4",
+    previewVideo: "https://cdn.sanity.io/files/x/y/preview.mp4",
+  })?.previewVideo?.endsWith("preview.mp4") === true
+);
+assert(
+  "legacy without previewVideo",
+  mapInProgressFrame({
+    frameId: "clip-legacy",
+    mediaType: "video",
+    video: "https://cdn.sanity.io/files/x/y/full.mp4",
+  })?.previewVideo === undefined
+);
+assert(
+  "panel fallback previewVideo ?? video",
+  (mapInProgressFrame({
+    frameId: "fb",
+    mediaType: "video",
+    video: "https://cdn.sanity.io/files/x/y/full.mp4",
+    previewVideo: "https://cdn.sanity.io/files/x/y/preview.mp4",
+  })?.previewVideo ??
+    mapInProgressFrame({
+      frameId: "fb",
+      mediaType: "video",
+      video: "https://cdn.sanity.io/files/x/y/full.mp4",
+      previewVideo: "https://cdn.sanity.io/files/x/y/preview.mp4",
+    })?.video)?.endsWith("preview.mp4") === true
+);
 assert("rejects local still path", mapInProgressFrame({
   frameId: "x",
   src: "/images/foo.jpg",

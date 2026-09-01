@@ -21,6 +21,8 @@ async function measureScenario(profile, mobile, scenario) {
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   await cdp.send("Network.enable");
+  await cdp.send("Network.clearBrowserCache");
+  await cdp.send("Network.setCacheDisabled", { cacheDisabled: true });
   await cdp.send("Network.emulateNetworkConditions", {
     offline: false,
     downloadThroughput: profile.download,
@@ -31,12 +33,22 @@ async function measureScenario(profile, mobile, scenario) {
   let posterMs = null;
   let videoMs = null;
   let bytes = 0;
+  let videoBytes = 0;
   const posterSeen = new Set();
   const videoSeen = new Set();
+  const videoDetails = [];
 
   page.on("response", async (res) => {
     const url = res.url();
-    const size = Number(res.headers()["content-length"] || 0);
+    let size = Number(res.headers()["content-length"] || 0);
+    try {
+      if (!size) {
+        const body = await res.body().catch(() => null);
+        if (body) size = body.length;
+      }
+    } catch {
+      /* ignore */
+    }
     if (size > 0) bytes += size;
     if (url.includes("/_next/image") && url.includes("cdn.sanity.io/images")) {
       posterSeen.add(url);
@@ -44,18 +56,37 @@ async function measureScenario(profile, mobile, scenario) {
     }
     if (url.includes("cdn.sanity.io/files") && url.endsWith(".mp4")) {
       videoSeen.add(url);
+      videoBytes += size;
+      videoDetails.push({ url: url.split("/").pop(), sizeMB: (size / 1_000_000).toFixed(2) });
       if (videoMs === null) videoMs = Date.now();
     }
   });
 
   const t0 = Date.now();
-  await page.goto(BASE, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await page.goto(BASE, { waitUntil: "domcontentloaded", timeout: 90_000 });
 
   if (scenario === "A") {
     await page.waitForTimeout(3000);
   } else {
     await page.locator("#in-progress").scrollIntoViewIfNeeded();
-    await page.waitForTimeout(scenario === "B" ? 5000 : 8000);
+    await page
+      .locator(".in-progress-board.is-interactive")
+      .waitFor({ timeout: 30_000 })
+      .catch(() => {});
+    if (scenario === "B" && mobile) {
+      await page.waitForFunction(
+        () => {
+          const active = document.querySelector(
+            ".in-progress-panel.is-active video source"
+          );
+          return Boolean(active?.getAttribute("src"));
+        },
+        undefined,
+        { timeout: 35_000 }
+      ).catch(() => {});
+    } else {
+      await page.waitForTimeout(scenario === "B" ? 10000 : 12000);
+    }
     if (scenario === "C" || scenario === "D") {
       await page.locator(".in-progress-panel.is-active").click();
       await expectViewer(page, scenario === "D");
@@ -66,7 +97,16 @@ async function measureScenario(profile, mobile, scenario) {
     const videos = [...document.querySelectorAll(".in-progress-panel video")];
     const playing = videos.filter((v) => !v.paused && v.readyState >= 2).length;
     const posters = [...document.querySelectorAll(".in-progress-panel .media-lqip, .in-progress-panel .media-full.is-shown")].length;
-    return { sources: videos.filter((v) => v.querySelector("source")).length, playing, posters };
+    const activeSrc =
+      document
+        .querySelector(".in-progress-panel.is-active video source")
+        ?.getAttribute("src") ?? "";
+    return {
+      sources: videos.filter((v) => v.querySelector("source")).length,
+      playing,
+      posters,
+      activeSrc: activeSrc.slice(-40),
+    };
   });
 
   const row = {
@@ -76,8 +116,10 @@ async function measureScenario(profile, mobile, scenario) {
     posterMs: posterMs ? posterMs - t0 : null,
     videoRequestMs: videoMs ? videoMs - t0 : null,
     bytesMB: (bytes / 1_000_000).toFixed(2),
+    videoBytesMB: (videoBytes / 1_000_000).toFixed(2),
     uniquePosters: posterSeen.size,
     uniqueVideos: videoSeen.size,
+    videoDetails: videoDetails.map((v) => v.url).join(", "),
     ...playback,
   };
   await browser.close();

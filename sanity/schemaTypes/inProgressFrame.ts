@@ -121,6 +121,17 @@ export const inProgressFrame = defineType({
         }),
     }),
     defineField({
+      name: "previewVideo",
+      title: "Прев’ю для головної (авто)",
+      type: "file",
+      group: "advanced",
+      hidden: true,
+      readOnly: true,
+      description:
+        "Легка 720p копія для панелей на головній. Заповнюється імпортом; клієнт не редагує.",
+      options: { accept: "video/mp4" },
+    }),
+    defineField({
       name: "poster",
       title: "Обкладинка відео",
       type: "image",

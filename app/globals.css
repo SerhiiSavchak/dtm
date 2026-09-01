@@ -2531,6 +2531,14 @@ html[data-motion="reduce"] .in-progress-visual {
   pointer-events: none;
 }
 
+.project-dossier .project-dossier-wait {
+  border: 2px solid color-mix(in oklab, var(--dossier-fg) 24%, transparent);
+  border-top-color: var(--accent);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--dossier-surface) 40%, transparent),
+    0 0 0 0.625rem color-mix(in oklab, var(--dossier-surface) 52%, transparent);
+}
+
 .in-progress-viewer-hit {
   position: absolute;
   top: 0;
@@ -3125,6 +3133,7 @@ html[data-motion="ok"] .process-rail-fill {
    ========================================================================== */
 
 .project-modal-backdrop {
+  --dossier-backdrop: rgba(13, 13, 15, 0.72);
   position: fixed;
   inset: 0;
   z-index: 90;
@@ -3132,10 +3141,27 @@ html[data-motion="ok"] .process-rail-fill {
   align-items: stretch;
   justify-content: stretch;
   padding: 0;
-  background: rgba(13, 13, 15, 0.72);
+  background: var(--dossier-backdrop);
+}
+
+html[data-theme="light"] .project-modal-backdrop {
+  --dossier-backdrop: color-mix(in oklab, var(--ink-deep) 38%, transparent);
 }
 
 .project-dossier {
+  --dossier-surface: var(--ink-deep);
+  --dossier-fg: var(--paper);
+  --dossier-fg-muted: color-mix(in oklab, var(--paper) 62%, transparent);
+  --dossier-fg-subtle: color-mix(in oklab, var(--paper) 42%, transparent);
+  --dossier-fg-soft: color-mix(in oklab, var(--paper) 72%, transparent);
+  --dossier-fg-faint: color-mix(in oklab, var(--paper) 28%, transparent);
+  --dossier-fg-copy: color-mix(in oklab, var(--paper) 78%, transparent);
+  --dossier-line: rgba(255, 255, 255, 0.12);
+  --dossier-media-chrome: var(--ink-deep);
+  --dossier-stage-bg: var(--ink-deep);
+  --dossier-stage-bg-contain: var(--ink-deep);
+  --dossier-thumb-bg: #161618;
+  --dossier-pending-overlay: color-mix(in oklab, var(--ink-deep) 24%, transparent);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
@@ -3150,9 +3176,25 @@ html[data-motion="ok"] .process-rail-fill {
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--ink-deep);
-  color: var(--paper);
+  background: var(--dossier-surface);
+  color: var(--dossier-fg);
   -webkit-overflow-scrolling: touch;
+}
+
+html[data-theme="light"] .project-dossier {
+  --dossier-surface: var(--color-bg);
+  --dossier-fg: var(--color-text);
+  --dossier-fg-muted: var(--color-muted);
+  --dossier-fg-subtle: color-mix(in oklab, var(--color-text) 55%, transparent);
+  --dossier-fg-soft: color-mix(in oklab, var(--color-text) 72%, transparent);
+  --dossier-fg-faint: color-mix(in oklab, var(--color-text) 28%, transparent);
+  --dossier-fg-copy: color-mix(in oklab, var(--color-text) 78%, transparent);
+  --dossier-line: var(--color-line);
+  --dossier-media-chrome: var(--color-bg);
+  --dossier-stage-bg: var(--color-bg);
+  --dossier-stage-bg-contain: var(--stone);
+  --dossier-thumb-bg: var(--color-surface);
+  --dossier-pending-overlay: color-mix(in oklab, var(--color-text) 8%, transparent);
 }
 
 .project-dossier-info {
@@ -3165,7 +3207,7 @@ html[data-motion="ok"] .process-rail-fill {
   flex-direction: column;
   min-width: 0;
   max-width: 100%;
-  background: var(--ink-deep);
+  background: var(--dossier-media-chrome);
 }
 
 .project-dossier-utility {
@@ -3183,8 +3225,8 @@ html[data-motion="ok"] .process-rail-fill {
     max(1.125rem, env(safe-area-inset-right, 0px))
     0.75rem
     max(1.125rem, env(safe-area-inset-left, 0px));
-  background: var(--ink-deep);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--dossier-surface);
+  border-bottom: 1px solid var(--dossier-line);
 }
 
 .project-dossier-index {
@@ -3193,7 +3235,7 @@ html[data-motion="ok"] .process-rail-fill {
   font-size: var(--text-micro);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--paper) 62%, transparent);
+  color: var(--dossier-fg-muted);
   font-variant-numeric: tabular-nums;
 }
 
@@ -3207,7 +3249,7 @@ html[data-motion="ok"] .process-rail-fill {
   padding: 0.35rem 0.15rem;
   border: 0;
   background: transparent;
-  color: color-mix(in oklab, var(--paper) 72%, transparent);
+  color: var(--dossier-fg-soft);
   cursor: pointer;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: var(--text-micro);
@@ -3217,12 +3259,12 @@ html[data-motion="ok"] .process-rail-fill {
 }
 
 .project-dossier-close:focus-visible {
-  color: var(--paper);
+  color: var(--dossier-fg);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .project-dossier-close:hover {
-    color: var(--paper);
+    color: var(--dossier-fg);
   }
 }
 
@@ -3235,17 +3277,30 @@ html[data-motion="ok"] .process-rail-fill {
   flex: 0 0 auto;
   height: 52svh;
   min-height: 14.5rem;
-  background: var(--ink-deep);
+  background: var(--dossier-media-chrome);
 }
 
 .project-dossier-stage {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: var(--ink-deep);
+  background: var(--dossier-stage-bg);
 }
 
-.project-dossier-stage.is-pending::after,
+.project-dossier-stage:has(.project-dossier-layer[data-fit="contain"].is-shown) {
+  background: var(--dossier-stage-bg-contain);
+}
+
+.project-dossier-stage.is-pending::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: var(--dossier-pending-overlay);
+  pointer-events: none;
+  transition: opacity 80ms var(--ease-out-soft);
+}
+
 .in-progress-viewer-stage-inner.is-pending::after {
   content: "";
   position: absolute;
@@ -3308,7 +3363,7 @@ html[data-motion="ok"] .process-rail-fill {
   font-size: var(--text-micro);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--paper) 78%, transparent);
+  color: var(--dossier-fg-copy);
   font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
@@ -3339,7 +3394,7 @@ html[data-motion="ok"] .process-rail-fill {
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
   scrollbar-width: thin;
-  background: var(--ink-deep);
+  background: var(--dossier-media-chrome);
   border-bottom: 0;
 }
 
@@ -3354,7 +3409,7 @@ html[data-motion="ok"] .process-rail-fill {
   height: 6.15rem;
   padding: 0;
   border: 0;
-  background: #161618;
+  background: var(--dossier-thumb-bg);
   cursor: pointer;
   overflow: hidden;
   transition: opacity var(--btn-duration) var(--ease-out-soft);
@@ -3408,7 +3463,7 @@ html[data-motion="ok"] .process-rail-fill {
   border-style: solid;
   border-width: 4px 0 4px 7px;
   border-color: transparent transparent transparent
-    color-mix(in oklab, var(--paper) 88%, transparent);
+    color-mix(in oklab, var(--dossier-fg) 88%, transparent);
   pointer-events: none;
 }
 
@@ -3436,7 +3491,7 @@ html[data-motion="ok"] .process-rail-fill {
   font-size: var(--text-micro);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--paper) 55%, transparent);
+  color: var(--dossier-fg-subtle);
 }
 
 .project-dossier-facts {
@@ -3445,8 +3500,8 @@ html[data-motion="ok"] .process-rail-fill {
   gap: 1.15rem 1.5rem;
   margin: 1.75rem 0 0;
   padding: 1.25rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid var(--dossier-line);
+  border-bottom: 1px solid var(--dossier-line);
 }
 
 .project-dossier-fact {
@@ -3463,14 +3518,14 @@ html[data-motion="ok"] .process-rail-fill {
   font-size: var(--text-micro);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--paper) 42%, transparent);
+  color: var(--dossier-fg-subtle);
 }
 
 .project-dossier-facts dd {
   margin: 0.4rem 0 0;
   font-size: 0.9375rem;
   line-height: 1.4;
-  color: var(--paper);
+  color: var(--dossier-fg);
   font-variant-numeric: tabular-nums;
 }
 
@@ -3479,7 +3534,7 @@ html[data-motion="ok"] .process-rail-fill {
   max-width: 58ch;
   font-size: 1rem;
   line-height: 1.58;
-  color: color-mix(in oklab, var(--paper) 78%, transparent);
+  color: var(--dossier-fg-copy);
 }
 
 .project-dossier-copy p {
@@ -3500,7 +3555,7 @@ html[data-motion="ok"] .process-rail-fill {
   border: 0;
   border-bottom: 1px solid var(--accent);
   background: transparent;
-  color: var(--paper);
+  color: var(--dossier-fg);
   cursor: pointer;
   font-size: 0.9375rem;
   line-height: 1.3;
@@ -3530,7 +3585,7 @@ html[data-motion="ok"] .process-rail-fill {
   padding: 0.85rem max(1.125rem, env(safe-area-inset-right, 0px))
     max(1rem, env(safe-area-inset-bottom, 0px))
     max(1.125rem, env(safe-area-inset-left, 0px));
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid var(--dossier-line);
 }
 
 .project-dossier-nav-btn {
@@ -3540,7 +3595,7 @@ html[data-motion="ok"] .process-rail-fill {
   padding: 0.35rem 0.15rem;
   border: 0;
   background: transparent;
-  color: var(--paper);
+  color: var(--dossier-fg);
   cursor: pointer;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: var(--text-micro);
@@ -3555,7 +3610,7 @@ html[data-motion="ok"] .process-rail-fill {
 }
 
 .project-dossier-nav-btn:disabled {
-  color: color-mix(in oklab, var(--paper) 28%, transparent);
+  color: var(--dossier-fg-faint);
   cursor: not-allowed;
 }
 
@@ -3595,7 +3650,11 @@ html[data-motion="ok"] .process-rail-fill {
     align-items: center;
     justify-content: center;
     padding: clamp(0.85rem, 2.4vw, 2.25rem);
-    background: rgba(13, 13, 15, 0.82);
+    --dossier-backdrop: rgba(13, 13, 15, 0.82);
+  }
+
+  html[data-theme="light"] .project-modal-backdrop {
+    --dossier-backdrop: color-mix(in oklab, var(--ink-deep) 45%, transparent);
   }
 
   .project-dossier {
@@ -3618,7 +3677,7 @@ html[data-motion="ok"] .process-rail-fill {
 
   .project-dossier-media {
     grid-area: auto;
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    border-right: 1px solid var(--dossier-line);
   }
 
   .project-dossier-utility {
@@ -3642,7 +3701,7 @@ html[data-motion="ok"] .process-rail-fill {
     gap: 0.5rem;
     padding: 0.7rem 1rem 0.85rem;
     border-bottom: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid var(--dossier-line);
   }
 
   .project-dossier-thumb {
@@ -4312,6 +4371,18 @@ html[data-motion="ok"] .media-full:not(.is-shown):not(.is-failed) {
 .media-full.is-failed {
   opacity: 0;
   animation: none;
+}
+
+/* Terminal error — frame stone bg shows; LQIP is unmounted in JS. */
+.media-load-error {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.media-frame[data-load-state="error"] {
+  background-color: color-mix(in srgb, var(--foreground) 10%, var(--stone));
 }
 
 @keyframes media-decode-in {

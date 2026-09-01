@@ -49,6 +49,7 @@ export function mapInProgressFrame(
 
   const src = doc.src?.trim() || undefined;
   const video = doc.video?.trim() || undefined;
+  const previewVideo = doc.previewVideo?.trim() || undefined;
   const titleUa = parseOptionalTitle(doc.titleUa);
   const titleEn = parseOptionalTitle(doc.titleEn);
   const area = parseOptionalArea(doc.area);
@@ -61,6 +62,7 @@ export function mapInProgressFrame(
       src,
       lqip: doc.lqip || undefined,
       video: video || undefined,
+      previewVideo: previewVideo || undefined,
       objectPosition: doc.objectPosition?.trim() || "center center",
       panel: video ? "video" : "portrait",
       titleUa,
@@ -77,6 +79,7 @@ export function mapInProgressFrame(
     src,
     lqip: doc.lqip || undefined,
     video,
+    previewVideo: previewVideo || undefined,
     objectPosition: doc.objectPosition?.trim() || "center center",
     panel: "video",
     titleUa,
