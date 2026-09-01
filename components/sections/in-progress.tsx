@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -18,6 +19,13 @@ import {
 } from "@/lib/in-progress-meta";
 import { useDictionary, useLocale } from "@/lib/i18n/locale-context";
 import { IMAGE_QUALITY } from "@/lib/image-slots";
+import {
+  inProgressPosterPriority,
+  prefersSaveData,
+  shouldAutoplayInProgressPanel,
+  shouldLoadInProgressVideo,
+} from "@/lib/media/playback-policy";
+import { preloadSiteImage } from "@/lib/media-preload";
 import { CopyText } from "../copy-text";
 import { InteractiveArrow } from "../fx/interactive-arrow";
 import { MediaImage } from "../media-image";
@@ -49,11 +57,13 @@ function ObjectVideo({
   item,
   alt,
   play,
+  loadSource,
   priority,
 }: {
   item: InProgressItem;
   alt: string;
   play: boolean;
+  loadSource: boolean;
   priority?: boolean;
 }) {
   if (!item.video) return null;
@@ -72,6 +82,7 @@ function ObjectVideo({
         videoClassName="in-progress-video-el object-cover"
         objectPosition={item.objectPosition}
         active={play}
+        loadSource={loadSource}
         preload="metadata"
       />
     </div>
@@ -87,6 +98,7 @@ function MediaPanel({
   active,
   ready,
   playVideo,
+  loadVideo,
   priority,
   onActivate,
   onOpen,
@@ -101,6 +113,7 @@ function MediaPanel({
   active: boolean;
   ready: boolean;
   playVideo: boolean;
+  loadVideo: boolean;
   priority?: boolean;
   onActivate: () => void;
   onOpen: () => void;
@@ -156,6 +169,7 @@ function MediaPanel({
             item={item}
             alt={title ? `${t.mediaAlt}. ${title}` : t.mediaAlt}
             play={playVideo}
+            loadSource={loadVideo}
             priority={priority}
           />
         ) : item.src ? (
@@ -201,17 +215,28 @@ export function InProgress({
   boardIds: string[];
 }) {
   const t = useDictionary().inProgress;
-  const composition = boardIds
-    .map((id) => frames.find((item) => item.id === id))
-    .filter((item): item is InProgressItem => Boolean(item));
   const framesForViewer = frames;
   const mediaIndexOf = (id: string) =>
     framesForViewer.findIndex((item) => item.id === id);
-  const panels = composition.length === 4 ? composition : [];
+  const panels = useMemo(() => {
+    const composition = boardIds
+      .map((id) => frames.find((item) => item.id === id))
+      .filter((item): item is InProgressItem => Boolean(item));
+    return composition.length === 4 ? composition : [];
+  }, [boardIds, frames]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [phase, setPhase] = useState<Phase>("boot");
   const [boardInView, setBoardInView] = useState(false);
+  const [boardNearView, setBoardNearView] = useState(false);
+  const saveData = useSyncExternalStore(
+    (cb) => {
+      window.addEventListener("resize", cb);
+      return () => window.removeEventListener("resize", cb);
+    },
+    () => prefersSaveData(),
+    () => false
+  );
   const boardRef = useRef<HTMLDivElement>(null);
   const hoverTarget = useRef<number | null>(null);
   const hoverFrom = useRef(0);
@@ -275,8 +300,19 @@ export function InProgress({
     );
     visibility.observe(board);
 
+    const near = new IntersectionObserver(
+      (entries) => {
+        setBoardNearView(Boolean(entries[0]?.isIntersecting));
+      },
+      { rootMargin: "480px 0px", threshold: 0 }
+    );
+    near.observe(board);
+
     if (reduced) {
-      return () => visibility.disconnect();
+      return () => {
+        visibility.disconnect();
+        near.disconnect();
+      };
     }
 
     const arm = window.requestAnimationFrame(() => {
@@ -302,8 +338,20 @@ export function InProgress({
       window.cancelAnimationFrame(arm);
       io.disconnect();
       visibility.disconnect();
+      near.disconnect();
     };
   }, [reduced]);
+
+  useEffect(() => {
+    if (!boardNearView) return;
+    for (const item of panels) {
+      if (!item.src) continue;
+      void preloadSiteImage(item.src, {
+        sizes: PANEL_SIZES,
+        quality: STAGE_QUALITY,
+      });
+    }
+  }, [boardNearView, panels]);
 
   useEffect(() => {
     if (reduced || phase !== "live") return;
@@ -314,8 +362,19 @@ export function InProgress({
   useEffect(() => () => stopHover(), [stopHover]);
 
   const ready = reduced || phase === "live" || phase === "ready";
-  /** All visible video panels may autoplay together while the board is on-screen. */
-  const playVideos = ready && boardInView && !reduced && openIndex == null;
+  const mediaLive = phase === "live" || phase === "ready";
+  const viewerOpen = openIndex != null;
+
+  const playbackCtx = (panelIndex: number) => ({
+    boardInView,
+    boardNearView,
+    panelIndex,
+    activeIndex,
+    reducedMotion: reduced,
+    viewerOpen,
+    saveData,
+    mediaLive,
+  });
   const boardClass = [
     "in-progress-board",
     reduced || phase !== "boot" ? "is-armed" : "",
@@ -375,7 +434,9 @@ export function InProgress({
               t={t}
               active={activeIndex === index}
               ready={ready}
-              playVideo={playVideos}
+              playVideo={shouldAutoplayInProgressPanel(playbackCtx(index))}
+              loadVideo={shouldLoadInProgressVideo(playbackCtx(index))}
+              priority={inProgressPosterPriority(index, boardNearView)}
               onActivate={() => setActiveIndex(index)}
               onOpen={() => setOpenIndex(mediaIndexOf(item.id))}
               onHoverEnter={() => armHover(index)}

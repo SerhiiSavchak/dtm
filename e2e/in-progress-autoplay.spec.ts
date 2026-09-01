@@ -2,7 +2,9 @@ import { expect, test } from "@playwright/test";
 import { openHome } from "./helpers";
 
 test.describe("In-progress four-panel video autoplay", () => {
-  test("all visible panels autoplay muted when board is on-screen", async ({
+  test.use({ viewport: { width: 1366, height: 900 } });
+
+  test("all visible panels autoplay muted when board is on-screen (desktop)", async ({
     page,
   }) => {
     await openHome(page, { reducedMotion: false });

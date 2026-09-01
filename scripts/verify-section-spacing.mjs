@@ -25,9 +25,10 @@ assert(
   "section-pad-sm uses split top",
   /\.section-pad-sm\s*\{[^}]*padding-top:\s*calc\(var\(--section-edge\)/s.test(css)
 );
+assert("section-arch-label-gap token defined", /--section-arch-label-gap:/m.test(css));
 assert(
-  "section-head arch inset moved to pad",
-  /\.section-head\s*\{[^}]*padding-top:\s*0/s.test(css)
+  "section-head label sits below arch rule",
+  /\.section-head\s*\{[^}]*padding-top:\s*var\(--section-arch-label-gap\)/s.test(css)
 );
 assert("section-space token defined", /--section-space:\s*clamp\(/m.test(css));
 assert(

@@ -59,7 +59,8 @@ function ViewerFrame({
           videoClassName="object-contain"
           objectPosition={item.objectPosition}
           active={active}
-          preload="metadata"
+          loadSource={active}
+          preload={active ? "auto" : "none"}
           showToggle
           playLabel={playLabel}
           pauseLabel={pauseLabel}

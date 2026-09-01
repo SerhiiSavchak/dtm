@@ -22,6 +22,8 @@ type VideoPreviewProps = {
   videoClassName?: string;
   objectPosition?: string;
   active?: boolean;
+  /** When false the <source> is not mounted — no video bytes fetched. */
+  loadSource?: boolean;
   loop?: boolean;
   preload?: "none" | "metadata" | "auto";
   priority?: boolean;
@@ -48,6 +50,7 @@ export function VideoPreview({
   videoClassName = "object-cover",
   objectPosition = "center center",
   active = true,
+  loadSource = true,
   loop = true,
   preload = "metadata",
   priority = false,
@@ -59,7 +62,7 @@ export function VideoPreview({
 }: VideoPreviewProps) {
   return (
     <VideoPreviewInner
-      key={`${mp4}::${poster ?? ""}`}
+      key={`${mp4}::${poster ?? ""}::${loadSource}`}
       mp4={mp4}
       alt={alt}
       poster={poster}
@@ -71,6 +74,7 @@ export function VideoPreview({
       videoClassName={videoClassName}
       objectPosition={objectPosition}
       active={active}
+      loadSource={loadSource}
       loop={loop}
       preload={preload}
       priority={priority}
@@ -95,6 +99,7 @@ function VideoPreviewInner({
   videoClassName = "object-cover",
   objectPosition = "center center",
   active = true,
+  loadSource = true,
   loop = true,
   preload = "metadata",
   priority = false,
@@ -108,9 +113,11 @@ function VideoPreviewInner({
   const signaled = useRef(false);
   const [videoReady, setVideoReady] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
   const positionStyle = { objectPosition } as CSSProperties;
   const hasPoster = Boolean(poster);
+  const effectivePreload = loadSource ? (active ? preload : "none") : "none";
 
   const signalReady = useCallback(() => {
     if (signaled.current) return;
@@ -120,7 +127,7 @@ function VideoPreviewInner({
 
   const tryPlay = useCallback(
     (el: HTMLVideoElement) => {
-      if (!active) {
+      if (!active || !loadSource) {
         el.pause();
         setPlaying(false);
         return;
@@ -134,11 +141,22 @@ function VideoPreviewInner({
         return;
       }
       if (el.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+      el.muted = true;
+      el.defaultMuted = true;
       el.play()
-        .then(() => setPlaying(true))
-        .catch(() => setPlaying(false));
+        .then(() => {
+          setPlaying(true);
+          setAutoplayBlocked(false);
+        })
+        .catch(() => {
+          setPlaying(false);
+          setAutoplayBlocked(true);
+          if (process.env.NODE_ENV !== "production") {
+            console.debug("[VideoPreview] autoplay rejected");
+          }
+        });
     },
-    [active]
+    [active, loadSource]
   );
 
   const onVideoFrame = useCallback(
@@ -155,6 +173,7 @@ function VideoPreviewInner({
     const el = videoRef.current;
     if (!el) return;
     el.muted = true;
+    el.defaultMuted = true;
     tryPlay(el);
     const onVis = () => {
       if (document.hidden) {
@@ -169,20 +188,27 @@ function VideoPreviewInner({
       document.removeEventListener("visibilitychange", onVis);
       el.pause();
     };
-  }, [active, mp4, tryPlay]);
+  }, [active, loadSource, mp4, tryPlay]);
 
   const toggle = () => {
     const el = videoRef.current;
     if (!el) return;
     if (el.paused) {
+      el.muted = true;
       el.play()
-        .then(() => setPlaying(true))
-        .catch(() => setPlaying(false));
+        .then(() => {
+          setPlaying(true);
+          setAutoplayBlocked(false);
+        })
+        .catch(() => setAutoplayBlocked(true));
     } else {
       el.pause();
       setPlaying(false);
     }
   };
+
+  const showPoster =
+    hasPoster && (!videoReady || autoplayBlocked);
 
   return (
     <div className={`relative h-full w-full overflow-hidden ${className}`}>
@@ -195,7 +221,7 @@ function VideoPreviewInner({
           priority={priority}
           quality={quality}
           sizes={sizes}
-          className={`${imageClassName} ${videoReady ? "opacity-0" : ""}`}
+          className={`${imageClassName} ${showPoster ? "" : "opacity-0"}`}
           style={positionStyle}
           onReady={signalReady}
         />
@@ -207,10 +233,10 @@ function VideoPreviewInner({
         }`}
         style={positionStyle}
         muted
-        autoPlay={active}
+        autoPlay={active && loadSource}
         loop={loop}
         playsInline
-        preload={preload}
+        preload={effectivePreload}
         aria-label={alt}
         onLoadedData={(event) => onVideoFrame(event.currentTarget)}
         onCanPlay={(event) => onVideoFrame(event.currentTarget)}
@@ -218,9 +244,9 @@ function VideoPreviewInner({
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       >
-        <source src={mp4} type="video/mp4" />
+        {loadSource ? <source src={mp4} type="video/mp4" /> : null}
       </video>
-      {showToggle ? (
+      {showToggle || autoplayBlocked ? (
         <button
           type="button"
           className="in-progress-viewer-toggle"

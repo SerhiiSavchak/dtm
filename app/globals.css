@@ -28,6 +28,7 @@
   --section-space-sm: clamp(3rem, 5vw, 4.75rem);
   --section-edge-sm: calc(var(--section-space-sm) * 0.5);
   --section-arch-inset: 0.95rem;
+  --section-arch-label-gap: 0.75rem;
   --section-head-gap: clamp(1.35rem, 2.2vw, 2rem);
   --header-bar: 5rem;
   --header-h: calc(var(--header-bar) + env(safe-area-inset-top, 0px));
@@ -281,6 +282,7 @@ input:disabled {
   Homepage section rhythm — split-beat model.
   Each section contributes half a beat top + half bottom; adjacent halves = one full beat.
   Arch-rule inset lives in pad-top (not section-head) so eyebrow-to-boundary matches foot-to-boundary.
+  Label-to-rule breathing room lives in section-head padding-top (--section-arch-label-gap).
 */
 .section-pad {
   padding-top: calc(var(--section-edge) + var(--section-arch-inset));
@@ -306,7 +308,7 @@ input:disabled {
 .section-head {
   position: relative;
   border-top-width: 0;
-  padding-top: 0;
+  padding-top: var(--section-arch-label-gap);
   margin-bottom: var(--section-head-gap);
 }
 
