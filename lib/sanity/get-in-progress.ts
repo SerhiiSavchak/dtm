@@ -1,4 +1,5 @@
 import { getSanityClient, sanityFetchOptions } from "./client";
+import { SANITY_CACHE_TAGS } from "./cache-tags";
 import { lastKnownGoodInProgress } from "./last-known-good";
 import { assembleInProgressRecord } from "./map-in-progress";
 import {
@@ -48,12 +49,12 @@ export async function getInProgressContent(): Promise<InProgressRecord> {
       client.fetch<SanityInProgressFrameDocument[]>(
         IN_PROGRESS_FRAMES_QUERY,
         {},
-        sanityFetchOptions()
+        sanityFetchOptions(SANITY_CACHE_TAGS.inProgress)
       ),
       client.fetch<SanityInProgressBoardDocument | null>(
         IN_PROGRESS_BOARD_QUERY,
         {},
-        sanityFetchOptions()
+        sanityFetchOptions(SANITY_CACHE_TAGS.inProgress)
       ),
     ]);
     const assembled = assembleInProgressRecord(docs, board);

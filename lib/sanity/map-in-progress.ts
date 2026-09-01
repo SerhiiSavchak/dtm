@@ -25,6 +25,19 @@ function inferMediaType(
   return null;
 }
 
+function parseOptionalArea(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    return undefined;
+  }
+  return value;
+}
+
+function parseOptionalTitle(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
+
 export function mapInProgressFrame(
   doc: SanityInProgressFrameDocument
 ): InProgressItem | null {
@@ -36,6 +49,9 @@ export function mapInProgressFrame(
 
   const src = doc.src?.trim() || undefined;
   const video = doc.video?.trim() || undefined;
+  const titleUa = parseOptionalTitle(doc.titleUa);
+  const titleEn = parseOptionalTitle(doc.titleEn);
+  const area = parseOptionalArea(doc.area);
 
   if (mediaType === "photo") {
     if (!src || !SANITY_IMAGE.test(src)) return null;
@@ -47,6 +63,9 @@ export function mapInProgressFrame(
       video: video || undefined,
       objectPosition: doc.objectPosition?.trim() || "center center",
       panel: video ? "video" : "portrait",
+      titleUa,
+      titleEn,
+      area,
     };
   }
 
@@ -60,6 +79,9 @@ export function mapInProgressFrame(
     video,
     objectPosition: doc.objectPosition?.trim() || "center center",
     panel: "video",
+    titleUa,
+    titleEn,
+    area,
   };
 }
 

@@ -14,7 +14,7 @@
 | Custom domain + HTTPS | Потрібні для бойового сайту |
 | Sanity images | `next.config.ts` → `images.remotePatterns`: `cdn.sanity.io/images/**` |
 | Image optimization | `next/image` (AVIF/WebP). Якщо хост не оптимізує — прийнятна альтернатива: прямі Sanity CDN URL без оптимізатора, але треба явно перевірити |
-| ISR / revalidate | Production: `revalidate: 60` у `sanityFetchOptions`. Прийнятна альтернатива: SSR на кожен запит або on-demand revalidate |
+| ISR / revalidate | Production: `revalidate: 60` + cache tags (`sanity-portfolio`, `sanity-in-progress`) + on-demand `POST /api/revalidate` після Sanity Publish |
 | Комерційне використання на free-tier | **Окремо перевірити умови провайдера** (Hobby Vercel на дату аудиту — не для комерції) |
 
 Статичний HTML-хост **не** підходить: є `/api/leads` і серверний Sanity fetch.

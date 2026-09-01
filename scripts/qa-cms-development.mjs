@@ -44,11 +44,13 @@ const PORTFOLIO_QUERY = `*[_type == "project"
 const FRAMES_QUERY = `*[_type == "inProgressFrame"
   && !(_id in path("drafts.**"))
   && defined(frameId.current)
-  && defined(still.asset)
+  && (defined(still.asset) || defined(poster.asset) || defined(video.asset))
 ] | order(orderRank asc) {
   _id,
   "frameId": frameId.current,
-  "src": still.asset->url
+  mediaType,
+  "src": coalesce(poster.asset->url, still.asset->url),
+  "video": video.asset->url
 }`;
 
 const BOARD_QUERY = `*[_id == "inProgressBoard" && !(_id in path("drafts.**"))][0] {
@@ -87,15 +89,18 @@ async function loadAssets(client) {
   }
   const videoDonor = await client.fetch(`*[_type == "inProgressFrame" && defined(video.asset)][0] {
     "still": still.asset._ref,
+    "poster": poster.asset._ref,
     "video": video.asset._ref
   }`);
   const stillDonor = await client.fetch(
-    `*[_type == "inProgressFrame" && defined(still.asset)][0]{ "still": still.asset._ref }`
+    `*[_type == "inProgressFrame" && (defined(still.asset) || defined(poster.asset))][0]{
+      "still": coalesce(still.asset._ref, poster.asset._ref)
+    }`
   );
   return {
     cover: donor.cover,
     gallery: donor.gallery.filter(Boolean),
-    still: videoDonor?.still || stillDonor?.still || donor.cover,
+    still: videoDonor?.still || videoDonor?.poster || stillDonor?.still || donor.cover,
     video: videoDonor?.video || null,
   };
 }
@@ -379,6 +384,8 @@ async function mutatePhase() {
       _id: QA_FRAME_ID,
       _type: "inProgressFrame",
       label: "QA кадр",
+      titleUa: "QA об’єкт",
+      mediaType: "photo",
       frameId: { _type: "slug", current: QA_FRAME_SLUG },
       still: imageField(assets.still),
       objectPosition: "center 30%",

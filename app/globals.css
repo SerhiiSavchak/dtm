@@ -2164,8 +2164,8 @@ html[data-motion="reduce"] .arch-corner {
     linear-gradient(
       180deg,
       color-mix(in oklab, var(--ink-deep) 18%, transparent) 0%,
-      transparent 38%,
-      color-mix(in oklab, var(--ink-deep) 46%, transparent) 100%
+      transparent 34%,
+      color-mix(in oklab, var(--ink-deep) 52%, transparent) 100%
     ),
     color-mix(in oklab, var(--ink-deep) 32%, transparent);
   opacity: 1;
@@ -2175,8 +2175,8 @@ html[data-motion="reduce"] .arch-corner {
   background:
     linear-gradient(
       180deg,
-      transparent 52%,
-      color-mix(in oklab, var(--ink-deep) 42%, transparent) 100%
+      transparent 48%,
+      color-mix(in oklab, var(--ink-deep) 48%, transparent) 100%
     ),
     color-mix(in oklab, var(--ink-deep) 6%, transparent);
 }
@@ -2192,7 +2192,6 @@ html[data-motion="reduce"] .arch-corner {
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  white-space: nowrap;
   text-shadow: 0 1px 10px color-mix(in oklab, var(--ink-deep) 55%, transparent);
 }
 
@@ -2200,6 +2199,7 @@ html[data-motion="reduce"] .arch-corner {
   top: 0.5rem;
   left: 0.28rem;
   opacity: 0.82;
+  white-space: nowrap;
 }
 
 .in-progress-panel.is-active .in-progress-tick {
@@ -2207,13 +2207,46 @@ html[data-motion="reduce"] .arch-corner {
 }
 
 .in-progress-caption {
-  left: 0.7rem;
-  bottom: 0.7rem;
+  left: 0.55rem;
+  bottom: 0.55rem;
+  right: 0.45rem;
   display: flex;
-  align-items: baseline;
-  gap: 0.55rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.22rem;
+  max-width: min(100%, 14rem);
   opacity: 0;
   transform: translate3d(0, 8px, 0);
+  white-space: normal;
+}
+
+.in-progress-caption-eyebrow {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 0.5625rem;
+  letter-spacing: 0.14em;
+  opacity: 0.88;
+  white-space: nowrap;
+}
+
+.in-progress-caption-title {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: clamp(0.72rem, 1.6vw, 0.95rem);
+  font-weight: 560;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-wrap: balance;
+  max-width: 100%;
+}
+
+.in-progress-caption-area {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  opacity: 0.9;
+  white-space: nowrap;
 }
 
 .in-progress-panel.is-active .in-progress-caption {
@@ -2296,8 +2329,19 @@ html[data-motion="reduce"] .arch-corner {
   }
 
   .in-progress-caption {
-    left: 0.9rem;
-    bottom: 0.9rem;
+    left: 0.85rem;
+    bottom: 0.85rem;
+    right: 0.7rem;
+    max-width: min(100%, 18rem);
+    gap: 0.28rem;
+  }
+
+  .in-progress-caption-eyebrow {
+    font-size: 0.625rem;
+  }
+
+  .in-progress-caption-area {
+    font-size: 0.6875rem;
   }
 }
 
@@ -2514,10 +2558,29 @@ html[data-motion="reduce"] .in-progress-visual {
   color: var(--paper);
 }
 
+.in-progress-viewer-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+  text-align: center;
+}
+
 .in-progress-viewer-count {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
+}
+
+.in-progress-viewer-meta {
+  max-width: min(70vw, 22rem);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  color: color-mix(in oklab, var(--paper) 82%, transparent);
+  text-wrap: balance;
 }
 
 .in-progress-viewer-stage .media-full,

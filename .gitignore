@@ -50,6 +50,7 @@ yarn-error.log*
 # client source media (temporary; never commit originals)
 /new-materials/
 /public/new-materials/
+/public/in-progress/
 
 # vercel
 .vercel

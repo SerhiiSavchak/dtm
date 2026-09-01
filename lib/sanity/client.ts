@@ -4,6 +4,10 @@ import {
   sanityDataset,
   sanityProjectId,
 } from "@/sanity/env";
+import {
+  SANITY_ISR_SECONDS,
+  type SanityCacheTag,
+} from "./cache-tags";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -30,10 +34,15 @@ export function getSanityClient(): SanityClient | null {
   return client;
 }
 
-export function sanityFetchOptions(): {
+export function sanityFetchOptions(tag: SanityCacheTag): {
   cache?: RequestCache;
-  next?: { revalidate: number };
+  next?: { revalidate: number; tags: string[] };
 } {
   if (isDev) return { cache: "no-store" };
-  return { next: { revalidate: 60 } };
+  return {
+    next: {
+      revalidate: SANITY_ISR_SECONDS,
+      tags: [tag],
+    },
+  };
 }

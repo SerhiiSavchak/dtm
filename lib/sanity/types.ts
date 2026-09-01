@@ -68,6 +68,9 @@ export type SanityInProgressFrameDocument = {
   _id?: string | null;
   frameId?: string | null;
   mediaType?: "photo" | "video" | null;
+  titleUa?: string | null;
+  titleEn?: string | null;
+  area?: number | null;
   objectPosition?: string | null;
   orderRank?: string | null;
   src?: string | null;

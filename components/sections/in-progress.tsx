@@ -12,7 +12,11 @@ import {
   type PointerEvent,
 } from "react";
 import { socialLinks, type InProgressItem } from "@/data/media";
-import { useDictionary } from "@/lib/i18n/locale-context";
+import {
+  formatInProgressArea,
+  resolveInProgressTitle,
+} from "@/lib/in-progress-meta";
+import { useDictionary, useLocale } from "@/lib/i18n/locale-context";
 import { IMAGE_QUALITY } from "@/lib/image-slots";
 import { CopyText } from "../copy-text";
 import { InteractiveArrow } from "../fx/interactive-arrow";
@@ -44,12 +48,12 @@ function fineHover() {
 function ObjectVideo({
   item,
   alt,
-  active,
+  play,
   priority,
 }: {
   item: InProgressItem;
   alt: string;
-  active: boolean;
+  play: boolean;
   priority?: boolean;
 }) {
   if (!item.video) return null;
@@ -67,7 +71,7 @@ function ObjectVideo({
         imageClassName="in-progress-image object-cover"
         videoClassName="in-progress-video-el object-cover"
         objectPosition={item.objectPosition}
-        active={active}
+        active={play}
         preload="metadata"
       />
     </div>
@@ -82,6 +86,7 @@ function MediaPanel({
   t,
   active,
   ready,
+  playVideo,
   priority,
   onActivate,
   onOpen,
@@ -95,6 +100,7 @@ function MediaPanel({
   t: Copy;
   active: boolean;
   ready: boolean;
+  playVideo: boolean;
   priority?: boolean;
   onActivate: () => void;
   onOpen: () => void;
@@ -103,6 +109,16 @@ function MediaPanel({
 }) {
   const kind = item.video ? t.videoKind : t.photoKind;
   const n = pad2(index + 1);
+  const { locale } = useLocale();
+  const title = resolveInProgressTitle(item, locale);
+  const areaLabel = formatInProgressArea(item.area, locale);
+  const ariaParts = [
+    t.open,
+    `${pad2(mediaIndex + 1)} / ${pad2(collectionLength)}`,
+    kind,
+    title,
+    areaLabel,
+  ].filter(Boolean);
 
   const onFocus = (event: FocusEvent<HTMLButtonElement>) => {
     if (!ready) return;
@@ -124,7 +140,7 @@ function MediaPanel({
       style={{ "--i": index } as CSSProperties}
       aria-expanded={active}
       aria-haspopup="dialog"
-      aria-label={`${t.open}. ${pad2(mediaIndex + 1)} / ${pad2(collectionLength)}. ${kind}`}
+      aria-label={ariaParts.join(". ")}
       onFocus={onFocus}
       onPointerEnter={onPointerEnter}
       onPointerLeave={onHoverLeave}
@@ -138,14 +154,14 @@ function MediaPanel({
         {item.video ? (
           <ObjectVideo
             item={item}
-            alt={t.mediaAlt}
-            active={active && ready}
+            alt={title ? `${t.mediaAlt}. ${title}` : t.mediaAlt}
+            play={playVideo}
             priority={priority}
           />
         ) : item.src ? (
           <MediaImage
             src={item.src}
-            alt={t.mediaAlt}
+            alt={title ? `${t.mediaAlt}. ${title}` : t.mediaAlt}
             fill
             quality={STAGE_QUALITY}
             sizes={PANEL_SIZES}
@@ -161,8 +177,17 @@ function MediaPanel({
         {n}
       </span>
       <span className="in-progress-caption" aria-hidden>
-        <span>{n}</span>
-        <span>{t.label}</span>
+        <span className="in-progress-caption-eyebrow">
+          <span>{n}</span>
+          <span aria-hidden>/</span>
+          <span>{t.label}</span>
+        </span>
+        {title ? (
+          <span className="in-progress-caption-title">{title}</span>
+        ) : null}
+        {areaLabel ? (
+          <span className="in-progress-caption-area">{areaLabel}</span>
+        ) : null}
       </span>
     </button>
   );
@@ -186,6 +211,7 @@ export function InProgress({
   const [activeIndex, setActiveIndex] = useState(0);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [phase, setPhase] = useState<Phase>("boot");
+  const [boardInView, setBoardInView] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
   const hoverTarget = useRef<number | null>(null);
   const hoverFrom = useRef(0);
@@ -239,7 +265,19 @@ export function InProgress({
   useLayoutEffect(() => {
     const board = boardRef.current;
     if (!board) return;
-    if (reduced) return;
+
+    const visibility = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        setBoardInView(Boolean(entry?.isIntersecting && entry.intersectionRatio >= 0.2));
+      },
+      { threshold: [0, 0.2, 0.35, 0.5] }
+    );
+    visibility.observe(board);
+
+    if (reduced) {
+      return () => visibility.disconnect();
+    }
 
     const arm = window.requestAnimationFrame(() => {
       setPhase((current) => (current === "boot" ? "armed" : current));
@@ -263,6 +301,7 @@ export function InProgress({
     return () => {
       window.cancelAnimationFrame(arm);
       io.disconnect();
+      visibility.disconnect();
     };
   }, [reduced]);
 
@@ -275,6 +314,8 @@ export function InProgress({
   useEffect(() => () => stopHover(), [stopHover]);
 
   const ready = reduced || phase === "live" || phase === "ready";
+  /** All visible video panels may autoplay together while the board is on-screen. */
+  const playVideos = ready && boardInView && !reduced && openIndex == null;
   const boardClass = [
     "in-progress-board",
     reduced || phase !== "boot" ? "is-armed" : "",
@@ -334,6 +375,7 @@ export function InProgress({
               t={t}
               active={activeIndex === index}
               ready={ready}
+              playVideo={playVideos}
               onActivate={() => setActiveIndex(index)}
               onOpen={() => setOpenIndex(mediaIndexOf(item.id))}
               onHoverEnter={() => armHover(index)}

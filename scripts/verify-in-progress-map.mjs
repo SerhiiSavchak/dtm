@@ -65,6 +65,42 @@ assert("rejects video without file", mapInProgressFrame({
   mediaType: "video",
 }) === null);
 
+assert(
+  "maps optional title and area",
+  mapInProgressFrame({
+    frameId: "clip-meta",
+    mediaType: "video",
+    titleUa: "ЖК Perfect Life",
+    titleEn: "Perfect Life",
+    area: 60,
+    video: "https://cdn.sanity.io/files/x/y/clip.mp4",
+  })?.titleUa === "ЖК Perfect Life" &&
+    mapInProgressFrame({
+      frameId: "clip-meta",
+      mediaType: "video",
+      titleUa: "ЖК Perfect Life",
+      area: 60,
+      video: "https://cdn.sanity.io/files/x/y/clip.mp4",
+    })?.area === 60
+);
+assert(
+  "legacy without title still maps",
+  mapInProgressFrame({
+    frameId: "legacy",
+    mediaType: "video",
+    video: "https://cdn.sanity.io/files/x/y/clip.mp4",
+  })?.titleUa === undefined
+);
+assert(
+  "rejects zero/negative area",
+  mapInProgressFrame({
+    frameId: "clip-zero",
+    mediaType: "video",
+    area: 0,
+    video: "https://cdn.sanity.io/files/x/y/clip.mp4",
+  })?.area === undefined
+);
+
 const frames = inProgressMedia.map((item, index) => ({
   ...item,
   src: `https://cdn.sanity.io/images/x/y/${index}.jpg`,

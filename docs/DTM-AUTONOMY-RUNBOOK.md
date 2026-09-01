@@ -50,7 +50,7 @@
 Сайт — Next.js (App Router). Потрібні:
 
 - білд `npm run build` (Node);
-- публічні сторінки (ISR головної ~60 с у production через Sanity fetch);
+- публічні сторінки (ISR головної ~60 с у production через Sanity fetch + on-demand revalidate після Publish);
 - Node-маршрут `POST /api/leads` (і застарілий аліас `/api/estimate`) для калькулятора.
 
 Технічно підходить будь-який хост з Node-функціями. Поточне підключення в робочій копії — Vercel.
@@ -135,6 +135,7 @@ Env на хостингу: імена з `.env.example`. Після зміни �
 | `NEXT_PUBLIC_INSTAGRAM_URL` | CTA | ні | ні | клієнт | https | дефолт у коді |
 | `NEXT_PUBLIC_PHONE_URL` | CTA | ні | ні | клієнт | `tel:` або якір | `#contacts` |
 | `SANITY_AUTH_TOKEN` | Sanity CLI | так | **не для продакшен-сайту** | людина в CLI | `sanity login` | скрипти seed/qa/migrate не пишуть |
+| `SANITY_REVALIDATE_SECRET` | Next on-demand ISR | так | для миттєвого оновлення CMS на проді | клієнт / хостинг | згенерувати довгий random → Vercel env + Sanity webhook header | publish лишається на ISR ~60 с |
 | `VERCEL_OIDC_TOKEN` | Vercel CLI | так | ні для застосунку | хто лінкав CLI | перелінк | ігнорувати в app |
 
 \*Chat id не «пароль», але не світити публічно.
@@ -215,6 +216,65 @@ npm run cms:snapshot
 Симуляція аутеджу Sanity (лише non-production): заголовок `x-dtm-simulate-sanity-failure: 1` → сайт читає snapshot.
 
 Після відновлення Sanity API знову читає live; snapshot лишається запасним.
+
+---
+
+## Публікація в CMS → оновлення сайту (без redeploy)
+
+**Зміни контенту в Sanity — це дані, не код.** Новий Vercel deploy для Publish **не потрібен**. Deploy потрібен лише коли змінюється застосунок (код, env, конфіг).
+
+### Як це працює для клієнта
+
+1. Редагування в Studio (`/admin`).
+2. Натискання **Publish** (або Unpublish / Delete).
+3. Sanity надсилає webhook `POST https://<домен>/api/revalidate` з тілом документа.
+4. Сервер перевіряє секрет `SANITY_REVALIDATE_SECRET` і скидає кеш Next.js за тегами:
+   - `project`, `projectMedia` → тег `sanity-portfolio`
+   - `inProgressFrame`, `inProgressBoard` → тег `sanity-in-progress`
+5. Наступний запит відвідувача до головної знову читає **опублікований** Sanity (з LKG fallback, якщо API недоступний).
+
+Очікувана затримка після Publish на проді: **кілька секунд** (webhook + один холодний fetch), не хвилини.
+
+### Резервний шлях (якщо webhook не спрацював)
+
+ISR `revalidate: 60` лишається увімкненим. Сайт **сам оновиться протягом ~60 с** навіть без webhook. Це страховка, не основний шлях.
+
+### Локальна розробка
+
+`npm run dev` використовує `cache: "no-store"` і Sanity API без CDN — Publish видно після refresh **без webhook**. Webhook на localhost не потрібен.
+
+Ручний тест endpoint (лише локально, після `SANITY_REVALIDATE_SECRET` у `.env.local`):
+
+```bash
+curl -sS -X POST http://localhost:3000/api/revalidate \
+  -H "content-type: application/json" \
+  -H "x-dtm-revalidate-secret: <ваш-локальний-секрет>" \
+  -d '{"_type":"project","dataset":"development"}'
+```
+
+### Налаштування webhook у Sanity (після deploy коду)
+
+Виконує розробник / власник у [manage.sanity.io](https://manage.sanity.io) → проєкт → **API** → **Webhooks** → **Create webhook**:
+
+| Поле | Значення |
+| --- | --- |
+| Name | `DTM production revalidate` |
+| URL | `https://<production-domain>/api/revalidate` |
+| Dataset | `production` (або ваш бойовий dataset) |
+| Trigger on | Create, Update, Delete |
+| Filter | `_type in ["project","projectMedia","inProgressFrame","inProgressBoard"]` |
+| Projection | `{_type, _id, "dataset": sanity::dataset()}` |
+| HTTP method | POST |
+| API version | `2025-08-22` (або поточний у проєкті) |
+| Secret / Headers | Header `x-dtm-revalidate-secret: <значення SANITY_REVALIDATE_SECRET з Vercel>` |
+
+На Vercel додати **той самий** `SANITY_REVALIDATE_SECRET` у Production env і зробити redeploy **один раз** після merge цього коду. Далі Publish не вимагає redeploy.
+
+**Не вставляти секрет у git, runbook або чат.** Лише ім’я змінної в `.env.example`.
+
+### Sanity CDN
+
+Production читає через `useCdn: true` для швидкості. Після скидання Next cache наступний fetch іде в Sanity CDN; для published perspective затримка зазвичай мінімальна. Вимикати CDN не потрібно.
 
 ---
 

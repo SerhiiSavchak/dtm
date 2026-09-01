@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import { type InProgressItem } from "@/data/media";
+import { formatInProgressViewerMeta } from "@/lib/in-progress-meta";
+import { useLocale } from "@/lib/i18n/locale-context";
 import { IMAGE_QUALITY, IMAGE_SIZES } from "@/lib/image-slots";
 import { useStageCrossfade } from "@/lib/media/stage-crossfade";
 import { preloadSiteImage } from "@/lib/media-preload";
@@ -31,6 +33,7 @@ function ViewerFrame({
   alt,
   playLabel,
   pauseLabel,
+  active = true,
   onReady,
   onFail,
 }: {
@@ -38,6 +41,7 @@ function ViewerFrame({
   alt: string;
   playLabel: string;
   pauseLabel: string;
+  active?: boolean;
   onReady?: () => void;
   onFail?: () => void;
 }) {
@@ -54,7 +58,7 @@ function ViewerFrame({
           imageClassName="object-contain"
           videoClassName="object-contain"
           objectPosition={item.objectPosition}
-          active
+          active={active}
           preload="metadata"
           showToggle
           playLabel={playLabel}
@@ -90,14 +94,12 @@ function ViewerStage({
   playLabel,
   pauseLabel,
   onRejected,
-  onBusyChange,
 }: {
   item: InProgressItem;
   alt: string;
   playLabel: string;
   pauseLabel: string;
   onRejected?: () => void;
-  onBusyChange?: (busy: boolean) => void;
 }) {
   const {
     shown,
@@ -115,10 +117,6 @@ function ViewerStage({
     onRejected?.();
   }, [onIncomingFail, onRejected]);
 
-  useLayoutEffect(() => {
-    onBusyChange?.(busy || pending);
-  }, [busy, pending, onBusyChange]);
-
   return (
     <>
       <div
@@ -132,6 +130,7 @@ function ViewerStage({
             alt={alt}
             playLabel={playLabel}
             pauseLabel={pauseLabel}
+            active={!incoming}
           />
         </div>
         {incoming ? (
@@ -143,6 +142,7 @@ function ViewerStage({
               alt={alt}
               playLabel={playLabel}
               pauseLabel={pauseLabel}
+              active
               onReady={onIncomingReady}
               onFail={handleFail}
             />
@@ -189,10 +189,11 @@ export function InProgressViewer({
   const closeRef = useRef<HTMLButtonElement>(null);
   const touchX = useRef<number | null>(null);
   const stableIndexRef = useRef(index);
-  const [stageBusy, setStageBusy] = useState(false);
   const titleId = useId();
+  const { locale } = useLocale();
   const item = items[index] ?? items[0];
   const last = items.length - 1;
+  const viewerMeta = item ? formatInProgressViewerMeta(item, locale) : null;
 
   const goTo = useCallback(
     (next: number) => {
@@ -275,7 +276,7 @@ export function InProgressViewer({
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [index, item?.video, last, onClose, onIndex]);
+  }, [goTo, index, item?.video, last, onClose]);
 
   if (typeof document === "undefined" || !item) return null;
 
@@ -326,7 +327,6 @@ export function InProgressViewer({
             playLabel={playLabel}
             pauseLabel={pauseLabel}
             onRejected={revertIndex}
-            onBusyChange={setStageBusy}
           />
 
           {index > 0 ? (
@@ -358,9 +358,14 @@ export function InProgressViewer({
           >
             ← {prevLabel}
           </button>
-          <p className="in-progress-viewer-count" aria-live="polite">
-            {index + 1} / {items.length}
-          </p>
+          <div className="in-progress-viewer-status">
+            <p className="in-progress-viewer-count" aria-live="polite">
+              {index + 1} / {items.length}
+            </p>
+            {viewerMeta ? (
+              <p className="in-progress-viewer-meta">{viewerMeta}</p>
+            ) : null}
+          </div>
           <button
             type="button"
             className="btn btn-sm btn-ghost"

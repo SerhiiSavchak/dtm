@@ -1,4 +1,5 @@
 import { getSanityClient, sanityFetchOptions } from "./client";
+import { SANITY_CACHE_TAGS } from "./cache-tags";
 import { lastKnownGoodPortfolio } from "./last-known-good";
 import { mapSanityProject } from "./map-project";
 import { PORTFOLIO_PROJECTS_QUERY } from "./queries";
@@ -40,7 +41,7 @@ export async function getPortfolioProjects(): Promise<PortfolioRecord[]> {
     const docs = await client.fetch<SanityProjectDocument[]>(
       PORTFOLIO_PROJECTS_QUERY,
       {},
-      sanityFetchOptions()
+      sanityFetchOptions(SANITY_CACHE_TAGS.portfolio)
     );
     const mapped = (docs ?? [])
       .map(mapSanityProject)

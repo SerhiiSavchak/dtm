@@ -41,7 +41,10 @@ assert.deepEqual(
   inProgressFrame.groups.map((g) => g.title),
   ["Матеріал", "Додаткові налаштування"]
 );
-assert.equal(field(inProgressFrame, "label").title, "Назва для адмінки");
+assert.equal(field(inProgressFrame, "titleUa").title, "Назва об'єкта");
+assert.equal(field(inProgressFrame, "area").title, "Площа, м²");
+assert.equal(field(inProgressFrame, "label").title, "Внутрішня примітка");
+assert.equal(field(inProgressFrame, "label").group, "advanced");
 assert.equal(field(inProgressFrame, "mediaType").title, "Тип матеріалу");
 assert.equal(field(inProgressFrame, "poster").title, "Обкладинка відео");
 assert.equal(field(inProgressFrame, "frameId").hidden, true);

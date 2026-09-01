@@ -23,8 +23,8 @@ export function useStageCrossfade<T>(
   const [incoming, setIncoming] = useState<T | null>(null);
   const [incomingOn, setIncomingOn] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
+  const [blockedKey, setBlockedKey] = useState<string | null>(null);
   const requestRef = useRef(keyOf(target));
-  const rejectKeyRef = useRef<string | null>(null);
 
   const targetKey = keyOf(target);
   const shownKey = keyOf(shown);
@@ -42,20 +42,18 @@ export function useStageCrossfade<T>(
       setShowLoader(false);
     }
   } else if (shownKey === targetKey) {
-    rejectKeyRef.current = null;
+    if (blockedKey !== null) setBlockedKey(null);
     if (incoming) {
       setIncoming(null);
       setIncomingOn(false);
       setShowLoader(false);
     }
   } else if (shownKey !== targetKey && incomingKey !== targetKey) {
-    if (rejectKeyRef.current !== targetKey) {
+    if (blockedKey !== targetKey) {
       setIncoming(target);
       setIncomingOn(false);
       setShowLoader(false);
     }
-  } else if (shownKey !== targetKey && incomingKey === targetKey) {
-    // waiting on incoming — keep state
   }
 
   useEffect(() => {
@@ -91,7 +89,7 @@ export function useStageCrossfade<T>(
     if (!incoming) return;
     const key = keyOf(incoming);
     if (requestRef.current !== key) return;
-    rejectKeyRef.current = key;
+    setBlockedKey(key);
     setIncoming(null);
     setIncomingOn(false);
     setShowLoader(false);

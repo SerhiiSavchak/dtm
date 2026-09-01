@@ -26,6 +26,11 @@ export type InProgressItem = {
   lqip?: string;
   objectPosition: string;
   panel: InProgressPanel;
+  /** Client-facing object name (UA). Optional for legacy LKG/fallback. */
+  titleUa?: string;
+  titleEn?: string;
+  /** Square metres. Omit when unknown. */
+  area?: number;
 };
 
 export type InProgressScene = {

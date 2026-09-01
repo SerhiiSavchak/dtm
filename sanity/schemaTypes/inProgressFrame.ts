@@ -20,10 +20,54 @@ export const inProgressFrame = defineType({
   fields: [
     orderRankField({ type: "inProgressFrame", hidden: true }),
     defineField({
-      name: "label",
-      title: "Назва для адмінки",
+      name: "titleUa",
+      title: "Назва об'єкта",
       type: "string",
       group: "content",
+      description: "Наприклад: ЖК Perfect Life або вул. Зелена",
+      validation: (Rule) =>
+        Rule.required()
+          .min(2)
+          .max(80)
+          .custom((value) => {
+            if (typeof value !== "string") return "Вкажіть назву об’єкта.";
+            if (!value.trim()) return "Вкажіть назву об’єкта.";
+            if (value.trim().length > 80) return "Назва занадто довга (до 80 символів).";
+            return true;
+          }),
+    }),
+    defineField({
+      name: "titleEn",
+      title: "Назва англійською",
+      type: "string",
+      group: "content",
+      description:
+        "Необов’язково. Якщо порожньо — на англійській версії сайту покажеться українська назва.",
+      validation: (Rule) =>
+        Rule.max(80).custom((value) => {
+          if (value == null || value === "") return true;
+          if (typeof value !== "string") return true;
+          if (value.trim().length > 80) return "Назва занадто довга (до 80 символів).";
+          return true;
+        }),
+    }),
+    defineField({
+      name: "area",
+      title: "Площа, м²",
+      type: "number",
+      group: "content",
+      description: "Необов’язково. Лише число, без «м²».",
+      validation: (Rule) =>
+        Rule.integer()
+          .positive()
+          .max(10_000)
+          .error("Площа має бути додатним числом."),
+    }),
+    defineField({
+      name: "label",
+      title: "Внутрішня примітка",
+      type: "string",
+      group: "advanced",
       description:
         "Лише в адмінці, на сайті не показується. Наприклад: Кухня — відео.",
     }),
@@ -110,7 +154,9 @@ export const inProgressFrame = defineType({
   ],
   preview: {
     select: {
+      titleUa: "titleUa",
       label: "label",
+      area: "area",
       frameId: "frameId.current",
       mediaType: "mediaType",
       still: "still",

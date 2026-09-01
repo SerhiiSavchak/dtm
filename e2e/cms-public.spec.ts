@@ -31,11 +31,26 @@ test.describe("cms public surfaces", () => {
     await page.locator("#in-progress").scrollIntoViewIfNeeded();
     const panels = page.locator(".in-progress-panel");
     await expect(panels).toHaveCount(4);
-    await expect(panels.nth(0)).toHaveAttribute(
-      "aria-label",
-      /01 \/ 10/
-    );
+    await expect(panels.nth(0)).toHaveAttribute("aria-label", /01 \/ 04/);
+    await expect(panels.nth(0)).toHaveAttribute("aria-label", /ВІДЕО/);
+    await expect(panels.nth(0)).toHaveAttribute("aria-label", /ЖК Perfect Life/);
+    await expect(panels.nth(0)).toHaveAttribute("aria-label", /60/);
+    await expect(panels.nth(1)).toHaveAttribute("aria-label", /ЖК Huge Lux/);
+    await expect(panels.nth(2)).toHaveAttribute("aria-label", /ЖК Національний/);
+    await expect(panels.nth(3)).toHaveAttribute("aria-label", /ЖК MS/);
     await expect(panels.nth(3)).toHaveAttribute("aria-label", /ВІДЕО/);
+
+    await expect(panels.nth(0).locator(".in-progress-caption-title")).toHaveText(
+      /Perfect Life/i
+    );
+    await expect(panels.nth(0).locator(".in-progress-caption-area")).toHaveText(
+      /60\s*м²/
+    );
+    const areaNowrap = await panels
+      .nth(0)
+      .locator(".in-progress-caption-area")
+      .evaluate((el) => getComputedStyle(el).whiteSpace);
+    expect(areaNowrap).toBe("nowrap");
 
     const geometry = await page.evaluate(() => {
       const visual = document.querySelector(".in-progress-visual");

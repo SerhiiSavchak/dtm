@@ -207,6 +207,7 @@ function VideoPreviewInner({
         }`}
         style={positionStyle}
         muted
+        autoPlay={active}
         loop={loop}
         playsInline
         preload={preload}

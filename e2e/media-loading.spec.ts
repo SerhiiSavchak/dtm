@@ -11,7 +11,7 @@ function delayImages(page: import("@playwright/test").Page) {
     const url = route.request().url();
     const isMedia =
       url.includes("/_next/image") ||
-      url.includes("cdn.sanity.io") ||
+      (url.includes("cdn.sanity.io/images/") && !url.includes("/files/")) ||
       /\.(jpg|jpeg|png|webp|avif)(\?|$)/i.test(url);
     if (delayed && isMedia) {
       const response = await route.fetch();

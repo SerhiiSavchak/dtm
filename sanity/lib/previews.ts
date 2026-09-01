@@ -57,7 +57,9 @@ export function galleryItemPreview(args: {
 }
 
 export function frameListPreview(args: {
+  titleUa?: string;
   label?: string;
+  area?: number;
   frameId?: string;
   mediaType?: string;
   still?: unknown;
@@ -81,9 +83,17 @@ export function frameListPreview(args: {
   const previewMedia = (args.poster ?? args.still ?? args.media) as
     | PreviewValue["media"]
     | undefined;
+  const title =
+    (typeof args.titleUa === "string" && args.titleUa.trim()) ||
+    (typeof args.label === "string" && args.label.trim()) ||
+    fallback;
+  const areaLabel =
+    typeof args.area === "number" && Number.isFinite(args.area) && args.area > 0
+      ? `${args.area} м²`
+      : "";
   return {
-    title: (typeof args.label === "string" && args.label.trim()) || fallback,
-    subtitle: kind,
+    title,
+    subtitle: [kind, areaLabel].filter(Boolean).join(" · "),
     media: previewMedia,
   };
 }
