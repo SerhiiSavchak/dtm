@@ -26,6 +26,16 @@ function getReduced() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+function subscribeMobile(cb: () => void) {
+  const mq = window.matchMedia("(max-width: 767px)");
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+
+function getMobile() {
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
 function canUseScrollDepth() {
   return (
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
@@ -42,6 +52,10 @@ function canUseScrollDepth() {
 export function Hero({ boot = true }: { boot?: boolean }) {
   const t = useDictionary().hero;
   const reduced = useSyncExternalStore(subscribeReduced, getReduced, () => false);
+  const mobile = useSyncExternalStore(subscribeMobile, getMobile, () => true);
+  const heroMp4 = mobile
+    ? (heroMedia.mp4Mobile ?? heroMedia.mp4)
+    : heroMedia.mp4;
   const intro = useSyncExternalStore(
     subscribeHeroIntro,
     getHeroIntroSnapshot,
@@ -110,7 +124,7 @@ export function Hero({ boot = true }: { boot?: boolean }) {
           <PosterVideo
             poster={heroMedia.poster}
             alt={t.imageAlt}
-            mp4={heroMedia.mp4}
+            mp4={heroMp4}
             webm={heroMedia.webm}
             sizes={IMAGE_SIZES.hero}
             priority

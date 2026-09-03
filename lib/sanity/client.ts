@@ -15,7 +15,8 @@ let client: SanityClient | null | undefined;
 
 /**
  * Published-only client. Dataset/project come from env — never hardcoded.
- * Dev uses the API (not CDN) so a Studio publish is visible after refresh.
+ * Always hit the API, not the CDN, so a Studio publish + webhook revalidation
+ * is visible on the next request instead of waiting for CDN TTL.
  */
 export function getSanityClient(): SanityClient | null {
   if (client !== undefined) return client;
@@ -28,7 +29,7 @@ export function getSanityClient(): SanityClient | null {
     projectId: sanityProjectId,
     dataset: sanityDataset,
     apiVersion: sanityApiVersion,
-    useCdn: !isDev,
+    useCdn: false,
     perspective: "published",
   });
   return client;

@@ -250,5 +250,37 @@ assert.equal(
 assert.equal(projects.length > 0, true);
 assert.equal(inProgressMedia.length > 0, true);
 
+const generatedPortfolio = JSON.parse(readFileSync(PORTFOLIO_PATH, "utf8"));
+const generatedInProgress = JSON.parse(readFileSync(IN_PROGRESS_PATH, "utf8"));
+assert.equal(generatedPortfolio.dataset, "development");
+assert.equal(generatedPortfolio.projects.length, 7);
+assert.equal(generatedPortfolio.projects[0]?.slug, "private-house-sokilnyky");
+assert.equal(
+  generatedPortfolio.projects.some((p) => p.slug === "interior-living"),
+  false
+);
+assert.equal(
+  generatedPortfolio.projects.every(
+    (p) => !p.media?.some((m) => m.video)
+  ),
+  true
+);
+assert.equal(generatedInProgress.dataset, "development");
+assert.equal(generatedInProgress.frames.length, 4);
+assert.equal(
+  generatedInProgress.boardIds.join(),
+  "perfect-life-60,huge-lux-90,natsionalnyi-70,ms-100"
+);
+for (const frame of generatedInProgress.frames) {
+  assert.ok(frame.video, `${frame.id} missing full video in LKG`);
+  assert.ok(frame.previewVideo, `${frame.id} missing previewVideo in LKG`);
+  assert.notEqual(frame.previewVideo, frame.video);
+  assert.ok(frame.src, `${frame.id} missing poster in LKG`);
+}
+assert.equal(
+  generatedInProgress.frames.some((f) => f.id === "house-living" || f.id === "kitchen-video"),
+  false
+);
+
 rmSync(dir, { recursive: true, force: true });
 console.log("cms snapshot checks passed");

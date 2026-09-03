@@ -1,0 +1,15 @@
+# Keep Vercel uploads to git-tracked app files only.
+# Source media and local backups must never ship with the production build.
+/backups
+/tmp
+/tmp-qa
+/tmp-stills
+/new-materials
+/public/new-materials
+/public/in-progress
+/playwright-report
+/test-results
+/coverage
+/node_modules
+/.next
+/test-results

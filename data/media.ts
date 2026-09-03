@@ -18,6 +18,8 @@ export const heroMedia = {
    * Source, licence, and encode notes: data/hero-asset.ts
    */
   mp4: "/videos/hero-loop.mp4" as string | null,
+  /** 720p muted derivative for mobile — same loop, lower initial bytes. */
+  mp4Mobile: "/videos/hero-loop-720.mp4" as string | null,
   poster: "/images/hero-poster.jpg",
   objectPosition: {
     mobile: "center 42%",
