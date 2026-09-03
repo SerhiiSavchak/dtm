@@ -130,7 +130,11 @@ test.describe("Portfolio media loading", () => {
     let failNext = false;
     await page.route("**/*", async (route) => {
       const url = route.request().url();
-      if (failNext && url.includes("/_next/image")) {
+      if (
+        failNext &&
+        (url.includes("/_next/image") ||
+          (url.includes("cdn.sanity.io/images/") && !url.includes("/files/")))
+      ) {
         await route.fulfill({
           status: 404,
           contentType: "text/plain",

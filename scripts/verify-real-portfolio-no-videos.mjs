@@ -1,6 +1,7 @@
 /**
  * Regression: the seven real Portfolio projects must have zero gallery video refs.
- * Queries development published Sanity only (read-only).
+ * Queries published Sanity (read-only). Default dataset: development.
+ * Production audit: SANITY_AUDIT_DATASET=production ALLOW_PRODUCTION_READ_AUDIT=1
  */
 import { createClient } from "next-sanity";
 import { existsSync, readFileSync } from "node:fs";
@@ -34,16 +35,26 @@ function loadEnvLocal() {
 loadEnvLocal();
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "";
-const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "development";
+const dataset =
+  process.env.SANITY_AUDIT_DATASET ||
+  process.env.NEXT_PUBLIC_SANITY_DATASET ||
+  "development";
 
 if (!projectId) {
   console.error("ABORT: NEXT_PUBLIC_SANITY_PROJECT_ID is missing.");
   process.exit(1);
 }
 
-if (dataset !== "development") {
+if (dataset !== "development" && dataset !== "production") {
   console.error(
-    `ABORT: expected development dataset for real-portfolio video audit, got ${JSON.stringify(dataset)}.`
+    `ABORT: real-portfolio video audit only allows development or production, got ${JSON.stringify(dataset)}.`
+  );
+  process.exit(1);
+}
+
+if (dataset === "production" && process.env.ALLOW_PRODUCTION_READ_AUDIT !== "1") {
+  console.error(
+    "ABORT: production video audit requires ALLOW_PRODUCTION_READ_AUDIT=1 (read-only)."
   );
   process.exit(1);
 }

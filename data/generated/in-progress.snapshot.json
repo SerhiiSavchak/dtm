@@ -1,84 +1,57 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-29T11:12:41.777Z",
+  "generatedAt": "2026-09-02T21:41:53.475Z",
   "dataset": "development",
   "frames": [
     {
-      "id": "house-living",
-      "src": "https://cdn.sanity.io/images/l1d717lp/development/29986e287b366a085bd4f6c7a32c151b70f49fe6-1280x720.jpg",
-      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAALABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAQFBgf/xAAiEAACAgMAAgEFAAAAAAAAAAABAgMRAAQFEhMGITFBYfH/xAAWAQEBAQAAAAAAAAAAAAAAAAAEAwX/xAAaEQACAwEBAAAAAAAAAAAAAAABAgADBBEx/9oADAMBAAIRAxEAPwBvWf27ez6JxPP4kha/OTuZ0JuZDIetE2yxb6Ai2T9YlwdqeOZWjkKkNVjIXc2p4fmSpHKwWZlaQXfkbw6VHvJZ7B7NPFJu93z2+dBGsAYx0Uo2P7hnSOOqx6QCKqgm6AH3wzVqyVsgJgH0uGIn/9k=",
-      "objectPosition": "62% 46%",
-      "panel": "portrait"
+      "id": "perfect-life-60",
+      "src": "https://cdn.sanity.io/images/l1d717lp/development/b92ca177436136d611d52f1a67bb8eaa860af1d1-1080x1920.jpg",
+      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgAAAgIDAAAAAAAAAAAAAAAAAAcEBgECBf/EACQQAAICAgECBwEAAAAAAAAAAAECAAMEBREGEhMhIzEyQVFx/8QAFQEBAQAAAAAAAAAAAAAAAAAAAwT/xAAeEQACAgIDAQEAAAAAAAAAAAAAAQIRAwQSIVETMf/aAAwDAQACEQMRAD8Az0xZjbekGk8WD5IfcSzroj28kGKmnEycbVW5FFj1XKOQUPBjk6NvfK1GA+UO8vTyzOx8yB9wcSc3QuePzXIrGdjU05DIz1gj9YQiW6vybT1LsfUcDxm4AY/sITzU/wAHWs2rsZuoxLdlgX1Y9Rax1+A+52zZvdRp2qqw8rxK17ax2ggTfSVLrcUKp9Q+5El2bN1RubGP9Msjr8e7olnncuqtCH3Gr3F2xuts1+QXdu4nshGvk7yxbmAIMIT14+irZn4TrXI9pAzbGCMAYQlciVFSy3bx284QhCYh/9k=",
+      "video": "https://cdn.sanity.io/files/l1d717lp/development/2ca2e3168b63cb3a8afde0c7207646145fac64a3.mp4",
+      "previewVideo": "https://cdn.sanity.io/files/l1d717lp/development/6810b4dea56c98ab38b6f3f5f46789cb4504e480.mp4",
+      "objectPosition": "center center",
+      "panel": "video",
+      "titleUa": "ЖК Perfect Life",
+      "area": 60
     },
     {
-      "id": "house-media",
-      "src": "https://cdn.sanity.io/images/l1d717lp/development/b0b54ae89060a698798e05982876fc280dc2f248-960x1280.jpg",
-      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAAAAQFBgcCA//EACcQAAICAgAFAgcAAAAAAAAAAAECAwQAEQUGEiExE1EHFBUiI0Fh/8QAFgEBAQEAAAAAAAAAAAAAAAAAAwEC/8QAGhEAAwADAQAAAAAAAAAAAAAAAAERAgMhMf/aAAwDAQACEQMRAD8AZ5fFKw8zh0bo8Rodk/wZ4cd4Tak1ZsxenETpF9sU+EZjh4ra0g6RH2JH7y682SD6Sg95Tg4umslDM5KyhyNYY1OfyHDLWQ65MhmXjsdSo6p6h2C50MtnO1n5VY6LkGWMlmIPY7zPnlkr24ZIHKSKezDyMVrWZ7DzvPK8jlu5Y7OFoXGJt9JCWz95wyPcnq84YsMU/9k=",
-      "objectPosition": "58% 42%",
-      "panel": "portrait"
+      "id": "huge-lux-90",
+      "src": "https://cdn.sanity.io/images/l1d717lp/development/72e9b64a827a1b217435b69cabd094f68486d5e9-1080x1920.jpg",
+      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAYIAgQHA//EACgQAAEEAQIFAwUAAAAAAAAAAAEAAgMEEQYSBRMhMVEHQXEjMkKBkf/EABgBAAMBAQAAAAAAAAAAAAAAAAABAgQD/8QAHhEAAgEDBQAAAAAAAAAAAAAAAAECAxESBBQhMVL/2gAMAwEAAhEDEQA/AOD0eBSzjowratackij3Fp/SsJBoGKpe4hEX5bXk2twPbCzn01WMex0YHwFDkykkyr0vDZGvI2O/iKwz9H0pJHuLPy8IlkVgT7TFx12G9aszR/WcPtOewXrK6N2Q2RjiuAemesJqgtx2rBMUhyGnz5U0l1XXO54eOnbBT7Rslp6eTsyeNrjLs5BLvYooBDqNhZncTnr3RRyG3j6K5MtTREct5b8LcpX7IcBzXHJ65KIujMjbsbreJ2wMCVyIiBXP/9k=",
+      "video": "https://cdn.sanity.io/files/l1d717lp/development/a685b03a59aaf0ea83a62f3b1503c7a113834e8b.mp4",
+      "previewVideo": "https://cdn.sanity.io/files/l1d717lp/development/cfe5cfd7f0f55ad5501f8174e3858bc84da2b4c6.mp4",
+      "objectPosition": "center center",
+      "panel": "video",
+      "titleUa": "ЖК Huge Lux",
+      "area": 90
     },
     {
-      "id": "house-niche",
-      "src": "https://cdn.sanity.io/images/l1d717lp/development/053dbcc7d6ee969a7fb16ac13d03b42e8daebe3b-1052x1280.jpg",
-      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAYABQDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAYFBwL/xAAkEAABAwMDBAMAAAAAAAAAAAACAAEDBAURITFBBhITFAdRkf/EABYBAQEBAAAAAAAAAAAAAAAAAAQFA//EAB0RAAICAwEBAQAAAAAAAAAAAAECAAMEESEiE3H/2gAMAwEAAhEDEQA/AOuwP09OLxiw+EhyxZ2dRl0qrXbJDOScWBn0xqsr5DoBoqCm9GQ45DkxgH4U7cqCkio4/bnnM9MdxaZUwUHFYHR7GK/2B7Pdx6+twVRDDDMQNz27oo2408bVL4HTH0iqGl4MWidOlaS6SAc8z9w7Px+LMu1smInaSLyCwu4sL6O/DoixxbnNnrv7E5FSivzyQ1zprg1Vh6SXOG2ZEROa9twK0rqf/9k=",
-      "objectPosition": "70% 52%",
-      "panel": "portrait"
+      "id": "natsionalnyi-70",
+      "src": "https://cdn.sanity.io/images/l1d717lp/development/c7b7a30d533e5e2cfccc0a965e43cf7c8346c6db-1080x1920.jpg",
+      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgAAAgIDAAAAAAAAAAAAAAAAAAQFBgIDB//EACIQAAICAgEEAwEAAAAAAAAAAAECAAMEEQUSITFRFDJBgf/EABcBAAMBAAAAAAAAAAAAAAAAAAACAwH/xAAZEQADAQEBAAAAAAAAAAAAAAAAARECMSH/2gAMAwEAAhEDEQA/AJXEwAoVWG403GtYjEIQB7jeErbQgSVqx7r+Pyri6qKtgDXcyGFfC2nChXYTJYRtRCZX02W2sxdt79wiUeF84u7j3xFPyEWz0Yvm8xi49F+LiWFy++pj4/k4/XythX7tv1G6M9goLMe8rlpcJ6V6SVzXU32KbS+22CB+QibZZY73uEyIKyqITuMB2A8whEQG5LW6fMIQjmH/2Q==",
+      "video": "https://cdn.sanity.io/files/l1d717lp/development/eb484e2e8c6979c473532c110bd891a7c2e3d548.mp4",
+      "previewVideo": "https://cdn.sanity.io/files/l1d717lp/development/d22d6a83ea2543fd76f75ee41bece01f7ae879af.mp4",
+      "objectPosition": "center center",
+      "panel": "video",
+      "titleUa": "ЖК Національний",
+      "area": 70
     },
     {
-      "id": "house-sconce",
-      "src": "https://cdn.sanity.io/images/l1d717lp/development/dddc2f136e2a2adeab10bb46504e87b7a206cd71-960x1280.jpg",
-      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAUDBggE/8QAJRAAAgIBAwQBBQAAAAAAAAAAAQIDBAAREiEFBiIxBxNBUWFx/8QAFwEBAAMAAAAAAAAAAAAAAAAAAwABAv/EAB0RAAICAQUAAAAAAAAAAAAAAAABAhEhAxIxUWH/2gAMAwEAAhEDEQA/AM/U4CkybFO4ngDGvcdO2UjNyORTt8dw04x92DHXk7lhM4Q7R47vWuXP5FrI3R1e0QZw3j/MKNyk/BHhV2Z/lAVyOeMM6b6KLTj94YoVDuCeWvaWeA8/fnGd/rk9pVNyUsqjgE64j1O3F/UHYsoJOmuTh2XZBcm+rYd0BIJwyy068QrppGvr8YYi028mdx//2Q==",
-      "objectPosition": "50% 40%",
-      "panel": "portrait"
-    },
-    {
-      "id": "house-bedroom",
-      "src": "https://cdn.sanity.io/images/l1d717lp/development/23d928439c18297db13ddb915f78a98027393785-1280x960.jpg",
-      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAPABQDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAQBAgUG/8QAIhAAAQMFAAEFAAAAAAAAAAAAAgEDBAAFBhExEiEyQVFh/8QAFgEBAQEAAAAAAAAAAAAAAAAABAMF/8QAHBEAAgICAwAAAAAAAAAAAAAAAQMAAhESQWGB/9oADAMBAAIRAxEAPwBPHp887zkVvI0JiCWwFfRda5VIl9tUuODpoquL0PpaifKXHMlu10QRejSSFHmlTqfNZ2VOWeYbAY5DFuSoo6Thp46/KzGlJoCM9x6w0WOfJ0TD0SY2jrDBIHt5RT2GiTthZOUw228qr5IHKKgFjiI2tP/Z",
-      "objectPosition": "54% 38%",
-      "panel": "portrait"
-    },
-    {
-      "id": "house-bed-two",
-      "src": "https://cdn.sanity.io/images/l1d717lp/development/322643b54f3ce2e025c7924c2d4d4c9e8931306d-960x1280.jpg",
-      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAIFBgME/8QAJhAAAQMEAgAGAwAAAAAAAAAAAQIDBAAFERIGIRMUFTFBUSIkgf/EABcBAAMBAAAAAAAAAAAAAAAAAAADBAX/xAAbEQEAAgMBAQAAAAAAAAAAAAABAAIDBBESMf/aAAwDAQACEQMRAD8A1sB2AqMhacqKjr18Ul0RGjqx4gIqMqTZoNocMtUhEkhQToes46qDx+82/wBNaN3eeS+ScKcScEZ67rIrq29dH7LnYqnJXud6tEKV4Ljv5BIJ7oqfyO3wHrmpfl2lZQnvHv1RQFkgoT02W92y0beshGmhWHHRk5+qzPJeYP8AKFiFaoiI9s2GzikDZYB+Pqkv8dqTHaD6AsBQ96aI0htsaJCcDrFJz7l+FSNx69RWdpt1BkHckEAD+CioVyP7aqKkNnKHBjnFRe8n/9k=",
-      "objectPosition": "50% 42%",
-      "panel": "portrait"
-    },
-    {
-      "id": "house-vanity",
-      "src": "https://cdn.sanity.io/images/l1d717lp/development/ce6a8c066e49feddeb9ad32517370b67085faeb2-960x1280.jpg",
-      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAQGBwX/xAAiEAACAgIBBAMBAAAAAAAAAAABAgADBAUREiExQQYTURT/xAAXAQADAQAAAAAAAAAAAAAAAAAAAgME/8QAHhEAAgMAAQUAAAAAAAAAAAAAAQIAAxESEyExMkH/2gAMAwEAAhEDEQA/AJrR/XkW2LcgQI3SGBldd8P+yxbhchUpyePUhcGxE2WIqsQrIQ459ibHq9xhHUhSqMwXpMLdRVZfsKzyYq0grtZVRYax6hHtjm47ZblaxxCXF1mepiGtN8zJm29Izhk5ZFaL5URvYfPP78+lNcgxsKrgdvNh/TM92zHoQcnv5nQxqKk12tdUAaxm6z+95nsAU7KLp7S3yNhbdaXFhAMIiQBwOPAhEF4MfokT/9k=",
-      "objectPosition": "52% 40%",
-      "panel": "portrait"
-    },
-    {
-      "id": "house-wardrobe",
-      "src": "https://cdn.sanity.io/images/l1d717lp/development/5aa8f12a5d43a0d4679b46861f34a5727f24f62e-960x1280.jpg",
-      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGgAAAQUBAAAAAAAAAAAAAAAAAAIFBgcIA//EACYQAAIBBAEDBAMBAAAAAAAAAAECAwAEBREGEjFREyFBYQcUIpH/xAAVAQEBAAAAAAAAAAAAAAAAAAADBP/EABoRAAMBAAMAAAAAAAAAAAAAAAABAhEDEiH/2gAMAwEAAhEDEQA/AHfHZq+xd00WVtHRj3I7DX1U5iP7tqjqw0VB0KqPm3KZb6REaRIppv59u6mlpl8jx24hEUjTHISRp1dW/TXXg0EpsWmkXxgLMDHj7YmiunHm9DEwoXMh79R+aKVBaZtzOEtJc5mbHLXDRNA7PbED58GmXLyTzxWsEp3LEyiOX514qZfkxVXm87KACyKWPk0wSRo15Y7UHcy7/wBqN04vEVqVUemiuMSLbYGyimcdaxrvZ9+1FQ/IswuiASAAABv6oqvvgK4dW6f/2Q==",
-      "objectPosition": "46% 48%",
-      "panel": "portrait"
-    },
-    {
-      "id": "house-bath",
-      "src": "https://cdn.sanity.io/images/l1d717lp/development/397d15f3aba4210e3cf8970cc5bb699f8584a33f-960x1280.jpg",
-      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAbABQDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAUGBAj/xAAmEAACAQQBAwMFAAAAAAAAAAABAgMABAUREgYTMQcUITJBUWGB/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAIEA//EABoRAAIDAQEAAAAAAAAAAAAAAAABAhFBIRL/2gAMAwEAAhEDEQA/AKa5nS0tTPPy4oNlR51+aW2OchzGUSG0ZpWYbLH41qpm16ju73F93KBpIuw3JyvHZ3Wj0juLe7zMrQH6UZtedDdTJeYu8HTbkqLdsbMx2XAoprPNqQiisbKKJjrXJ9K4+1lsWIyszgqEjIVV39/jxUT6bTWGJyU3twEklHHW/wB+Kh8gTHdKqHQow8rpl7JlYhu8vz/aINz5gsqh3ToC/wATkJrgyQ5F4UYA8O2Dqim1tK7QIWYk6oqhISz/2Q==",
-      "objectPosition": "48% 46%",
-      "panel": "portrait"
-    },
-    {
-      "id": "kitchen-video",
-      "src": "https://cdn.sanity.io/images/l1d717lp/development/29ddde013c4dba726fe56a4b50894587521576c9-464x848.jpg",
-      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAlABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAUHAwYIBP/EACYQAAEEAgECBgMAAAAAAAAAAAEAAgMEBREGEiEHExQiMUFRY4H/xAAXAQADAQAAAAAAAAAAAAAAAAABAgMA/8QAHxEAAwABAwUAAAAAAAAAAAAAAAERAgQxkQMSEyFR/9oADAMBAAIRAxEAPwCwcNi69vCwOewEgkErZPQ1I8X5QjAVP5fL8rqTCDj4eanT1Hpj6tFQUua8RLHUN2mtH6dKL6dVo9dhcjW14B0e0a/KLk3M875LFk7EUmTna9jy0jt20iHhf0PedG4K5dY1wpRMk+z1O1pZuUXcs/GgmJsRDtkxy9zpeTich82RoP0pbPV/V0ns2T7T8I4K5Rmyq9oqWTIcQkle+7ja/qXEmQu7klFE5jAitaDJSHOLAdlvf7RI9Dg3u+WXWuzS2XCLJ47YdHkoowBqRp3/ABbY1xLHHaIqLciyGt0atidz5oWOd8bIRETVhiP/2Q==",
-      "video": "https://cdn.sanity.io/files/l1d717lp/development/991340e3384da44ffc60afb37a6cb88fc3d42a66.mp4",
-      "objectPosition": "50% 42%",
-      "panel": "video"
+      "id": "ms-100",
+      "src": "https://cdn.sanity.io/images/l1d717lp/development/beb2a135e8282f3c958a945ca9ba87c5b2df2895-1080x1920.jpg",
+      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAkABQDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAYHAgQFA//EACIQAAEEAgIDAAMAAAAAAAAAAAEAAgMEBRETIQYxQVFTYf/EABgBAAMBAQAAAAAAAAAAAAAAAAACAwEE/8QAGBEBAQEBAQAAAAAAAAAAAAAAAAERAhL/2gAMAwEAAhEDEQA/AKlx+H5CGhpJ1v0t92ALtnXQ9qwMPRosYDHZgLvwSt/IUYuEtaI37+sIUfR8U/PjGskLSil9zx+d87iAQP6UW+4MZY2rCYIS8tMr27IHWl2/H4mNuaOyAfpUfqY2OLZilLd9ntb1dzqD+SKXZ9kE+0vXFgiY2WjlOkUVk8qja7UgId9RTymVnXy1z9pXtJlLZHciIuqpxzZr1gyEl6IiUP/Z",
+      "video": "https://cdn.sanity.io/files/l1d717lp/development/cb79e32243005a08e18806bd467f5bf7d84e8bd4.mp4",
+      "previewVideo": "https://cdn.sanity.io/files/l1d717lp/development/10af6c0c982ad277da85ff56e7197e267b45a7c1.mp4",
+      "objectPosition": "center center",
+      "panel": "video",
+      "titleUa": "ЖК MS",
+      "area": 100
     }
   ],
   "boardIds": [
-    "house-living",
-    "house-bedroom",
-    "house-vanity",
-    "kitchen-video"
+    "perfect-life-60",
+    "huge-lux-90",
+    "natsionalnyi-70",
+    "ms-100"
   ]
 }

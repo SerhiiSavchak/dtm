@@ -73,6 +73,7 @@ export function MediaImage({
 
   const [attempt, setAttempt] = useState<LoadAttempt>("optimized");
   const [phase, setPhase] = useState<LoadPhase>("loading");
+  const attemptRef = useRef<LoadAttempt>("optimized");
   const prevSrcRef = useRef(srcKey);
 
   useLayoutEffect(() => {
@@ -80,6 +81,7 @@ export function MediaImage({
     prevSrcRef.current = srcKey;
     loadTokenRef.current += 1;
     readyOnceRef.current = false;
+    attemptRef.current = "optimized";
     setAttempt("optimized");
     setPhase("loading");
   }, [srcKey]);
@@ -105,19 +107,24 @@ export function MediaImage({
   );
 
   const escalate = useCallback(
-    (token: number) => {
+    (
+      token: number,
+      errorEvent?: SyntheticEvent<HTMLImageElement>
+    ) => {
       if (token !== loadTokenRef.current) return;
-      setAttempt((current) => {
-        const next = nextLoadAttempt(current, canDirect);
-        if (next === "failed") {
-          setPhase("error");
-          onError?.(undefined as never);
-          return current;
-        }
-        setPhase("loading");
-        loadTokenRef.current += 1;
-        return next;
-      });
+      const next = nextLoadAttempt(attemptRef.current, canDirect);
+      if (next === "failed") {
+        setPhase("error");
+        queueMicrotask(() => {
+          if (token !== loadTokenRef.current) return;
+          onError?.(errorEvent as never);
+        });
+        return;
+      }
+      attemptRef.current = next;
+      loadTokenRef.current += 1;
+      setAttempt(next);
+      setPhase("loading");
     },
     [canDirect, onError]
   );
@@ -139,19 +146,9 @@ export function MediaImage({
   const handleError = useCallback(
     (event: SyntheticEvent<HTMLImageElement>) => {
       if (event.currentTarget !== event.target) return;
-      setAttempt((current) => {
-        const next = nextLoadAttempt(current, canDirect);
-        if (next === "failed") {
-          setPhase("error");
-          onError?.(event);
-          return current;
-        }
-        setPhase("loading");
-        loadTokenRef.current += 1;
-        return next;
-      });
+      escalate(loadTokenRef.current, event);
     },
-    [canDirect, onError]
+    [escalate]
   );
 
   const probeLoaded = useCallback(() => {
