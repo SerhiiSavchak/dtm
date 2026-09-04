@@ -156,25 +156,27 @@ async function testEmailChannelMatrix() {
 
 async function testEmailSendControlledFailures() {
   const lead = toCanonicalLead(validInput());
-  const prev = {
-    key: process.env.RESEND_API_KEY,
-    to: process.env.LEADS_TO_EMAIL,
-    from: process.env.LEADS_FROM_EMAIL,
-  };
+  const prev = snapshotEnv([
+    "RESEND_API_KEY",
+    "LEADS_FROM_EMAIL",
+    "LEAD_EMAIL_TO",
+    "LEAD_EMAIL_COPY_TO",
+  ]);
 
   delete process.env.RESEND_API_KEY;
-  delete process.env.LEADS_TO_EMAIL;
   delete process.env.LEADS_FROM_EMAIL;
+  delete process.env.LEAD_EMAIL_TO;
+  delete process.env.LEAD_EMAIL_COPY_TO;
   const missing = await sendOwnerEmail(lead);
   assert("F unconfigured", missing.ok === false && missing.reason === "unconfigured");
 
   process.env.RESEND_API_KEY = "re_test_not_real";
-  process.env.LEADS_TO_EMAIL = "not-an-email";
+  process.env.LEAD_EMAIL_TO = "not-an-email";
   process.env.LEADS_FROM_EMAIL = "also-bad";
   const invalid = await sendOwnerEmail(lead, { send: async () => ({ data: { id: "x" } }) });
   assert("F invalid_configuration", invalid.ok === false && invalid.reason === "invalid_configuration");
 
-  process.env.LEADS_TO_EMAIL = "owner@example.com";
+  process.env.LEAD_EMAIL_TO = "owner@example.com";
   process.env.LEADS_FROM_EMAIL = "DTM Website <onboarding@resend.dev>";
 
   const rejected = await sendOwnerEmail(lead, {
@@ -201,12 +203,7 @@ async function testEmailSendControlledFailures() {
   });
   assert("A send ok", ok.ok === true && ok.messageId === "msg_1");
 
-  if (prev.key === undefined) delete process.env.RESEND_API_KEY;
-  else process.env.RESEND_API_KEY = prev.key;
-  if (prev.to === undefined) delete process.env.LEADS_TO_EMAIL;
-  else process.env.LEADS_TO_EMAIL = prev.to;
-  if (prev.from === undefined) delete process.env.LEADS_FROM_EMAIL;
-  else process.env.LEADS_FROM_EMAIL = prev.from;
+  restoreEnv(prev);
 }
 
 function testPhoneMask() {
@@ -318,6 +315,8 @@ function testSourceGuards() {
   const calc = readFileSync(join(root, "components/calculator/estimate-calculator.tsx"), "utf8");
   const route = readFileSync(join(root, "app/api/leads/route.ts"), "utf8");
   const telegram = readFileSync(join(root, "lib/leads/telegram.ts"), "utf8");
+  const email = readFileSync(join(root, "lib/leads/email.ts"), "utf8");
+  const processLead = readFileSync(join(root, "lib/leads/process-lead.ts"), "utf8");
 
   assert("no useRef(crypto.randomUUID())", !calc.includes("useRef(crypto.randomUUID())"));
   assert("no useRef(createLeadSession())", !calc.includes("useRef(createLeadSession())"));
@@ -339,13 +338,178 @@ function testSourceGuards() {
   assert("telegram checks json.ok", telegram.includes("json?.ok") || telegram.includes("json.ok"));
   assert("telegram cache no-store", telegram.includes('cache: "no-store"'));
   assert("telegram 429 retry_after", telegram.includes("retry_after"));
+  assert("telegram copy env", telegram.includes("TELEGRAM_COPY_CHAT_IDS"));
+  assert("telegram primary env", telegram.includes("TELEGRAM_PRIMARY_CHAT_ID"));
+  assert("telegram no legacy chat env", !telegram.includes("TELEGRAM_CHAT_ID"));
+  assert("email copy env", email.includes("LEAD_EMAIL_COPY_TO"));
+  assert("email primary env", email.includes("LEAD_EMAIL_TO"));
+  assert("email no legacy to env", !email.includes("LEADS_TO_EMAIL"));
+  assert("email no legacy copy env", !email.includes("LEADS_COPY_TO_EMAIL"));
+  assert("copy fail does not fail lead logs", processLead.includes("telegram_copy_failed"));
+}
+
+function restoreEnv(prev) {
+  for (const [key, value] of Object.entries(prev)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+}
+
+function snapshotEnv(keys) {
+  const prev = {};
+  for (const key of keys) prev[key] = process.env[key];
+  return prev;
+}
+
+async function testTelegramCopyMatrix() {
+  const prev = snapshotEnv([
+    "TELEGRAM_BOT_TOKEN",
+    "TELEGRAM_PRIMARY_CHAT_ID",
+    "TELEGRAM_COPY_CHAT_IDS",
+    "TELEGRAM_MESSAGE_THREAD_ID",
+  ]);
+  process.env.TELEGRAM_BOT_TOKEN = "123456:TESTTOKEN";
+  process.env.TELEGRAM_PRIMARY_CHAT_ID = "111";
+  process.env.TELEGRAM_COPY_CHAT_IDS = "222, 333";
+  delete process.env.TELEGRAM_MESSAGE_THREAD_ID;
+
+  const lead = toCanonicalLead(validInput({ name: "DTM TEST" }));
+
+  const bothOkCalls = [];
+  const bothOk = await sendOwnerTelegram(lead, {
+    fetch: async (_url, init) => {
+      const body = JSON.parse(String(init.body));
+      bothOkCalls.push(body.chat_id);
+      return new Response(
+        JSON.stringify({ ok: true, result: { message_id: Number(body.chat_id) } }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    },
+  });
+  assert("tg copy both primary ok", bothOk.ok === true && bothOk.messageId === 111);
+  assert("tg copy both copies ok", bothOk.ok && bothOk.copies.length === 2 && bothOk.copies.every((c) => c.ok === true));
+  assertEqual("tg copy both three chats", bothOkCalls.sort().join(","), "111,222,333");
+
+  const copyFail = await sendOwnerTelegram(lead, {
+    fetch: async (_url, init) => {
+      const body = JSON.parse(String(init.body));
+      if (String(body.chat_id) === "222") {
+        return new Response(JSON.stringify({ ok: false, description: "Forbidden: bot can't initiate conversation" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 700 } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+  });
+  assert("tg copy fail primary ok", copyFail.ok === true && copyFail.messageId === 700);
+  assert("tg copy fail copy rejected", copyFail.ok && copyFail.copies[0]?.ok === false);
+
+  const primaryFail = await sendOwnerTelegram(lead, {
+    fetch: async (_url, init) => {
+      const body = JSON.parse(String(init.body));
+      if (String(body.chat_id) === "111") {
+        return new Response(JSON.stringify({ ok: false, description: "fail" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 800 } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+  });
+  assert("tg primary fail is fail", primaryFail.ok === false);
+  assert("tg primary fail copy still attempted", primaryFail.copies[0]?.ok === true);
+
+  restoreEnv(prev);
+}
+
+async function testEmailCopyMatrix() {
+  const prev = snapshotEnv([
+    "RESEND_API_KEY",
+    "LEADS_FROM_EMAIL",
+    "LEAD_EMAIL_TO",
+    "LEAD_EMAIL_COPY_TO",
+  ]);
+  process.env.RESEND_API_KEY = "re_test_not_real";
+  process.env.LEAD_EMAIL_TO = "client@example.com";
+  process.env.LEADS_FROM_EMAIL = "DTM Website <onboarding@resend.dev>";
+  process.env.LEAD_EMAIL_COPY_TO = "dev@example.com";
+
+  const lead = toCanonicalLead(validInput());
+
+  const bothTargets = [];
+  const both = await sendOwnerEmail(lead, {
+    send: async (payload) => {
+      bothTargets.push(payload.to);
+      return { data: { id: `id-${payload.to}` }, error: null };
+    },
+  });
+  assert("email copy both primary ok", both.ok === true);
+  assert("email copy both copy ok", both.ok && both.copy?.ok === true);
+  assertEqual("email copy both two recipients", bothTargets.sort().join(","), "client@example.com,dev@example.com");
+
+  const copyFail = await sendOwnerEmail(lead, {
+    send: async (payload) => {
+      if (payload.to === "dev@example.com") {
+        return { data: null, error: { name: "validation_error", message: "denied" } };
+      }
+      return { data: { id: "primary-ok" }, error: null };
+    },
+  });
+  assert("email copy fail primary ok", copyFail.ok === true && copyFail.messageId === "primary-ok");
+  assert("email copy fail copy not ok", copyFail.ok && copyFail.copy?.ok === false);
+
+  const primaryFail = await sendOwnerEmail(lead, {
+    send: async (payload) => {
+      if (payload.to === "client@example.com") {
+        return { data: null, error: { name: "validation_error", message: "denied" } };
+      }
+      return { data: { id: "copy-ok" }, error: null };
+    },
+  });
+  assert("email primary fail is fail", primaryFail.ok === false);
+  assert("email primary fail copy still attempted", primaryFail.copy?.ok === true);
+
+  restoreEnv(prev);
+}
+
+async function testCopyFailureDoesNotFailLead() {
+  const cache = new SubmissionIdempotency(10 * 60 * 1000);
+  const result = await deliverParsedLead(validInput(), cache, {
+    sendTelegram: async () => ({
+      ok: true,
+      messageId: 1,
+      statusCode: 200,
+      durationMs: 1,
+      copies: [{ ok: false, reason: "rejected", statusCode: 403 }],
+    }),
+    sendEmail: async () => ({
+      ok: true,
+      messageId: "em-ok",
+      durationMs: 1,
+      copy: { ok: false, reason: "resend_error" },
+    }),
+  });
+  assertEqual("copy fail lead 200", result.status, 200);
+  assert("copy fail telegram sent", result.body.ok && result.body.delivered.telegram === true);
+  assert("copy fail email sent", result.body.ok && result.body.delivered.email === true);
 }
 
 async function testTelegramOkAnd429() {
-  const prevToken = process.env.TELEGRAM_BOT_TOKEN;
-  const prevChat = process.env.TELEGRAM_CHAT_ID;
+  const prev = snapshotEnv([
+    "TELEGRAM_BOT_TOKEN",
+    "TELEGRAM_PRIMARY_CHAT_ID",
+    "TELEGRAM_COPY_CHAT_IDS",
+  ]);
   process.env.TELEGRAM_BOT_TOKEN = "123456:TESTTOKEN";
-  process.env.TELEGRAM_CHAT_ID = "1";
+  process.env.TELEGRAM_PRIMARY_CHAT_ID = "1";
+  delete process.env.TELEGRAM_COPY_CHAT_IDS;
 
   const lead = toCanonicalLead(validInput({ name: "DTM TEST" }));
   let calls = 0;
@@ -401,10 +565,7 @@ async function testTelegramOkAnd429() {
   assert("telegram 429 not infinite", still429.ok === false);
   assertEqual("telegram 429 at most two calls", calls, 2);
 
-  if (prevToken === undefined) delete process.env.TELEGRAM_BOT_TOKEN;
-  else process.env.TELEGRAM_BOT_TOKEN = prevToken;
-  if (prevChat === undefined) delete process.env.TELEGRAM_CHAT_ID;
-  else process.env.TELEGRAM_CHAT_ID = prevChat;
+  restoreEnv(prev);
 }
 
 async function testDeliveryMatrix() {
@@ -456,6 +617,9 @@ const tests = [
   ["session lifecycle", async () => testSessionLifecycle()],
   ["source guards", async () => testSourceGuards()],
   ["telegram ok and 429", testTelegramOkAnd429],
+  ["telegram copy matrix", testTelegramCopyMatrix],
+  ["email copy matrix", testEmailCopyMatrix],
+  ["copy failure does not fail lead", testCopyFailureDoesNotFailLead],
 ];
 
 for (const [name, fn] of tests) {

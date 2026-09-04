@@ -171,6 +171,7 @@ export async function deliverParsedLead(
         leadId: lead.leadId,
         durationMs: telegramResult.value.durationMs,
         statusCode: telegramResult.value.statusCode,
+        recipient: "primary",
       });
     } else {
       const value =
@@ -183,6 +184,7 @@ export async function deliverParsedLead(
           leadId: lead.leadId,
           durationMs: value && !value.ok ? value.durationMs : undefined,
           statusCode: value && !value.ok ? value.statusCode : undefined,
+          recipient: "primary",
           errorType: unconfigured
             ? "unconfigured"
             : value && !value.ok
@@ -193,11 +195,25 @@ export async function deliverParsedLead(
       );
     }
 
+    if (telegramResult.status === "fulfilled") {
+      for (const copy of telegramResult.value.copies ?? []) {
+        if (copy.ok) continue;
+        logLead("telegram_copy_failed", {
+          requestId,
+          leadId: lead.leadId,
+          recipient: "copy",
+          errorType: copy.reason ?? "rejected",
+          statusCode: copy.statusCode,
+        });
+      }
+    }
+
     if (emailResult.status === "fulfilled" && emailResult.value.ok) {
       logLead("email_send_success", {
         requestId,
         leadId: lead.leadId,
         durationMs: emailResult.value.durationMs,
+        recipient: "primary",
       });
     } else {
       const value = emailResult.status === "fulfilled" ? emailResult.value : null;
@@ -207,6 +223,7 @@ export async function deliverParsedLead(
           requestId,
           leadId: lead.leadId,
           durationMs: value && !value.ok ? value.durationMs : undefined,
+          recipient: "primary",
           errorType:
             value && !value.ok
               ? value.errorType ?? value.reason
@@ -214,6 +231,19 @@ export async function deliverParsedLead(
         },
         value && !value.ok && value.reason === "unconfigured" ? "info" : "error"
       );
+    }
+
+    if (
+      emailResult.status === "fulfilled" &&
+      emailResult.value.copy &&
+      !emailResult.value.copy.ok
+    ) {
+      logLead("email_copy_failed", {
+        requestId,
+        leadId: lead.leadId,
+        recipient: "copy",
+        errorType: emailResult.value.copy.reason ?? "rejected",
+      });
     }
 
     const telegramMessageId =

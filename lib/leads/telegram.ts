@@ -15,18 +15,32 @@ export type TelegramFailReason =
   | "rejected"
   | "timeout";
 
+export type TelegramCopyAttempt = {
+  ok: boolean;
+  reason?: TelegramFailReason;
+  statusCode?: number;
+};
+
 export type TelegramSendResult =
-  | { ok: true; messageId: number; statusCode: number; durationMs: number }
+  | {
+      ok: true;
+      messageId: number;
+      statusCode: number;
+      durationMs: number;
+      copies: TelegramCopyAttempt[];
+    }
   | {
       ok: false;
       reason: TelegramFailReason;
       statusCode?: number;
       durationMs: number;
       errorType: TelegramFailReason;
+      copies: TelegramCopyAttempt[];
     };
 
 type TelegramApiJson = {
   ok?: boolean;
+  description?: string;
   parameters?: { retry_after?: number };
   result?: { message_id?: number };
 };
@@ -38,9 +52,35 @@ function sleep(ms: number) {
 function fail(
   reason: TelegramFailReason,
   durationMs: number,
-  statusCode?: number
+  statusCode?: number,
+  copies: TelegramCopyAttempt[] = []
 ): TelegramSendResult {
-  return { ok: false, reason, durationMs, errorType: reason, statusCode };
+  return { ok: false, reason, durationMs, errorType: reason, statusCode, copies };
+}
+
+function parseChatIds(raw: string | undefined): string[] {
+  if (!raw?.trim()) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const part of raw.split(/[,\s]+/)) {
+    const id = part.trim();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  return out;
+}
+
+/** Primary client chat. */
+export function resolveTelegramPrimaryChatId(): string | undefined {
+  const primary = process.env.TELEGRAM_PRIMARY_CHAT_ID?.trim();
+  return primary || undefined;
+}
+
+/** Developer/ops copies. Primary id is excluded to avoid a double-send. */
+export function resolveTelegramCopyChatIds(primary?: string): string[] {
+  const ids = parseChatIds(process.env.TELEGRAM_COPY_CHAT_IDS);
+  return primary ? ids.filter((id) => id !== primary) : ids;
 }
 
 function parseSendResult(
@@ -65,6 +105,7 @@ function parseSendResult(
     messageId: json.result.message_id,
     statusCode: res.status,
     durationMs,
+    copies: [],
   };
 }
 
@@ -84,54 +125,108 @@ async function postSendMessage(
   return { res, json };
 }
 
+async function sendToChat(args: {
+  token: string;
+  chatId: string;
+  text: string;
+  threadId?: number;
+  fetchImpl: typeof fetch;
+  started: number;
+}): Promise<TelegramSendResult> {
+  if (!isNumericChatId(args.chatId)) {
+    return fail("invalid_chat", Date.now() - args.started);
+  }
+
+  const payload: Record<string, unknown> = {
+    chat_id: args.chatId,
+    text: args.text,
+    disable_web_page_preview: true,
+  };
+  if (args.threadId != null) payload.message_thread_id = args.threadId;
+
+  const url = `${TELEGRAM_API}/bot${args.token}/sendMessage`;
+  const serialized = JSON.stringify(payload);
+
+  try {
+    const first = await postSendMessage(url, serialized, args.fetchImpl);
+    const parsed = parseSendResult(first.res, first.json, Date.now() - args.started);
+    if ("retryAfterMs" in parsed) {
+      await sleep(parsed.retryAfterMs);
+      const second = await postSendMessage(url, serialized, args.fetchImpl);
+      const retried = parseSendResult(
+        second.res,
+        second.json,
+        Date.now() - args.started
+      );
+      if ("retryAfterMs" in retried) {
+        return fail("rejected", Date.now() - args.started, second.res.status);
+      }
+      return retried;
+    }
+    return parsed;
+  } catch (error) {
+    const durationMs = Date.now() - args.started;
+    if (error instanceof Error && error.name === "TimeoutError") {
+      return fail("timeout", durationMs);
+    }
+    return fail("rejected", durationMs);
+  }
+}
+
+function toCopyAttempt(result: TelegramSendResult): TelegramCopyAttempt {
+  if (result.ok) return { ok: true, statusCode: result.statusCode };
+  return {
+    ok: false,
+    reason: result.reason,
+    statusCode: result.statusCode,
+  };
+}
+
+/**
+ * Sends to the primary client chat and independently to copy chats.
+ * Channel success is PRIMARY only. Copy failures never flip ok to false.
+ */
 export async function sendOwnerTelegram(
   lead: CanonicalLead,
   deps?: { fetch?: typeof fetch }
 ): Promise<TelegramSendResult> {
   const started = Date.now();
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
-  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
+  const chatId = resolveTelegramPrimaryChatId();
+  const copyIds = resolveTelegramCopyChatIds(chatId);
   const threadRaw = process.env.TELEGRAM_MESSAGE_THREAD_ID?.trim();
   const fetchImpl = deps?.fetch ?? fetch;
 
   if (!token || !chatId) return fail("unconfigured", Date.now() - started);
   if (!isNumericChatId(chatId)) return fail("invalid_chat", Date.now() - started);
 
-  const payload: Record<string, unknown> = {
-    chat_id: chatId,
-    text: formatOwnerTelegram(lead),
-    disable_web_page_preview: true,
-  };
+  const threadId = threadRaw && /^\d+$/.test(threadRaw) ? Number(threadRaw) : undefined;
+  const text = formatOwnerTelegram(lead);
 
-  if (threadRaw && /^\d+$/.test(threadRaw)) {
-    payload.message_thread_id = Number(threadRaw);
+  const [primary, ...copyResults] = await Promise.all([
+    sendToChat({
+      token,
+      chatId,
+      text,
+      threadId,
+      fetchImpl,
+      started,
+    }),
+    ...copyIds.map((copyId) =>
+      sendToChat({
+        token,
+        chatId: copyId,
+        text,
+        fetchImpl,
+        started,
+      })
+    ),
+  ]);
+
+  const copies = copyResults.map(toCopyAttempt);
+
+  if (primary.ok) {
+    return { ...primary, copies };
   }
-
-  const url = `${TELEGRAM_API}/bot${token}/sendMessage`;
-  const serialized = JSON.stringify(payload);
-
-  try {
-    const first = await postSendMessage(url, serialized, fetchImpl);
-    const parsed = parseSendResult(first.res, first.json, Date.now() - started);
-    if ("retryAfterMs" in parsed) {
-      await sleep(parsed.retryAfterMs);
-      const second = await postSendMessage(url, serialized, fetchImpl);
-      const retried = parseSendResult(
-        second.res,
-        second.json,
-        Date.now() - started
-      );
-      if ("retryAfterMs" in retried) {
-        return fail("rejected", Date.now() - started, second.res.status);
-      }
-      return retried;
-    }
-    return parsed;
-  } catch (error) {
-    const durationMs = Date.now() - started;
-    if (error instanceof Error && error.name === "TimeoutError") {
-      return fail("timeout", durationMs);
-    }
-    return fail("rejected", durationMs);
-  }
+  return { ...primary, copies };
 }
