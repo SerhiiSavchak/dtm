@@ -48,7 +48,10 @@ export const parameterFieldLabels = {
   start: "Плановий старт",
 } as const;
 
-export const PUBLIC_TELEGRAM_USERNAME = "xrayboy";
-export const PUBLIC_TELEGRAM_URL = `https://t.me/${PUBLIC_TELEGRAM_USERNAME}`;
+/**
+ * Public personal Telegram CTA (not the lead Bot API).
+ * Phone deep-link: requires the owner to allow discovery by phone number.
+ */
+export const PUBLIC_TELEGRAM_URL = "https://t.me/+380931230505";
 export const PUBLIC_INSTAGRAM_URL =
   "https://www.instagram.com/dtm_remont_lviv/";

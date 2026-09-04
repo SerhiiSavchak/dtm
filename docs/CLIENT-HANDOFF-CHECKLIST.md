@@ -14,7 +14,7 @@
 | Домен / DNS | У репозиторії реєстратор **не** зафіксований | Клієнт: реєстратор, DNS, листи про продовження | Не знімати DNS розробника, доки новий хостинг і записи підтверджені |
 | Telegram (заявки) | Сервер: клієнтський бот (`TELEGRAM_BOT_TOKEN`), primary чат клієнта (`TELEGRAM_PRIMARY_CHAT_ID`), опційна копія розробника (`TELEGRAM_COPY_CHAT_IDS`). Успіх Telegram = **primary**. Збій копії не валить заявку | Бот і чат клієнта + `/start` у кожному private chat | Оновити env; перевірити одну заявку в чат клієнта і копію розробника |
 | Email (Resend) | **Опційно.** Primary: `LEAD_EMAIL_TO` (`dtm.remont@gmail.com`). Копія: `LEAD_EMAIL_COPY_TO`. Якщо налаштований і Telegram впав — заявка все одно `200`. Збій копії не валить primary | Лише якщо клієнт хоче пошту | `RESEND_API_KEY`, `LEADS_FROM_EMAIL`, primary + опційна копія |
-| Telegram (публічне посилання) | Дефолт у коді: `t.me/xrayboy` (`PUBLIC_TELEGRAM_USERNAME`). Це **не** Bot API | Акаунт / username клієнта | `NEXT_PUBLIC_TELEGRAM_URL` або зміна дефолту в коді |
+| Telegram (публічне посилання) | Дефолт у коді: `https://t.me/+380931230505` (`PUBLIC_TELEGRAM_URL`). Це **не** Bot API | Публічний username клієнта, якщо phone-discovery вимкнено | `NEXT_PUBLIC_TELEGRAM_URL` або зміна дефолту в `lib/leads/labels.ts` |
 | CMS snapshot | `npm run cms:snapshot` → `data/generated/*.snapshot.json` | Оновлювати після публікацій, комітити з деплоєм | Last-known-good при аутеджі Sanity |
 | Sanity backup | `npm run sanity:backup` → `backups/` (не в git) | Регулярний export з ассетами | Restore лише свідомо, `--replace` руйнівний |
 | Instagram / телефон | Дефолт Instagram у коді; телефон — `#contacts` якщо немає env | Посилання клієнта | `NEXT_PUBLIC_INSTAGRAM_URL`, `NEXT_PUBLIC_PHONE_URL` |

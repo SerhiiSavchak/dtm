@@ -64,8 +64,8 @@ export {
 
 /**
  * Public social URLs. Verified DTM destinations are the defaults.
- * Optional NEXT_PUBLIC_* overrides remain for staging, but public Telegram
- * is never a Bot API chat id.
+ * Optional NEXT_PUBLIC_* overrides remain for staging. Public Telegram is
+ * personal contact (`PUBLIC_TELEGRAM_URL`) — never a Bot API chat id.
  */
 export const TELEGRAM_URL_PLACEHOLDER = PUBLIC_TELEGRAM_URL;
 
