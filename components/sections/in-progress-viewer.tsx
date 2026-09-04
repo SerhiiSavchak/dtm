@@ -82,6 +82,7 @@ function ViewerFrame({
       sizes={VIEWER_SIZES}
       priority
       className="object-contain"
+      style={{ objectPosition: item.objectPosition }}
       onReady={onReady}
       onError={() => onFail?.()}
       lqip={item.lqip}

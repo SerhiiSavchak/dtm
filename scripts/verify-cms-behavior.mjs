@@ -547,8 +547,17 @@ const ipPosB = mapInProgressFrame({
 });
 assert.equal(ipPosA.objectPosition, "20% 30%");
 assert.equal(ipPosB.objectPosition, "left top");
-assert.match(viewer, /objectPosition: item\.objectPosition/);
+assert.notEqual(ipPosA.objectPosition, ipPosB.objectPosition);
+assert.match(viewer, /objectPosition=\{item\.objectPosition\}/);
+assert.match(
+  viewer,
+  /style=\{\{\s*objectPosition:\s*item\.objectPosition\s*\}\}/
+);
 assert.match(panel, /objectPosition=\{item\.objectPosition\}/);
+assert.match(
+  panel,
+  /style=\{\{\s*objectPosition:\s*item\.objectPosition\s*\}\}/
+);
 
 cover("frameId-identity");
 assert.equal(
