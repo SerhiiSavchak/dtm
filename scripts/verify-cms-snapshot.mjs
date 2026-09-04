@@ -256,6 +256,12 @@ assert.equal(generatedPortfolio.dataset, "production");
 assert.equal(generatedPortfolio.projects.length, 7);
 assert.equal(generatedPortfolio.projects[0]?.slug, "private-house-sokilnyky");
 assert.equal(
+  generatedPortfolio.projects.every((p) =>
+    ["large", "tall", "wide", "small"].includes(p.span)
+  ),
+  true
+);
+assert.equal(
   generatedPortfolio.projects.some((p) => p.slug === "interior-living"),
   false
 );

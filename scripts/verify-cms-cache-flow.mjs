@@ -52,4 +52,30 @@ revalidateTag(SANITY_CACHE_TAGS.inProgress);
 const inProgressF = taggedFetch(SANITY_CACHE_TAGS.inProgress, () => inProgressSource);
 assert.equal(inProgressF, "in-progress-v2");
 
+let spanSource = { slug: "private-house-sokilnyky", span: "tall" };
+const spanCold = taggedFetch("sanity-portfolio-span", () => ({ ...spanSource }));
+assert.equal(spanCold.span, "tall");
+spanSource = { slug: "private-house-sokilnyky", span: "large" };
+const spanWarmStale = taggedFetch("sanity-portfolio-span", () => ({ ...spanSource }));
+assert.equal(spanWarmStale.span, "tall", "warm cache must not show unpublished span");
+const httpAck = { ok: true, status: 200, revalidated: [SANITY_CACHE_TAGS.portfolio] };
+assert.equal(httpAck.status, 200);
+const spanAfterHttpOnly = taggedFetch("sanity-portfolio-span", () => ({ ...spanSource }));
+assert.equal(
+  spanAfterHttpOnly.span,
+  "tall",
+  "HTTP 200 acknowledgement without tag invalidation is not a frontend update"
+);
+revalidateTag("sanity-portfolio-span");
+const spanRapidB = taggedFetch("sanity-portfolio-span", () => ({ ...spanSource }));
+assert.equal(spanRapidB.span, "large");
+spanSource = { slug: "private-house-sokilnyky", span: "small" };
+revalidateTag("sanity-portfolio-span");
+const spanRapidC = taggedFetch("sanity-portfolio-span", () => ({ ...spanSource }));
+assert.equal(spanRapidC.span, "small");
+spanSource = { slug: "private-house-sokilnyky", span: "tall" };
+revalidateTag("sanity-portfolio-span");
+const spanBackA = taggedFetch("sanity-portfolio-span", () => ({ ...spanSource }));
+assert.equal(spanBackA.span, "tall");
+
 console.log("cms cache flow checks passed");

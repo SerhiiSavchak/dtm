@@ -3050,31 +3050,26 @@ html[data-motion="ok"] .process-rail-fill {
   }
 }
 
-/* Editorial spread: dominant lead, next project clearly peeking.
-   Extra cards keep uneven widths — not an equal grid.
+/* Desktop widths follow CMS card size (`data-span`). Uneven, not a grid.
    Telegram stills are 720–1052px wide; 70vw/16:10 covers upscale them. */
 @media (min-width: 1024px) {
   .project-slide {
     flex-basis: min(34vw, 30rem);
   }
 
-  .project-slide.is-lead {
-    flex-basis: min(42vw, 36rem);
-  }
-
-  .project-slide[data-span="large"]:not(.is-lead) {
+  .project-slide[data-span="large"] {
     flex-basis: min(36vw, 32rem);
   }
 
-  .project-slide[data-span="wide"]:not(.is-lead) {
+  .project-slide[data-span="wide"] {
     flex-basis: min(33vw, 29rem);
   }
 
-  .project-slide[data-span="tall"]:not(.is-lead) {
+  .project-slide[data-span="tall"] {
     flex-basis: min(27vw, 23.5rem);
   }
 
-  .project-slide[data-span="small"]:not(.is-lead) {
+  .project-slide[data-span="small"] {
     flex-basis: min(23vw, 20rem);
   }
 }

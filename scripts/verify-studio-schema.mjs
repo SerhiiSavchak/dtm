@@ -32,6 +32,10 @@ assert.equal(field(project, "rooms").title, "Кількість кімнат");
 assert.equal(field(project, "year").hidden, true);
 assert.equal(field(project, "orderRank").hidden, true);
 
+assert.equal(field(project, "span").title, "Розмір картки");
+assert.match(field(project, "span").description, /портфоліо на сайті/);
+assert.doesNotMatch(field(project, "span").description, /автоматично за порядком/);
+
 const initials = project.initialValue();
 assert.equal(initials.span, "small");
 assert.equal(initials.slug._type, "slug");
