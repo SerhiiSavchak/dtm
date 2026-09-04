@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const interTight = Inter_Tight({
@@ -17,8 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://dtm-chi.vercel.app";
+const SITE_URL = siteUrl();
 
 export const metadata: Metadata = {
   title: "DTM — Дім Твоєї Мрії · Комплексний ремонт у Львові",

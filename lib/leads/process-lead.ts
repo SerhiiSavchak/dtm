@@ -206,6 +206,16 @@ export async function deliverParsedLead(
           statusCode: copy.statusCode,
         });
       }
+      const partner = telegramResult.value.partner;
+      if (partner && !partner.ok) {
+        logLead("telegram_partner_failed", {
+          requestId,
+          leadId: lead.leadId,
+          recipient: "partner",
+          errorType: partner.reason ?? "rejected",
+          statusCode: partner.statusCode,
+        });
+      }
     }
 
     if (emailResult.status === "fulfilled" && emailResult.value.ok) {

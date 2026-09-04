@@ -340,12 +340,16 @@ function testSourceGuards() {
   assert("telegram 429 retry_after", telegram.includes("retry_after"));
   assert("telegram copy env", telegram.includes("TELEGRAM_COPY_CHAT_IDS"));
   assert("telegram primary env", telegram.includes("TELEGRAM_PRIMARY_CHAT_ID"));
+  assert("telegram partner env", telegram.includes("TELEGRAM_PARTNER_CHAT_ID"));
   assert("telegram no legacy chat env", !telegram.includes("TELEGRAM_CHAT_ID"));
   assert("email copy env", email.includes("LEAD_EMAIL_COPY_TO"));
   assert("email primary env", email.includes("LEAD_EMAIL_TO"));
   assert("email no legacy to env", !email.includes("LEADS_TO_EMAIL"));
   assert("email no legacy copy env", !email.includes("LEADS_COPY_TO_EMAIL"));
   assert("copy fail does not fail lead logs", processLead.includes("telegram_copy_failed"));
+  assert("partner fail does not fail lead logs", processLead.includes("telegram_partner_failed"));
+  assert("partner log has no chat id field", !processLead.includes("chatId") && !processLead.includes("chat_id"));
+  assert("partner log has no bot token field", !processLead.includes("BOT_TOKEN") && !processLead.includes("bot_token"));
 }
 
 function restoreEnv(prev) {
@@ -366,11 +370,13 @@ async function testTelegramCopyMatrix() {
     "TELEGRAM_BOT_TOKEN",
     "TELEGRAM_PRIMARY_CHAT_ID",
     "TELEGRAM_COPY_CHAT_IDS",
+    "TELEGRAM_PARTNER_CHAT_ID",
     "TELEGRAM_MESSAGE_THREAD_ID",
   ]);
   process.env.TELEGRAM_BOT_TOKEN = "123456:TESTTOKEN";
   process.env.TELEGRAM_PRIMARY_CHAT_ID = "111";
   process.env.TELEGRAM_COPY_CHAT_IDS = "222, 333";
+  delete process.env.TELEGRAM_PARTNER_CHAT_ID;
   delete process.env.TELEGRAM_MESSAGE_THREAD_ID;
 
   const lead = toCanonicalLead(validInput({ name: "DTM TEST" }));
@@ -501,15 +507,198 @@ async function testCopyFailureDoesNotFailLead() {
   assert("copy fail email sent", result.body.ok && result.body.delivered.email === true);
 }
 
+function captureLeadLogs() {
+  const events = [];
+  const origInfo = console.info;
+  const origError = console.error;
+  console.info = (payload) => {
+    events.push(payload);
+  };
+  console.error = (payload) => {
+    events.push(payload);
+  };
+  return {
+    events,
+    restore() {
+      console.info = origInfo;
+      console.error = origError;
+    },
+  };
+}
+
+async function testTelegramPartnerMatrix() {
+  const prev = snapshotEnv([
+    "TELEGRAM_BOT_TOKEN",
+    "TELEGRAM_PRIMARY_CHAT_ID",
+    "TELEGRAM_COPY_CHAT_IDS",
+    "TELEGRAM_PARTNER_CHAT_ID",
+    "TELEGRAM_MESSAGE_THREAD_ID",
+  ]);
+  process.env.TELEGRAM_BOT_TOKEN = "123456:TESTTOKEN";
+  process.env.TELEGRAM_PRIMARY_CHAT_ID = "111";
+  process.env.TELEGRAM_COPY_CHAT_IDS = "222, 333";
+  process.env.TELEGRAM_PARTNER_CHAT_ID = "444";
+  delete process.env.TELEGRAM_MESSAGE_THREAD_ID;
+
+  const lead = toCanonicalLead(validInput({ name: "DTM TEST" }));
+
+  const successCalls = [];
+  const success = await sendOwnerTelegram(lead, {
+    fetch: async (_url, init) => {
+      const body = JSON.parse(String(init.body));
+      successCalls.push({ chat_id: String(body.chat_id), text: body.text });
+      return new Response(
+        JSON.stringify({ ok: true, result: { message_id: Number(body.chat_id) } }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    },
+  });
+  assert("tg partner success primary ok", success.ok === true && success.messageId === 111);
+  assert("tg partner success partner ok", success.ok && success.partner?.ok === true);
+  assert("tg partner success copies unchanged", success.ok && success.copies.length === 2 && success.copies.every((c) => c.ok === true));
+  assertEqual(
+    "tg partner success four chats",
+    successCalls.map((c) => c.chat_id).sort().join(","),
+    "111,222,333,444"
+  );
+  assert(
+    "tg partner same message text",
+    successCalls.length > 0 && successCalls.every((c) => c.text === successCalls[0].text)
+  );
+  assert("tg partner copy ids unchanged", successCalls.some((c) => c.chat_id === "222") && successCalls.some((c) => c.chat_id === "333"));
+
+  const partnerFail = await sendOwnerTelegram(lead, {
+    fetch: async (_url, init) => {
+      const body = JSON.parse(String(init.body));
+      if (String(body.chat_id) === "444") {
+        return new Response(JSON.stringify({ ok: false, description: "Forbidden" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 900 } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+  });
+  assert("tg partner fail primary ok", partnerFail.ok === true && partnerFail.messageId === 900);
+  assert("tg partner fail partner rejected", partnerFail.ok && partnerFail.partner?.ok === false);
+  assertEqual("tg partner fail copies still two", partnerFail.copies.length, 2);
+  assert("tg partner fail copies still ok", partnerFail.copies.every((c) => c.ok === true));
+
+  const primaryFail = await sendOwnerTelegram(lead, {
+    fetch: async (_url, init) => {
+      const body = JSON.parse(String(init.body));
+      if (String(body.chat_id) === "111") {
+        return new Response(JSON.stringify({ ok: false, description: "fail" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ ok: true, result: { message_id: 901 } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+  });
+  assert("tg partner primary fail is fail", primaryFail.ok === false);
+  assert("tg partner primary fail partner still attempted", primaryFail.partner?.ok === true);
+
+  delete process.env.TELEGRAM_PARTNER_CHAT_ID;
+  const missingCalls = [];
+  const missing = await sendOwnerTelegram(lead, {
+    fetch: async (_url, init) => {
+      const body = JSON.parse(String(init.body));
+      missingCalls.push(String(body.chat_id));
+      return new Response(
+        JSON.stringify({ ok: true, result: { message_id: Number(body.chat_id) } }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    },
+  });
+  assert("tg partner missing primary ok", missing.ok === true && missing.messageId === 111);
+  assert("tg partner missing skipped", missing.partner === undefined);
+  assertEqual("tg partner missing three chats", missingCalls.sort().join(","), "111,222,333");
+  assert("tg partner missing no partner id", !missingCalls.includes("444"));
+
+  restoreEnv(prev);
+}
+
+async function testTelegramPartnerFailureDoesNotFailLead() {
+  const failCapture = captureLeadLogs();
+  try {
+    const cache = new SubmissionIdempotency(10 * 60 * 1000);
+    const failed = await deliverParsedLead(validInput(), cache, {
+      sendTelegram: async () => ({
+        ok: true,
+        messageId: 1,
+        statusCode: 200,
+        durationMs: 1,
+        copies: [{ ok: true, statusCode: 200 }],
+        partner: { ok: false, reason: "rejected", statusCode: 403 },
+      }),
+      sendEmail: async () => ({
+        ok: true,
+        messageId: "em-ok",
+        durationMs: 1,
+        copy: null,
+      }),
+    });
+    assertEqual("partner fail lead 200", failed.status, 200);
+    assert("partner fail telegram sent", failed.body.ok && failed.body.delivered.telegram === true);
+    assert("partner fail email sent", failed.body.ok && failed.body.delivered.email === true);
+    const partnerLogs = failCapture.events.filter((e) => e?.event === "telegram_partner_failed");
+    assertEqual("partner fail one log", partnerLogs.length, 1);
+    assertEqual("partner fail recipient", partnerLogs[0].recipient, "partner");
+    assertEqual("partner fail errorType", partnerLogs[0].errorType, "rejected");
+    const serialized = JSON.stringify(failCapture.events);
+    assert("partner fail log has no chat id", !serialized.includes("chat_id") && !serialized.includes("chatId"));
+    assert("partner fail log has no bot token", !serialized.includes("BOT_TOKEN") && !serialized.includes("123456:"));
+  } finally {
+    failCapture.restore();
+  }
+
+  const missingCapture = captureLeadLogs();
+  try {
+    const missingCache = new SubmissionIdempotency(10 * 60 * 1000);
+    const missing = await deliverParsedLead(validInput(), missingCache, {
+      sendTelegram: async () => ({
+        ok: true,
+        messageId: 2,
+        statusCode: 200,
+        durationMs: 1,
+        copies: [],
+      }),
+      sendEmail: async () => ({
+        ok: true,
+        messageId: "em-ok",
+        durationMs: 1,
+        copy: null,
+      }),
+    });
+    assertEqual("partner missing lead 200", missing.status, 200);
+    assert("partner missing telegram sent", missing.body.ok && missing.body.delivered.telegram === true);
+    assert(
+      "partner missing no partner log",
+      missingCapture.events.every((e) => e?.event !== "telegram_partner_failed")
+    );
+  } finally {
+    missingCapture.restore();
+  }
+}
+
 async function testTelegramOkAnd429() {
   const prev = snapshotEnv([
     "TELEGRAM_BOT_TOKEN",
     "TELEGRAM_PRIMARY_CHAT_ID",
     "TELEGRAM_COPY_CHAT_IDS",
+    "TELEGRAM_PARTNER_CHAT_ID",
   ]);
   process.env.TELEGRAM_BOT_TOKEN = "123456:TESTTOKEN";
   process.env.TELEGRAM_PRIMARY_CHAT_ID = "1";
   delete process.env.TELEGRAM_COPY_CHAT_IDS;
+  delete process.env.TELEGRAM_PARTNER_CHAT_ID;
 
   const lead = toCanonicalLead(validInput({ name: "DTM TEST" }));
   let calls = 0;
@@ -618,6 +807,8 @@ const tests = [
   ["source guards", async () => testSourceGuards()],
   ["telegram ok and 429", testTelegramOkAnd429],
   ["telegram copy matrix", testTelegramCopyMatrix],
+  ["telegram partner matrix", testTelegramPartnerMatrix],
+  ["telegram partner failure does not fail lead", testTelegramPartnerFailureDoesNotFailLead],
   ["email copy matrix", testEmailCopyMatrix],
   ["copy failure does not fail lead", testCopyFailureDoesNotFailLead],
 ];

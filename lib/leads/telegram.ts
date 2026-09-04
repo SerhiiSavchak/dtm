@@ -28,6 +28,7 @@ export type TelegramSendResult =
       statusCode: number;
       durationMs: number;
       copies: TelegramCopyAttempt[];
+      partner?: TelegramCopyAttempt;
     }
   | {
       ok: false;
@@ -36,6 +37,7 @@ export type TelegramSendResult =
       durationMs: number;
       errorType: TelegramFailReason;
       copies: TelegramCopyAttempt[];
+      partner?: TelegramCopyAttempt;
     };
 
 type TelegramApiJson = {
@@ -81,6 +83,14 @@ export function resolveTelegramPrimaryChatId(): string | undefined {
 export function resolveTelegramCopyChatIds(primary?: string): string[] {
   const ids = parseChatIds(process.env.TELEGRAM_COPY_CHAT_IDS);
   return primary ? ids.filter((id) => id !== primary) : ids;
+}
+
+/** Optional partner copy. Missing/empty env is skipped. Primary id is excluded. */
+export function resolveTelegramPartnerChatId(primary?: string): string | undefined {
+  const id = process.env.TELEGRAM_PARTNER_CHAT_ID?.trim();
+  if (!id) return undefined;
+  if (primary && id === primary) return undefined;
+  return id;
 }
 
 function parseSendResult(
@@ -183,8 +193,8 @@ function toCopyAttempt(result: TelegramSendResult): TelegramCopyAttempt {
 }
 
 /**
- * Sends to the primary client chat and independently to copy chats.
- * Channel success is PRIMARY only. Copy failures never flip ok to false.
+ * Sends to the primary client chat and independently to copy/partner chats.
+ * Channel success is PRIMARY only. Copy and partner failures never flip ok to false.
  */
 export async function sendOwnerTelegram(
   lead: CanonicalLead,
@@ -194,6 +204,7 @@ export async function sendOwnerTelegram(
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
   const chatId = resolveTelegramPrimaryChatId();
   const copyIds = resolveTelegramCopyChatIds(chatId);
+  const partnerId = resolveTelegramPartnerChatId(chatId);
   const threadRaw = process.env.TELEGRAM_MESSAGE_THREAD_ID?.trim();
   const fetchImpl = deps?.fetch ?? fetch;
 
@@ -203,7 +214,7 @@ export async function sendOwnerTelegram(
   const threadId = threadRaw && /^\d+$/.test(threadRaw) ? Number(threadRaw) : undefined;
   const text = formatOwnerTelegram(lead);
 
-  const [primary, ...copyResults] = await Promise.all([
+  const [primary, ...rest] = await Promise.all([
     sendToChat({
       token,
       chatId,
@@ -221,12 +232,26 @@ export async function sendOwnerTelegram(
         started,
       })
     ),
+    ...(partnerId
+      ? [
+          sendToChat({
+            token,
+            chatId: partnerId,
+            text,
+            fetchImpl,
+            started,
+          }),
+        ]
+      : []),
   ]);
 
+  const copyResults = rest.slice(0, copyIds.length);
   const copies = copyResults.map(toCopyAttempt);
+  const partnerResult = partnerId ? rest[copyIds.length] : undefined;
+  const partner = partnerResult ? toCopyAttempt(partnerResult) : undefined;
 
   if (primary.ok) {
-    return { ...primary, copies };
+    return { ...primary, copies, ...(partner ? { partner } : {}) };
   }
-  return { ...primary, copies };
+  return { ...primary, copies, ...(partner ? { partner } : {}) };
 }

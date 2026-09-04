@@ -52,6 +52,7 @@ const telegramBot = readFileSync(join(root, "lib/leads/telegram.ts"), "utf8");
 assert("lead bot still uses TELEGRAM_BOT_TOKEN", telegramBot.includes("TELEGRAM_BOT_TOKEN"));
 assert("lead bot still uses TELEGRAM_PRIMARY_CHAT_ID", telegramBot.includes("TELEGRAM_PRIMARY_CHAT_ID"));
 assert("lead bot still uses TELEGRAM_COPY_CHAT_IDS", telegramBot.includes("TELEGRAM_COPY_CHAT_IDS"));
+assert("lead bot uses TELEGRAM_PARTNER_CHAT_ID", telegramBot.includes("TELEGRAM_PARTNER_CHAT_ID"));
 assert("lead bot does not import public CTA URL", !telegramBot.includes("PUBLIC_TELEGRAM_URL"));
 assert("lead bot does not link t.me contact", !telegramBot.includes("t.me/"));
 
