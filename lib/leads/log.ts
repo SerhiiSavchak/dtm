@@ -7,9 +7,11 @@ export type LeadLogEvent =
   | "telegram_send_started"
   | "telegram_send_success"
   | "telegram_send_failed"
+  | "telegram_copy_failed"
   | "email_send_started"
   | "email_send_success"
   | "email_send_failed"
+  | "email_copy_failed"
   | "lead_completed"
   | "lead_failed";
 
