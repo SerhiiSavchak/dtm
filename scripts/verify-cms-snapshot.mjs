@@ -252,7 +252,7 @@ assert.equal(inProgressMedia.length > 0, true);
 
 const generatedPortfolio = JSON.parse(readFileSync(PORTFOLIO_PATH, "utf8"));
 const generatedInProgress = JSON.parse(readFileSync(IN_PROGRESS_PATH, "utf8"));
-assert.equal(generatedPortfolio.dataset, "development");
+assert.equal(generatedPortfolio.dataset, "production");
 assert.equal(generatedPortfolio.projects.length, 7);
 assert.equal(generatedPortfolio.projects[0]?.slug, "private-house-sokilnyky");
 assert.equal(
@@ -265,7 +265,7 @@ assert.equal(
   ),
   true
 );
-assert.equal(generatedInProgress.dataset, "development");
+assert.equal(generatedInProgress.dataset, "production");
 assert.equal(generatedInProgress.frames.length, 4);
 assert.equal(
   generatedInProgress.boardIds.join(),
