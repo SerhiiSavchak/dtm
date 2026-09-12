@@ -19,6 +19,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const SITE_URL = siteUrl();
+const googleSiteVerification =
+  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim() || undefined;
 
 export const metadata: Metadata = {
   title: "DTM — Дім Твоєї Мрії · Комплексний ремонт у Львові",
@@ -41,6 +43,9 @@ export const metadata: Metadata = {
       "Комплексний ремонт квартир, будинків і комерційних приміщень у Львові",
   },
   robots: { index: true, follow: true },
+  ...(googleSiteVerification
+    ? { verification: { google: googleSiteVerification } }
+    : {}),
 };
 
 export const viewport: Viewport = {

@@ -21,27 +21,35 @@ test.describe("production domain / SEO", () => {
   test("www homepage canonical and OG use www host", async ({ request }) => {
     const response = await request.get(`${WWW}/`);
     expect(response.status()).toBe(200);
+    expect(response.headers()["x-robots-tag"] ?? "").not.toMatch(/noindex/i);
     const html = await response.text();
     expect(html).toContain(`rel="canonical" href="${WWW}"`);
     expect(html).toContain(`property="og:url" content="${WWW}"`);
     expect(html).toMatch(/name="robots" content="index, follow"/);
+    expect(html).not.toMatch(/name="robots" content="[^"]*noindex/i);
     expect(html).not.toContain("dtm-chi.vercel.app");
     expect(html).not.toContain("localhost");
+    expect(html).not.toContain("vercel.app");
   });
 
   test("sitemap and robots use www host", async ({ request }) => {
     const robots = await request.get(`${WWW}/robots.txt`);
     expect(robots.status()).toBe(200);
     const robotsText = await robots.text();
+    expect(robotsText).toMatch(/Allow:\s*\//);
     expect(robotsText).toContain(`Sitemap: ${WWW}/sitemap.xml`);
     expect(robotsText).toMatch(/Disallow:\s*\/admin/i);
+    expect(robotsText).not.toMatch(/Disallow:\s*\/_next/i);
     expect(robotsText).not.toContain("dtm-chi.vercel.app");
+    expect(robotsText).not.toContain("localhost");
 
     const sitemap = await request.get(`${WWW}/sitemap.xml`);
     expect(sitemap.status()).toBe(200);
     const xml = await sitemap.text();
     expect(xml).toContain(`<loc>${WWW}</loc>`);
     expect(xml).not.toContain("dtm-chi.vercel.app");
+    expect(xml).not.toContain("localhost");
+    expect(xml).not.toContain("vercel.app");
   });
 
   test("apex permanently redirects to www", async ({ request }) => {
